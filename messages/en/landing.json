@@ -1,0 +1,99 @@
+{
+  "hero": {
+    "title": "Clarity, Control and Predictability for Your Ad Campaigns",
+    "subtitle": "Connect Google, Meta, TikTok, LinkedIn, X and YouTube in one place. See everything organized, make confident decisions and grow consistently.",
+    "cta_primary": "Start Now",
+    "cta_secondary": "Book a Demo",
+    "cta_premium": "Talk to a Loquia Specialist"
+  },
+  "audiences": {
+    "title": "Who is Loquia For?",
+    "subtitle": "Three audiences arrive at Loquia:",
+    "agency": {
+      "title": "Marketing Agencies",
+      "description": "Need to organize clients, deliver predictable results, and increase perceived value."
+    },
+    "mediabuyer": {
+      "title": "Media Buyers / Paid Ads Specialists",
+      "description": "Spend hours analyzing dashboards, reporting data, and searching for opportunities."
+    },
+    "business": {
+      "title": "Small and Medium Businesses",
+      "description": "Invest in ads but lack clarity, rely on others, and want control."
+    },
+    "benefits": {
+      "title": "All of them want:",
+      "clarity": "Clarity",
+      "control": "Control",
+      "predictability": "Predictability",
+      "results": "Consistent results",
+      "time": "Time savings"
+    }
+  },
+  "problem": {
+    "title": "The Problem You Face",
+    "external_title": "External Problem",
+    "external_items": [
+      "Scattered dashboards",
+      "Slow analysis",
+      "Manual reporting",
+      "Hard-to-see opportunities",
+      "No consolidated view"
+    ],
+    "internal_title": "Internal Problem",
+    "internal_text": "I should be delivering better results… but I'm constantly overwhelmed.",
+    "philosophical_title": "Philosophical Problem",
+    "philosophical_text": "Managing ads shouldn't be this complicated."
+  },
+  "guide": {
+    "title": "How Loquia Helps You",
+    "empathy_title": "Empathy",
+    "empathy_text": "We understand how complex and exhausting it can be to manage campaigns without clarity or predictability.",
+    "authority_title": "Authority",
+    "authority_items": [
+      "Direct connections to major ad platforms",
+      "Robust and reliable architecture",
+      "Practical insights",
+      "Actionable recommendations",
+      "Designed by marketing and performance experts"
+    ]
+  },
+  "plan": {
+    "title": "Three-Step Success Path",
+    "step1_title": "1. Connect your accounts",
+    "step1_text": "Google, Meta, TikTok, LinkedIn, X and YouTube.",
+    "step2_title": "2. See everything organized",
+    "step2_text": "Clear insights, structured opportunities, unified dashboards.",
+    "step3_title": "3. Grow predictably",
+    "step3_text": "Consistent decision-making and scalable performance."
+  },
+  "success": {
+    "title": "The Success You Achieve",
+    "subtitle": "With Loquia, you:",
+    "items": [
+      "Know exactly what works",
+      "Make confident decisions",
+      "Save hours weekly",
+      "Deliver better results",
+      "Grow consistently",
+      "Strengthen the value you provide"
+    ]
+  },
+  "failure": {
+    "title": "What Happens Without Loquia",
+    "subtitle": "Without Loquia:",
+    "items": [
+      "Money continues to be wasted",
+      "Decisions become guesswork",
+      "Competitors gain advantage",
+      "Time is lost on manual work",
+      "It's harder to scale predictably"
+    ]
+  },
+  "cta_section": {
+    "title": "Ready to Transform Your Campaigns?",
+    "subtitle": "Join hundreds of professionals who are already growing predictably.",
+    "cta_primary": "Start Now",
+    "cta_secondary": "Book a Demo"
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "title": "Planos e Preços",
+  "subtitle": "Escolha o plano ideal para o seu momento de crescimento",
+  "billing": {
+    "monthly": "Mensal",
+    "annually": "Anual",
+    "save": "Economize 20%"
+  },
+  "plans": {
+    "starter": {
+      "name": "Starter",
+      "price": "84",
+      "description": "Para iniciantes que querem ter clareza e controle com baixo custo.",
+      "tagline": "O ponto de partida ideal para ter clareza e controle.",
+      "features": [
+        "3 campanhas",
+        "2 plataformas",
+        "Painel essencial",
+        "Relatórios básicos",
+        "Timeline simples"
+      ],
+      "cta": "Começar com Starter"
+    },
+    "professional": {
+      "name": "Professional",
+      "price": "128",
+      "badge": "Mais Vendido",
+      "description": "Feito para quem precisa de previsibilidade diária, menos retrabalho e mais velocidade.",
+      "tagline": "Clareza, velocidade e previsibilidade.",
+      "features": [
+        "10 campanhas",
+        "Todas as plataformas conectadas",
+        "Recomendações práticas",
+        "Setup Center completo",
+        "Exportações PDF/CSV",
+        "Suporte prioritário"
+      ],
+      "cta": "Começar com Professional"
+    },
+    "advanced": {
+      "name": "Advanced",
+      "price": "168",
+      "description": "Focado em volume, controle e equipes maiores. Mais flexibilidade, mais autonomia, mais capacidade operacional.",
+      "tagline": "Performance em escala.",
+      "features": [
+        "Mais campanhas",
+        "Mais controles avançados",
+        "Personalizações",
+        "Tudo do Professional"
+      ],
+      "cta": "Começar com Advanced"
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "price": "420",
+      "description": "Infraestrutura completa para operações exigentes. Ideal para agências grandes e empresas estruturadas.",
+      "tagline": "Infraestrutura completa para crescimento sério.",
+      "features": [
+        "Campanhas ilimitadas",
+        "Usuários ilimitados",
+        "Multi-tenant",
+        "API pública",
+        "SLA",
+        "White-label como addon"
+      ],
+      "cta": "Começar com Enterprise"
+    },
+    "premium": {
+      "name": "Premium Loquia",
+      "price": "748",
+      "badge": "Serviço Completo",
+      "description": "Equipe de especialistas da Loquia executa tudo para você. O cliente só acompanha os resultados.",
+      "tagline": "Sua operação de marketing conduzida por profissionais experientes.",
+      "features": [
+        "Planejamento",
+        "Estratégia",
+        "Execução",
+        "Monitoramento diário",
+        "Reuniões mensais",
+        "Relatórios estratégicos aprofundados"
+      ],
+      "cta": "Fale com Especialista"
+    }
+  },
+  "faq": {
+    "title": "Perguntas Frequentes",
+    "questions": [
+      {
+        "question": "Posso mudar de plano a qualquer momento?",
+        "answer": "Sim! Você pode fazer upgrade ou downgrade do seu plano a qualquer momento. As mudanças são aplicadas imediatamente."
+      },
+      {
+        "question": "Existe período de teste gratuito?",
+        "answer": "Sim, oferecemos 14 dias de teste gratuito em todos os planos pagos. Não é necessário cartão de crédito."
+      },
+      {
+        "question": "Como funciona o suporte?",
+        "answer": "Todos os planos incluem suporte por email. Planos Professional e superiores têm suporte prioritário com tempo de resposta garantido."
+      },
+      {
+        "question": "Posso cancelar a qualquer momento?",
+        "answer": "Sim, você pode cancelar sua assinatura a qualquer momento. Não há taxas de cancelamento ou multas."
+      }
+    ]
+  },
+  "currency": "USD",
+  "per_month": "/mês",
+  "compare_plans": "Comparar Planos"
+}
