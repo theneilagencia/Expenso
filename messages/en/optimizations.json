@@ -1,0 +1,9 @@
+{
+  "title": "AI Optimizations",
+  "description": "Smart suggestions to improve your performance.",
+  "accept": "Accept",
+  "reject": "Reject",
+  "complete": "Complete",
+  "reprocess": "Reprocess Optimizations",
+  "noOptimizations": "No optimizations available"
+}

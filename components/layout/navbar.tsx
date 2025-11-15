@@ -1,19 +1,24 @@
-'use client'
+'use client';
 
-import { createClient } from '@/lib/supabase-client'
-import { useRouter } from 'next/navigation'
-import { GlowButton } from '@/components/glow'
-import { LogOut, User } from 'lucide-react'
+import { useTranslations } from 'next-intl';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { createClient } from '@/lib/supabase-client';
+import { GlowButton } from '@/components/glow';
+import { LogOut, User } from 'lucide-react';
 
 export function Navbar() {
-  const router = useRouter()
-  const supabase = createClient()
+  const t = useTranslations('navbar');
+  const tAuth = useTranslations('auth');
+  const { locale } = useParams();
+  const router = useRouter();
+  const supabase = createClient();
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push('/sign-in')
-    router.refresh()
-  }
+    await supabase.auth.signOut();
+    router.push(`/${locale}/sign-in`);
+    router.refresh();
+  };
 
   return (
     <nav className="border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm">
@@ -21,25 +26,25 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <a href="/" className="text-2xl font-bold text-white">
+            <Link href={`/${locale}`} className="text-2xl font-bold text-white">
               Loquia
-            </a>
+            </Link>
           </div>
 
           {/* Navigation */}
           <div className="hidden md:flex items-center space-x-4">
-            <a
-              href="/campaigns"
+            <Link
+              href={`/${locale}/campaigns`}
               className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
-              Campaigns
-            </a>
-            <a
-              href="/setup"
+              {t('campaigns')}
+            </Link>
+            <Link
+              href={`/${locale}/setup`}
               className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
-              Setup
-            </a>
+              {t('setup')}
+            </Link>
           </div>
 
           {/* User menu */}
@@ -54,11 +59,11 @@ export function Navbar() {
               className="flex items-center space-x-2"
             >
               <LogOut className="w-4 h-4" />
-              <span>Sign Out</span>
+              <span>{tAuth('logout')}</span>
             </GlowButton>
           </div>
         </div>
       </div>
     </nav>
-  )
+  );
 }

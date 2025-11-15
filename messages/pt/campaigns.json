@@ -1,0 +1,17 @@
+{
+  "title": "Campanhas",
+  "new": "Nova campanha",
+  "empty": "Nenhuma campanha encontrada.",
+  "newCampaign": "Nova Campanha",
+  "noCampaigns": "Você ainda não tem campanhas",
+  "createFirst": "Criar Primeira Campanha",
+  "budget": "Orçamento",
+  "spent": "Gasto",
+  "impressions": "Impressões",
+  "clicks": "Cliques",
+  "conversions": "Conversões",
+  "insights": "Insights",
+  "optimizations": "Otimizações",
+  "timeline": "Linha do Tempo",
+  "noEvents": "Nenhum evento registrado"
+}

@@ -1,0 +1,15 @@
+{
+  "loading": "Loading...",
+  "save": "Save",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "edit": "Edit",
+  "confirm": "Confirm",
+  "view": "View",
+  "submit": "Submit",
+  "back": "Back",
+  "navbar": {
+    "campaigns": "Campaigns",
+    "setup": "Setup"
+  }
+}

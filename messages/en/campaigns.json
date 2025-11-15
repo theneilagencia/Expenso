@@ -1,0 +1,17 @@
+{
+  "title": "Campaigns",
+  "new": "New campaign",
+  "empty": "No campaigns found.",
+  "newCampaign": "New Campaign",
+  "noCampaigns": "You don't have any campaigns yet",
+  "createFirst": "Create First Campaign",
+  "budget": "Budget",
+  "spent": "Spent",
+  "impressions": "Impressions",
+  "clicks": "Clicks",
+  "conversions": "Conversions",
+  "insights": "Insights",
+  "optimizations": "Optimizations",
+  "timeline": "Timeline",
+  "noEvents": "No events recorded"
+}

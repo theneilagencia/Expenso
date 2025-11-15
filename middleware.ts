@@ -1,100 +1,53 @@
-// Middleware de autenticação Next.js
-// Protege rotas e atualiza sessão do usuário
+import createMiddleware from 'next-intl/middleware';
+import { NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
 
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
+const intlMiddleware = createMiddleware({
+  locales: ['pt', 'en'],
+  defaultLocale: 'pt',
+  localePrefix: 'always'
+});
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  })
+  const { pathname } = request.nextUrl;
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value
+  // Apply i18n routing
+  const response = intlMiddleware(request);
+
+  // Auth check for protected routes
+  const protectedPaths = ['/campaigns', '/setup'];
+  const isProtected = protectedPaths.some(path => pathname.includes(path));
+
+  if (isProtected) {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return request.cookies.get(name)?.value;
+          },
+          set(name: string, value: string, options: any) {
+            response.cookies.set({ name, value, ...options });
+          },
+          remove(name: string, options: any) {
+            response.cookies.set({ name, value: '', ...options });
+          },
         },
-        set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-        },
-        remove(name: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-        },
-      },
+      }
+    );
+
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      const locale = pathname.split('/')[1] || 'pt';
+      return NextResponse.redirect(new URL(`/${locale}/sign-in`, request.url));
     }
-  )
-
-  // Atualizar sessão do usuário
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  // Rotas protegidas - requer autenticação
-  const protectedPaths = ['/campaigns', '/setup']
-  const isProtectedPath = protectedPaths.some(path => 
-    request.nextUrl.pathname.startsWith(path)
-  )
-
-  // Redirecionar para login se não autenticado
-  if (isProtectedPath && !user) {
-    return NextResponse.redirect(new URL('/sign-in', request.url))
   }
 
-  // Redirecionar para home se já autenticado e tentando acessar auth pages
-  const authPaths = ['/sign-in', '/sign-up']
-  const isAuthPath = authPaths.some(path => 
-    request.nextUrl.pathname.startsWith(path)
-  )
-
-  if (isAuthPath && user) {
-    return NextResponse.redirect(new URL('/campaigns', request.url))
-  }
-
-  return response
+  return response;
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
-}
+  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)']
+};

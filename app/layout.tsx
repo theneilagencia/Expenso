@@ -1,29 +1,5 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
+import { redirect } from 'next/navigation';
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
-
-export const metadata: Metadata = {
-  title: "Loquia - AI-Powered Campaign Management",
-  description: "Manage and optimize your advertising campaigns with AI insights",
-};
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html lang="en" className="dark">
-      <body
-        className={`${inter.variable} font-sans antialiased bg-black text-white min-h-screen`}
-      >
-        {children}
-      </body>
-    </html>
-  );
+export default function RootLayout() {
+  redirect('/pt');
 }

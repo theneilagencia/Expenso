@@ -1,0 +1,15 @@
+{
+  "loading": "Carregando...",
+  "save": "Salvar",
+  "cancel": "Cancelar",
+  "delete": "Excluir",
+  "edit": "Editar",
+  "confirm": "Confirmar",
+  "view": "Visualizar",
+  "submit": "Enviar",
+  "back": "Voltar",
+  "navbar": {
+    "campaigns": "Campanhas",
+    "setup": "Configuração"
+  }
+}
