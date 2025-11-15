@@ -47,7 +47,6 @@ export async function GET() {
   // URL de autorização da Meta (Facebook Graph API v19.0)
   const authUrl = "https://www.facebook.com/v19.0/dialog/oauth?" + params.toString();
 
-  console.log("[Meta OAuth] Redirecionando para:", authUrl);
 
   // Redirecionar para a página de autorização da Meta
   return NextResponse.redirect(authUrl);

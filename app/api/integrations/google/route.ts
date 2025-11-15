@@ -51,7 +51,6 @@ export async function GET() {
   // URL de autorização do Google OAuth 2.0
   const authUrl = "https://accounts.google.com/o/oauth2/v2/auth?" + params.toString();
 
-  console.log("[Google OAuth] Redirecionando para:", authUrl);
 
   // Redirecionar para a página de autorização do Google
   return NextResponse.redirect(authUrl);

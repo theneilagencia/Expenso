@@ -40,7 +40,6 @@ export async function GET(req: Request) {
       );
     }
 
-    console.log("[Meta Callback] Código recebido, trocando por token...");
 
     // Validar variáveis de ambiente
     if (!process.env.META_CLIENT_ID || !process.env.META_CLIENT_SECRET || !process.env.META_REDIRECT_URI) {
@@ -86,7 +85,6 @@ export async function GET(req: Request) {
       );
     }
 
-    console.log("[Meta Callback] Token obtido com sucesso");
 
     // Obter informações do usuário autenticado
     const supabase = supabaseServer();
@@ -100,7 +98,6 @@ export async function GET(req: Request) {
     }
 
     // Salvar token no Supabase
-    console.log("[Meta Callback] Salvando token no banco de dados...");
     
     const { data: integration, error: dbError } = await supabase
       .from("integrations")
@@ -126,12 +123,10 @@ export async function GET(req: Request) {
       );
     }
 
-    console.log("[Meta Callback] Integração salva com sucesso:", integration?.id);
 
     // Notificar webhook Manus (se configurado)
     if (process.env.MANUS_WEBHOOK_URL) {
       try {
-        console.log("[Meta Callback] Notificando webhook Manus...");
         
         const webhookRes = await fetch(process.env.MANUS_WEBHOOK_URL, {
           method: "POST",
@@ -153,7 +148,6 @@ export async function GET(req: Request) {
         });
 
         if (webhookRes.ok) {
-          console.log("[Meta Callback] Webhook notificado com sucesso");
         } else {
           console.warn("[Meta Callback] Falha ao notificar webhook:", await webhookRes.text());
         }
@@ -167,7 +161,6 @@ export async function GET(req: Request) {
 
     // Redirecionar usuário de volta para o app
     const redirectUrl = new URL("/integrations?connected=meta", url.origin);
-    console.log("[Meta Callback] Redirecionando para:", redirectUrl.toString());
 
     return NextResponse.redirect(redirectUrl);
 
