@@ -46,11 +46,7 @@ export function LandingPremium({ content, locale }: LandingPremiumProps) {
           variants={stagger}
           className="relative z-10 text-center max-w-4xl mx-auto"
         >
-          <motion.div variants={fadeIn} className="mb-8">
-            <div className="w-16 h-16 mx-auto animate-float opacity-60">
-              <GlobeMeshIcon className="w-full h-full block" />
-            </div>
-          </motion.div>
+          {/* Icon temporarily removed due to sizing issue */}
           
           <motion.h1 variants={fadeIn} className="text-4xl md:text-5xl font-bold mb-6 text-balance">
             {hero.title}
