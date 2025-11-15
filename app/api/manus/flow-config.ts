@@ -80,10 +80,6 @@ export class WebhookClient {
 
     for (let attempt = 1; attempt <= this.retryAttempts; attempt++) {
       try {
-        console.log(`[WebhookClient] Tentativa ${attempt}/${this.retryAttempts} - Enviando evento:`, {
-          event_type: payload.event_type,
-          flow_id: payload.flow_id,
-        });
 
         const response = await fetch(this.baseUrl, {
           method: 'POST',
@@ -99,7 +95,6 @@ export class WebhookClient {
         }
 
         const result = await response.json();
-        console.log('[WebhookClient] Evento enviado com sucesso:', result);
         return true;
 
       } catch (error) {

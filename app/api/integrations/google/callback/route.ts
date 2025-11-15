@@ -39,7 +39,6 @@ export async function GET(req: Request) {
       );
     }
 
-    console.log("[Google Callback] Código recebido, trocando por token...");
 
     // Validar variáveis de ambiente
     if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET || !process.env.GOOGLE_REDIRECT_URI) {
@@ -92,8 +91,6 @@ export async function GET(req: Request) {
       );
     }
 
-    console.log("[Google Callback] Tokens obtidos com sucesso");
-    console.log("[Google Callback] Refresh token presente:", !!refreshToken);
 
     // Obter informações do usuário autenticado
     const supabase = await supabaseServer();
@@ -107,7 +104,6 @@ export async function GET(req: Request) {
     }
 
     // Salvar tokens no Supabase
-    console.log("[Google Callback] Salvando tokens no banco de dados...");
     
     const { data: integration, error: dbError } = await supabase
       .from("integrations")
@@ -141,12 +137,10 @@ export async function GET(req: Request) {
       );
     }
 
-    console.log("[Google Callback] Integração salva com sucesso:", integration?.id);
 
     // Notificar webhook Manus (se configurado)
     if (process.env.MANUS_WEBHOOK_URL) {
       try {
-        console.log("[Google Callback] Notificando webhook Manus...");
         
         const webhookRes = await fetch(process.env.MANUS_WEBHOOK_URL, {
           method: "POST",
@@ -169,7 +163,6 @@ export async function GET(req: Request) {
         });
 
         if (webhookRes.ok) {
-          console.log("[Google Callback] Webhook notificado com sucesso");
         } else {
           console.warn("[Google Callback] Falha ao notificar webhook:", await webhookRes.text());
         }
@@ -183,7 +176,6 @@ export async function GET(req: Request) {
 
     // Redirecionar usuário de volta para o app
     const redirectUrl = new URL("/integrations?connected=google", url.origin);
-    console.log("[Google Callback] Redirecionando para:", redirectUrl.toString());
 
     return NextResponse.redirect(redirectUrl);
 

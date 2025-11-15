@@ -27,7 +27,6 @@ export async function exampleSendMessage() {
   );
   
   if (success) {
-    console.log('Mensagem enviada com sucesso');
   } else {
     console.error('Falha ao enviar mensagem');
   }
@@ -47,7 +46,6 @@ export async function exampleUpdateState() {
   });
   
   if (success) {
-    console.log('Estado atualizado com sucesso');
   }
 }
 
@@ -65,7 +63,6 @@ export async function exampleCompleteFlow() {
   });
   
   if (success) {
-    console.log('Flow completado com sucesso');
   }
 }
 
@@ -86,7 +83,6 @@ export async function exampleReportError() {
   );
   
   if (success) {
-    console.log('Erro reportado com sucesso');
   }
 }
 
@@ -156,7 +152,6 @@ export async function exampleCustomEvent() {
   });
   
   if (success) {
-    console.log('Evento customizado enviado com sucesso');
   }
 }
 
@@ -167,7 +162,6 @@ export async function exampleHealthCheck() {
   const isHealthy = await webhookClient.healthCheck();
   
   if (isHealthy) {
-    console.log('Webhook está disponível e funcionando');
   } else {
     console.error('Webhook não está respondendo');
   }

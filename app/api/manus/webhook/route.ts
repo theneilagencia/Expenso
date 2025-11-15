@@ -32,12 +32,6 @@ export async function POST(request: NextRequest) {
     const payload: WebhookPayload = await request.json();
 
     // Log do evento recebido (em produção, usar um logger adequado)
-    console.log('[Webhook] Evento recebido:', {
-      event_type: payload.event_type,
-      flow_id: payload.flow_id,
-      step_id: payload.step_id,
-      timestamp: payload.timestamp || new Date().toISOString(),
-    });
 
     // Validação básica do payload
     if (!payload.event_type) {
@@ -121,26 +115,19 @@ async function processWebhookEvent(payload: WebhookPayload) {
  */
 
 async function handleMessageSent(data: Record<string, any> | undefined) {
-  console.log('[Webhook] Processando mensagem enviada:', data);
-  // TODO: Implementar lógica de processamento de mensagens
   return { type: 'message_sent', processed: true };
 }
 
 async function handleStateUpdated(data: Record<string, any> | undefined) {
-  console.log('[Webhook] Processando atualização de estado:', data);
-  // TODO: Implementar lógica de atualização de estado
   return { type: 'state_updated', processed: true };
 }
 
 async function handleFlowCompleted(data: Record<string, any> | undefined) {
-  console.log('[Webhook] Processando conclusão de flow:', data);
-  // TODO: Implementar lógica de conclusão de flow
   return { type: 'flow_completed', processed: true };
 }
 
 async function handleFlowError(data: Record<string, any> | undefined) {
   console.error('[Webhook] Processando erro de flow:', data);
-  // TODO: Implementar lógica de tratamento de erros
   return { type: 'flow_error', processed: true };
 }
 
