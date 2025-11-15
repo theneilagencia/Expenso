@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import Image from 'next/image';
 import { LanguageSwitcher } from '@/components/language-switcher';
 
 export const dynamic = 'force-dynamic';
@@ -66,8 +67,15 @@ export default async function LandingPage({ params }: { params: { locale: string
       {/* HEADER */}
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.08] bg-black/80 backdrop-blur-xl">
         <div className="mx-auto max-w-[1280px] px-6 md:px-8 lg:px-12 flex items-center justify-between h-16 md:h-20">
-          <Link href={`/${params.locale}`} className="text-xl font-bold">
-            Loquia
+          <Link href={`/${params.locale}`} className="flex items-center">
+            <Image
+              src="/logo-white.png"
+              alt="Loquia"
+              width={120}
+              height={30}
+              className="h-8 w-auto"
+              priority
+            />
           </Link>
           <LanguageSwitcher />
         </div>
@@ -292,28 +300,77 @@ export default async function LandingPage({ params }: { params: { locale: string
           <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent my-16 md:my-24" />
         </div>
 
-        {/* STATS SECTION */}
+        {/* MÓDULOS OPCIONAIS SECTION */}
         <section className="py-16 md:py-24 lg:py-32">
           <div className="mx-auto max-w-[1280px] px-6 md:px-8 lg:px-12">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight mb-4" style={{letterSpacing: '-0.02em'}}>
-                {stats.title}
+                Módulos Opcionais que Entregam Vantagens Exclusivas
               </h2>
-              <p className="text-lg md:text-xl leading-relaxed text-white/70">
-                {stats.subtitle}
-              </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {stats.items.map((stat, index) => (
-                <div 
-                  key={index} 
-                  className="text-center p-8 md:p-10 bg-gradient-to-b from-white/[0.03] to-transparent border border-white/[0.08] rounded-2xl"
-                >
-                  <div className="text-6xl font-bold text-emerald-500 mb-4">{stat.value}</div>
-                  <p className="text-base md:text-lg leading-relaxed text-white/65">{stat.label}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+              {/* Qualificação Inteligente */}
+              <div className="bg-white/[0.02] border border-white/[0.08] rounded-xl p-8 md:p-10 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/[0.15] hover:bg-white/[0.04]">
+                <h3 className="text-2xl md:text-3xl font-semibold tracking-tight leading-snug mb-4" style={{letterSpacing: '-0.01em'}}>
+                  Qualificação Inteligente de Leads por Voz
+                </h3>
+                <p className="text-base md:text-lg leading-relaxed text-white/70 mb-6">
+                  Ideal para quem precisa filtrar rapidamente leads que realmente têm potencial. O sistema faz a primeira conversa, coleta informações e ajuda você a priorizar quem vale a pena.
+                </p>
+                <div className="space-y-3">
+                  <h4 className="text-lg font-semibold text-emerald-500 mb-3">Benefícios diretos</h4>
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
+                      <span className="text-sm md:text-base leading-relaxed text-white/60">Atendimento imediato</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
+                      <span className="text-sm md:text-base leading-relaxed text-white/60">Menos tempo gasto com leads frios</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
+                      <span className="text-sm md:text-base leading-relaxed text-white/60">Aumento de conversão de oportunidades</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
+                      <span className="text-sm md:text-base leading-relaxed text-white/60">Escalabilidade sem contratar equipe</span>
+                    </li>
+                  </ul>
                 </div>
-              ))}
+              </div>
+
+              {/* Diagnóstico e Planejamento */}
+              <div className="bg-white/[0.02] border border-white/[0.08] rounded-xl p-8 md:p-10 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/[0.15] hover:bg-white/[0.04]">
+                <h3 className="text-2xl md:text-3xl font-semibold tracking-tight leading-snug mb-4" style={{letterSpacing: '-0.01em'}}>
+                  Diagnóstico e Planejamento Automático
+                </h3>
+                <p className="text-base md:text-lg leading-relaxed text-white/70 mb-6">
+                  Para quem quer acelerar a criação de diagnósticos e planos estratégicos. O módulo analisa páginas públicas e extrai informações úteis para montar uma base sólida para suas campanhas.
+                </p>
+                <div className="space-y-3">
+                  <h4 className="text-lg font-semibold text-emerald-500 mb-3">Benefícios diretos</h4>
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
+                      <span className="text-sm md:text-base leading-relaxed text-white/60">Economia de horas de pesquisa</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
+                      <span className="text-sm md:text-base leading-relaxed text-white/60">Plano estratégico mais completo</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
+                      <span className="text-sm md:text-base leading-relaxed text-white/60">Visão de mercado clara</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
+                      <span className="text-sm md:text-base leading-relaxed text-white/60">Diagnósticos mais profissionais</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         </section>
