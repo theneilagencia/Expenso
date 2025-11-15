@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase-client';
 import { GlowButton } from '@/components/glow';
 import { LanguageSwitcher } from '@/components/language-switcher';
@@ -27,8 +28,14 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href={`/${locale}`} className="text-2xl font-bold text-white">
-              Loquia
+            <Link href={`/${locale}`} className="flex items-center">
+              <Image
+                src="/logo-white.png"
+                alt="Loquia"
+                width={120}
+                height={30}
+                className="h-8 w-auto"
+              />
             </Link>
           </div>
 

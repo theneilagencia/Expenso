@@ -1,6 +1,7 @@
 import { useTranslations } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import Image from 'next/image';
 import { GlowButton, GlowCard } from '@/components/glow';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { ArrowRight, Sparkles, Target, TrendingUp } from 'lucide-react';
@@ -19,9 +20,18 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-            Loquia
-          </h1>
+          {/* Logo */}
+          <div className="flex justify-center mb-8">
+            <Image
+              src="/logo-white.png"
+              alt="Loquia"
+              width={400}
+              height={80}
+              priority
+              className="h-16 w-auto md:h-20"
+            />
+          </div>
+          
           <p className="text-xl md:text-2xl text-gray-300 mb-8">
             {t('hero.subtitle')}
           </p>

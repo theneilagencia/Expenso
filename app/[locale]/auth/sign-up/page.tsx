@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function SignUpPage() {
   const t = useTranslations('auth');
@@ -46,7 +47,16 @@ export default function SignUpPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-black">
         <div className="w-full max-w-md p-8 bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700 shadow-2xl">
-          <h1 className="text-3xl font-bold text-white mb-6 text-center">
+          <div className="flex justify-center mb-6">
+            <Image
+              src="/logo-white.png"
+              alt="Loquia"
+              width={200}
+              height={50}
+              className="h-12 w-auto"
+            />
+          </div>
+          <h1 className="text-xl font-bold text-white mb-6 text-center">
             {t('checkEmail')}
           </h1>
           <p className="text-gray-300 text-center mb-6">
@@ -66,9 +76,15 @@ export default function SignUpPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-black">
       <div className="w-full max-w-md p-8 bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700 shadow-2xl">
-        <h1 className="text-3xl font-bold text-white mb-6 text-center">
-          Loquia
-        </h1>
+        <div className="flex justify-center mb-6">
+          <Image
+            src="/logo-white.png"
+            alt="Loquia"
+            width={200}
+            height={50}
+            className="h-12 w-auto"
+          />
+        </div>
         <h2 className="text-xl text-gray-300 mb-8 text-center">
           {t('createAccount')}
         </h2>
