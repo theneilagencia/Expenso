@@ -2,7 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import Image from 'next/image';
 import { LanguageSwitcher } from '@/components/language-switcher';
-import { ThemeToggle } from '@/components/theme-toggle';
+
 import { LandingPremium } from './landing-premium';
 
 // Force dynamic rendering
@@ -66,7 +66,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 glass">
+      <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-black/50 border-b border-white/5">
         <div className="container mx-auto py-4 px-6">
           <div className="flex justify-between items-center">
             <Link href={`/${locale}`}>
@@ -79,10 +79,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 className="h-8 w-auto"
               />
             </Link>
-            <div className="flex items-center gap-4">
-              <ThemeToggle />
-              <LanguageSwitcher />
-            </div>
+            <LanguageSwitcher />
           </div>
         </div>
       </header>
@@ -95,20 +92,20 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-gray-800 py-12 mt-20">
+      <footer className="border-t border-white/5 py-12 mt-20">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-white/40">
               © 2024 Loquia. All rights reserved.
             </p>
             <div className="flex gap-8">
-              <Link href={`/${locale}/pricing`} className="text-sm text-gray-400 hover:text-white transition-colors">
+              <Link href={`/${locale}/pricing`} className="text-sm text-white/60 hover:text-white transition-colors">
                 Pricing
               </Link>
-              <Link href={`/${locale}/addons`} className="text-sm text-gray-400 hover:text-white transition-colors">
+              <Link href={`/${locale}/addons`} className="text-sm text-white/60 hover:text-white transition-colors">
                 Addons
               </Link>
-              <Link href={`/${locale}/contact`} className="text-sm text-gray-400 hover:text-white transition-colors">
+              <Link href={`/${locale}/contact`} className="text-sm text-white/60 hover:text-white transition-colors">
                 Contact
               </Link>
             </div>
