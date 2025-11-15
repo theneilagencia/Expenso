@@ -89,7 +89,7 @@ export async function GET(req: Request) {
     console.log("[Meta Callback] Token obtido com sucesso");
 
     // Obter informações do usuário autenticado
-    const supabase = supabaseServer();
+    const supabase = await supabaseServer();
     const {
       data: { user },
       error: userError

@@ -1,27 +1,42 @@
-import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
+// Supabase Server-Side Client (usando @supabase/ssr)
+// Para uso em Server Components, Route Handlers e Server Actions
 
-/**
- * Cliente Supabase para uso server-side
- * 
- * Este cliente é usado em rotas de API e Server Components
- * para acessar o Supabase com autenticação do usuário.
- */
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 
-export function supabaseServer() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+export async function createClient() {
+  const cookieStore = await cookies()
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Variáveis de ambiente do Supabase não configuradas');
-  }
-
-  // Criar cliente Supabase
-  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: false,
-    },
-  });
-
-  return supabase;
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          try {
+            cookieStore.set({ name, value, ...options })
+          } catch (error) {
+            // The `set` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+        remove(name: string, options: CookieOptions) {
+          try {
+            cookieStore.set({ name, value: '', ...options })
+          } catch (error) {
+            // The `delete` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+      },
+    }
+  )
 }
+
+// Backward compatibility
+export const supabaseServer = createClient

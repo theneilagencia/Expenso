@@ -96,7 +96,7 @@ export async function GET(req: Request) {
     console.log("[Google Callback] Refresh token presente:", !!refreshToken);
 
     // Obter informações do usuário autenticado
-    const supabase = supabaseServer();
+    const supabase = await supabaseServer();
     const {
       data: { user },
       error: userError
