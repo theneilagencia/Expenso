@@ -1,9 +1,18 @@
 import OpenAI from 'openai';
 
-// Inicializar cliente OpenAI
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy initialization to avoid build-time errors
+let openaiClient: OpenAI | null = null;
+
+function getOpenAIClient() {
+  if (!openaiClient) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey || apiKey === 'sk-dummy-key-not-used') {
+      throw new Error('OpenAI API key not configured or is dummy value');
+    }
+    openaiClient = new OpenAI({ apiKey });
+  }
+  return openaiClient;
+}
 
 export interface InsightGenerationParams {
   campaignId: string;
@@ -62,6 +71,7 @@ Forneça uma análise estruturada em JSON com o seguinte formato:
 Seja específico, acionável e focado em resultados de negócio.`;
 
   try {
+    const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -125,6 +135,7 @@ Forneça sugestões em JSON:
   ]
 }`;
 
+  const openai = getOpenAIClient();
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
