@@ -48,7 +48,7 @@ export function LandingPremium({ content, locale }: LandingPremiumProps) {
         >
           <motion.div variants={fadeIn} className="mb-8">
             <div className="w-16 h-16 mx-auto animate-float opacity-60">
-              <GlobeMeshIcon />
+              <GlobeMeshIcon className="w-full h-full block" />
             </div>
           </motion.div>
           
@@ -118,7 +118,7 @@ export function LandingPremium({ content, locale }: LandingPremiumProps) {
         >
           <motion.div variants={fadeIn} className="text-center mb-16">
             <div className="w-12 h-12 mx-auto mb-6 opacity-60">
-              <PrecisionGearIcon />
+              <PrecisionGearIcon className="w-full h-full block" />
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">{solution.title}</h2>
             <p className="text-lg text-white/60 mb-6">{solution.subtitle}</p>
@@ -155,11 +155,11 @@ export function LandingPremium({ content, locale }: LandingPremiumProps) {
             {features.items.map((item: any, index: number) => (
               <motion.div key={index} variants={fadeIn} className="card">
                 <div className="w-10 h-10 mb-4 opacity-60">
-                  {index === 0 && <DataGridIcon />}
-                  {index === 1 && <NetworkNodeIcon />}
-                  {index === 2 && <CrystalPrismIcon />}
-                  {index === 3 && <GlobeMeshIcon />}
-                  {index === 4 && <PrecisionGearIcon />}
+                  {index === 0 && <DataGridIcon className="w-full h-full block" />}
+                  {index === 1 && <NetworkNodeIcon className="w-full h-full block" />}
+                  {index === 2 && <CrystalPrismIcon className="w-full h-full block" />}
+                  {index === 3 && <GlobeMeshIcon className="w-full h-full block" />}
+                  {index === 4 && <PrecisionGearIcon className="w-full h-full block" />}
                 </div>
                 <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
                 <p className="text-sm text-white/60">{item.description}</p>
