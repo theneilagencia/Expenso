@@ -232,7 +232,7 @@ export default async function ContactPage({ params }: { params: { locale: string
               <LocaleLink href="/pricing" className="text-white/40 hover:text-white transition-colors text-sm">
                 Pricing
               </LocaleLink>
-              <Link href="/addons" className="text-white/40 hover:text-white transition-colors text-sm">
+              <LocaleLink href="/addons" className="text-white/40 hover:text-white transition-colors text-sm">
                 Addons
               </LocaleLink>
             </div>

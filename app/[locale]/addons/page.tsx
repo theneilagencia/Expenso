@@ -197,7 +197,7 @@ export default async function AddonsPage({ params }: { params: { locale: string 
               <LocaleLink href="/pricing" className="text-white/40 hover:text-white transition-colors text-sm">
                 Pricing
               </LocaleLink>
-              <Link href="/roi-calculator" className="text-white/40 hover:text-white transition-colors text-sm">
+              <LocaleLink href="/roi-calculator" className="text-white/40 hover:text-white transition-colors text-sm">
                 ROI Calculator
               </LocaleLink>
             </div>
