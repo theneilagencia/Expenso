@@ -1,6 +1,8 @@
 import { getTranslations } from 'next-intl/server';
-import Link from 'next/link';
+import { Link } from '@/navigation';
+import Image from 'next/image';
 import { LanguageSwitcher } from '@/components/language-switcher';
+import { NavbarLinks } from '@/components/navbar-links';
 import ROICalculatorClient from './roi-calculator-client';
 
 export default async function ROICalculatorPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -67,37 +69,64 @@ export default async function ROICalculatorPage({ params }: { params: Promise<{ 
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
-      {/* Header */}
-      <div className="border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+      {/* PREMIUM BACKGROUND */}
+      <div className="premium-background">
+        {/* Geometric Shapes */}
+        <div className="geometric-circle-1" />
+        <div className="geometric-circle-2" />
+        <div className="geometric-circle-3" />
+        <div className="geometric-hexagon-1" />
+        <div className="geometric-hexagon-2" />
+        <div className="diagonal-lines" />
+        
+        {/* Subtle Orbs */}
+        <div className="subtle-orb-1" />
+        <div className="subtle-orb-2" />
+        
+        {/* Grid Pattern */}
+        <div className="grid-pattern" />
+      </div>
+
+      {/* HEADER */}
+      <header className="border-b border-white/[0.08] relative z-10">
+        <div className="mx-auto max-w-[1280px] px-6 md:px-8 lg:px-12 py-4">
           <div className="flex justify-between items-center">
-            <Link href={`/${locale}`} className="text-2xl font-bold text-white">
-              Loquia
+            <Link href="/" className="flex items-center">
+              <Image 
+                src="/logo-white.png" 
+                alt="Loquia" 
+                width={120} 
+                height={32}
+                className="h-8 w-auto"
+              />
             </Link>
-            <LanguageSwitcher />
+            <div className="flex items-center gap-8">
+              <NavbarLinks />
+              <LanguageSwitcher />
+            </div>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Client Component with translations */}
       <ROICalculatorClient locale={locale} translations={translations} />
 
-      {/* Footer */}
-      <footer className="border-t border-white/10 py-8 mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="text-gray-400 text-sm">
-              © 2024 Loquia. All rights reserved.
+      {/* FOOTER */}
+      <footer className="border-t border-white/[0.08] py-12 relative z-10">
+        <div className="mx-auto max-w-[1280px] px-6 md:px-8 lg:px-12">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="text-white/40 text-sm">
+              © 2024 Loquia. Todos os direitos reservados.
             </div>
-            <div className="flex space-x-6">
-              <Link href={`/${locale}`} className="text-gray-400 hover:text-white transition-colors">
+            <div className="flex gap-8">
+              <Link href="/" className="text-white/40 hover:text-white transition-colors text-sm">
                 Home
               </Link>
-              <Link href={`/${locale}/pricing`} className="text-gray-400 hover:text-white transition-colors">
+              <Link href="/pricing" className="text-white/40 hover:text-white transition-colors text-sm">
                 Pricing
               </Link>
-              <Link href={`/${locale}/addons`} className="text-gray-400 hover:text-white transition-colors">
+              <Link href="/addons" className="text-white/40 hover:text-white transition-colors text-sm">
                 Addons
               </Link>
             </div>
