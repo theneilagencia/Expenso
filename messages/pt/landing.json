@@ -1,15 +1,14 @@
 {
   "hero": {
-    "title": "Trate clareza, controle e crescimento em seus anúncios",
-    "subtitle": "Organize todas as suas campanhas, descubra onde está perdendo dinheiro (e onde você realmente pode ganhar) ganhando tempo para focar no que realmente gera resultado.",
+    "title": "Ganhe clareza imediata, controle total e crescimento consistente em cada campanha",
+    "subtitle": "Organize tudo em um só lugar, identifique o que está drenando seu orçamento e veja exatamente onde você pode lucrar mais, liberando recursos para acelerar seus resultados",
     "cta_primary": "Começar agora",
     "cta_secondary": "Ver planos",
-    "cta_tertiary": "Simular ROI",
-    "available_in": "Disponível em português e inglês"
+    "cta_tertiary": "Simular ROI"
   },
   "problem": {
     "title": "O Problema",
-    "subtitle": "Você não deveria perder tempo e dinheiro tentando entender suas campanhas. Mas a realidade é outra.",
+    "subtitle": "Você não deveria perder tempo e dinheiro tentando entender suas campanhas. Mas a realidade é outra, gerando insegurança, desperdício e decisões lentas",
     "issues": [
       {
         "title": "Campanhas espalhadas em vários painéis",
@@ -20,10 +19,6 @@
         "description": "Dados desconexos dificultam a tomada de decisão"
       },
       {
-        "title": "Demora para identificar problemas",
-        "description": "Você descobre os problemas tarde demais"
-      },
-      {
         "title": "Horas gastas em relatórios e análises manuais",
         "description": "Tempo que poderia ser usado para otimizar campanhas"
       },
@@ -31,13 +26,12 @@
         "title": "Falta de clareza sobre retorno e oportunidades",
         "description": "Você não sabe onde investir mais ou cortar gastos"
       }
-    ],
-    "conclusion": "Isso gera insegurança, desperdício e decisões lentas."
+    ]
   },
   "solution": {
-    "title": "Apresentação do Loquia",
+    "title": "O Loquia coloca tudo em ordem para você",
     "subtitle": "O Loquia coloca tudo em ordem para você.",
-    "intro": "Você enxerga suas campanhas em um só ambiente, entende o que merece atenção e age com confiança. É uma plataforma que simplifica, organiza e acelera o trabalho de quem precisa gerar resultado.",
+    "intro": "Você enxerga suas campanhas em um só ambiente, entende o que merece atenção e age com confiança. Simplificamos, organizamos e aceleramos o trabalho de quem precisa gerar resultado.",
     "benefits": [
       {
         "title": "Visão consolidada",
@@ -62,7 +56,7 @@
     ]
   },
   "features": {
-    "title": "O Loquia ajuda você a",
+    "title": "Como ajudamos o seu negócio",
     "items": [
       {
         "title": "Enxergar tudo em um só lugar",
@@ -88,7 +82,7 @@
   },
   "target_audience": {
     "title": "Para quem é o Loquia?",
-    "subtitle": "Três perfis que mais se beneficiam",
+    "subtitle": "Conheça os 03 perfis que mais se beneficiam",
     "profiles": [
       {
         "name": "Agências de Marketing",
@@ -96,7 +90,7 @@
       },
       {
         "name": "Profissionais de Mídia / Media Buyers",
-        "description": "Vivem sob pressão por resultado, passam horas analisando dados e precisam de clareza para otimizar campanhas rapidamente."
+        "description": "Não dominam a parte técnica, estão começando do zero e precisam evitar erros que custam tempo e dinheiro"
       },
       {
         "name": "Pequenas e Médias Empresas",
@@ -105,8 +99,8 @@
     ]
   },
   "how_it_works": {
-    "title": "Como funciona",
-    "subtitle": "3 passos simples para começar",
+    "title": "Apenas 03 passos para começar fazer a diferença",
+    "subtitle": "",
     "steps": [
       {
         "number": "1",

@@ -323,7 +323,7 @@ export default async function LandingPage({ params }: { params: { locale: string
           <div className="mx-auto max-w-[1280px] px-6 md:px-8 lg:px-12">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight mb-6" style={{letterSpacing: '-0.02em'}}>
-                Como cada módulo da plataforma ajuda você a crescer
+                Conheça os módulos da plataforma
               </h2>
               <p className="text-lg md:text-xl leading-relaxed max-w-3xl mx-auto text-white/70">
                 A plataforma é formada por módulos práticos e orientados a negócio.<br />
@@ -469,7 +469,7 @@ export default async function LandingPage({ params }: { params: { locale: string
           <div className="mx-auto max-w-[1280px] px-6 md:px-8 lg:px-12">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight mb-4" style={{letterSpacing: '-0.02em'}}>
-                Módulos Opcionais que Entregam Vantagens Exclusivas
+                Módulos adicionais que entregam diferenciais para o seu negócio
               </h2>
             </div>
 

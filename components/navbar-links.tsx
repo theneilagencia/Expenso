@@ -12,12 +12,6 @@ export function NavbarLinks() {
         Ver planos
       </Link>
       <Link 
-        href="/addons" 
-        className="text-sm text-white/70 hover:text-white transition-colors"
-      >
-        Addons
-      </Link>
-      <Link 
         href="/contact" 
         className="text-sm text-white/70 hover:text-white transition-colors"
       >
