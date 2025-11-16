@@ -197,7 +197,7 @@ export default async function PricingPage({ params }: { params: { locale: string
           <div className="mx-auto max-w-[1280px] px-6 md:px-8 lg:px-12">
             <div className="text-center mb-16 scroll-reveal">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight mb-4" style={{letterSpacing: '-0.02em'}}>
-                Módulos Opcionais que Entregam Vantagens Exclusivas
+                Módulos Adicionais
               </h2>
               <p className="text-lg md:text-xl leading-relaxed max-w-2xl mx-auto text-white/70">
                 Adicione funcionalidades específicas ao seu plano e ganhe vantagens competitivas imediatas

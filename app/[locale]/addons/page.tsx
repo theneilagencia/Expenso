@@ -92,7 +92,7 @@ export default async function AddonsPage({ params }: { params: { locale: string 
         <section className="py-20 md:py-32 lg:py-40 relative">
           <div className="mx-auto max-w-[1280px] px-6 md:px-8 lg:px-12 text-center relative z-10">
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-none mb-6 opacity-0 animate-fade-in-up" style={{letterSpacing: '-0.03em', textWrap: 'balance'}}>
-              Módulos Opcionais que Entregam Vantagens Exclusivas
+              Módulos Adicionais
             </h1>
             <p className="text-lg md:text-xl leading-relaxed max-w-3xl mx-auto mb-12 text-white/70 opacity-0 animate-fade-in-up animate-delay-200" style={{textWrap: 'balance'}}>
               Adicione funcionalidades específicas ao seu plano e ganhe vantagens competitivas imediatas
