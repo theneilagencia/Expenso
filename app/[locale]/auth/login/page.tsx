@@ -53,6 +53,18 @@ export default async function LoginPage() {
         <div className="w-full max-w-md scroll-reveal">
           {/* Login Card */}
           <div className="premium-card p-8 md:p-10">
+            {/* Logo */}
+            <div className="flex justify-center mb-8">
+              <Image
+                src="/logo-white.png"
+                alt="Loquia"
+                width={150}
+                height={38}
+                className="h-10 w-auto"
+                priority
+              />
+            </div>
+
             <div className="text-center mb-8">
               <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3" style={{letterSpacing: '-0.02em'}}>
                 Bem-vindo de volta
