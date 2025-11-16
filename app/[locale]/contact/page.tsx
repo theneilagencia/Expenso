@@ -53,7 +53,7 @@ export default async function ContactPage({ params }: { params: { locale: string
               className="h-8 w-auto"
               priority
             />
-          </LocaleLink>
+          </Link>
           <LanguageSwitcher />
         </div>
       </header>

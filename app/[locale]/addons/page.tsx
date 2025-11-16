@@ -59,7 +59,7 @@ export default async function AddonsPage({ params }: { params: { locale: string 
               className="h-8 w-auto"
               priority
             />
-          </LocaleLink>
+          </Link>
           <LanguageSwitcher />
         </div>
       </header>
