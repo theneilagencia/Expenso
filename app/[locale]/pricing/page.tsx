@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { LocaleLink } from '@/components/locale-link';
 import Image from 'next/image';
 import { LanguageSwitcher } from '@/components/language-switcher';
+import { NavbarLinks } from '@/components/navbar-links';
 import { CheckCircle2 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -80,6 +81,9 @@ export default async function PricingPage({ params }: { params: { locale: string
               priority
             />
           </Link>
+          
+          <NavbarLinks />
+          
           <LanguageSwitcher />
         </div>
       </header>
@@ -248,7 +252,7 @@ export default async function PricingPage({ params }: { params: { locale: string
                 <div className="flex items-center justify-between pt-6 border-t border-white/10">
                   <div>
                     <span className="text-white/50 text-sm">USD</span>
-                    <span className="text-3xl font-bold mx-1">42</span>
+                    <span className="text-3xl font-bold mx-1">64</span>
                     <span className="text-white/50 text-sm">/mês</span>
                   </div>
                   <LocaleLink 
@@ -307,7 +311,7 @@ export default async function PricingPage({ params }: { params: { locale: string
                 <div className="flex items-center justify-between pt-6 border-t border-white/10">
                   <div>
                     <span className="text-white/50 text-sm">USD</span>
-                    <span className="text-3xl font-bold mx-1">38</span>
+                    <span className="text-3xl font-bold mx-1">161</span>
                     <span className="text-white/50 text-sm">/mês</span>
                   </div>
                   <LocaleLink 

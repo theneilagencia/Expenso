@@ -565,14 +565,14 @@ export default async function LandingPage({ params }: { params: { locale: string
             <div className="text-xl font-bold">Loquia</div>
             
             <nav className="flex gap-8">
-              <Link href={`/${params.locale}/pricing`} className="text-white/60 hover:text-white transition-colors duration-200">
-                Pricing
+              <Link href="/pricing" className="text-white/60 hover:text-white transition-colors duration-200">
+                Ver planos
               </Link>
-              <Link href={`/${params.locale}/addons`} className="text-white/60 hover:text-white transition-colors duration-200">
+              <Link href="/addons" className="text-white/60 hover:text-white transition-colors duration-200">
                 Addons
               </Link>
-              <Link href={`/${params.locale}/contact`} className="text-white/60 hover:text-white transition-colors duration-200">
-                Contact
+              <Link href="/contact" className="text-white/60 hover:text-white transition-colors duration-200">
+                Contato
               </Link>
             </nav>
           </div>

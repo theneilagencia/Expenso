@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { LocaleLink } from '@/components/locale-link';
 import Image from 'next/image';
 import { LanguageSwitcher } from '@/components/language-switcher';
+import { NavbarLinks } from '@/components/navbar-links';
 import { Mail, MessageSquare, Calendar, ArrowRight } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -54,6 +55,9 @@ export default async function ContactPage({ params }: { params: { locale: string
               priority
             />
           </Link>
+          
+          <NavbarLinks />
+          
           <LanguageSwitcher />
         </div>
       </header>

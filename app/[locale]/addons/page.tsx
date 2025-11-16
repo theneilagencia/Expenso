@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { LocaleLink } from '@/components/locale-link';
 import Image from 'next/image';
 import { LanguageSwitcher } from '@/components/language-switcher';
+import { NavbarLinks } from '@/components/navbar-links';
 import { CheckCircle2, Phone, BarChart3 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -60,6 +61,9 @@ export default async function AddonsPage({ params }: { params: { locale: string 
               priority
             />
           </Link>
+          
+          <NavbarLinks />
+          
           <LanguageSwitcher />
         </div>
       </header>
