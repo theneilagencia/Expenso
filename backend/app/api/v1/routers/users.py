@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import get_current_user
 from app.dependencies import get_db
+from app.models.user import User
 from app.schemas.user import UserResponse, UserUpdateRequest
 
 router = APIRouter()
@@ -19,16 +20,21 @@ async def update_me(
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    # Re-fetch user from the route's db session to avoid cross-session issues
+    user = db.query(User).filter(User.id == current_user.id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
     if request.locale is not None:
         if request.locale not in ("en-US", "pt-BR"):
             raise HTTPException(status_code=400, detail="Invalid locale")
-        current_user.locale = request.locale
+        user.locale = request.locale
 
     if request.full_name is not None:
         if len(request.full_name.strip()) < 2:
             raise HTTPException(status_code=400, detail="Name must be at least 2 characters")
-        current_user.full_name = request.full_name.strip()
+        user.full_name = request.full_name.strip()
 
     db.commit()
-    db.refresh(current_user)
-    return current_user
+    db.refresh(user)
+    return user

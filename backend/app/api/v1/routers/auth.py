@@ -133,12 +133,16 @@ async def change_password(
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    from app.models.user import User
+
     if not verify_password(request.current_password, current_user.password_hash):
         raise HTTPException(status_code=400, detail="Current password is incorrect")
 
-    current_user.password_hash = hash_password(request.new_password)
-    current_user.password_changed_at = datetime.now(timezone.utc)
-    current_user.force_password_reset = False
+    # Re-fetch from route's db session
+    user = db.query(User).filter(User.id == current_user.id).first()
+    user.password_hash = hash_password(request.new_password)
+    user.password_changed_at = datetime.now(timezone.utc)
+    user.force_password_reset = False
     db.commit()
 
     return {"message": "Password changed successfully"}
