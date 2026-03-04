@@ -1,0 +1,21 @@
+{
+  "assistant": "AI Assistant",
+  "analyzing": "Analyzing your request...",
+  "riskScore": "Risk Score",
+  "riskLow": "Low Risk",
+  "riskMedium": "Medium Risk",
+  "riskHigh": "High Risk",
+  "riskBlock": "Blocked",
+  "recommendation": "Recommendation",
+  "recommendApprove": "Recommend Approval",
+  "recommendReview": "Recommend Review",
+  "recommendReject": "Recommend Rejection",
+  "attentionPoints": "Attention Points",
+  "policyViolations": "Policy Violations",
+  "qualityScore": "Quality Score",
+  "suggestion": "Suggestion",
+  "chatPlaceholder": "Ask about expenses, policies, or your requests...",
+  "chatWelcome": "Hi! I can help you with expense policies, request status, and more. How can I assist you?",
+  "unavailable": "AI assistant is temporarily unavailable. Your request will continue without AI analysis.",
+  "reanalyze": "Re-analyze"
+}

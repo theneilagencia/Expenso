@@ -1,0 +1,18 @@
+{
+  "title": "Pagamentos",
+  "process": "Processar Pagamento",
+  "method": "M\u00e9todo de Pagamento",
+  "revolut": "Revolut",
+  "pix": "PIX",
+  "payroll": "Folha de Pagamento",
+  "scheduled": "Agendado",
+  "processing": "Processando",
+  "completed": "Conclu\u00eddo",
+  "failed": "Falhou",
+  "retry": "Tentar Novamente",
+  "batchPayment": "Pagamento em Lote",
+  "selectRequests": "Selecione as solicita\u00e7\u00f5es para pagamento em lote",
+  "paymentConfirm": "Confirmar pagamento de {amount} via {method}?",
+  "paymentSuccess": "Pagamento processado com sucesso",
+  "paymentFailed": "Pagamento falhou. Tente novamente."
+}

@@ -1,0 +1,13 @@
+{
+  "title": "Notifica\u00e7\u00f5es",
+  "markRead": "Marcar como lida",
+  "markAllRead": "Marcar todas como lidas",
+  "noNotifications": "Sem notifica\u00e7\u00f5es",
+  "requestSubmitted": "Solicita\u00e7\u00e3o #{id} enviada com sucesso",
+  "requestApproved": "Solicita\u00e7\u00e3o #{id} foi aprovada",
+  "requestRejected": "Solicita\u00e7\u00e3o #{id} foi reprovada",
+  "correctionRequested": "Corre\u00e7\u00e3o solicitada para #{id}",
+  "paymentProcessed": "Pagamento da #{id} foi processado",
+  "slaReminder": "Lembrete de SLA: Solicita\u00e7\u00e3o #{id} precisa de aten\u00e7\u00e3o",
+  "slaEscalation": "Escala\u00e7\u00e3o de SLA: Prazo da solicita\u00e7\u00e3o #{id} expirado"
+}

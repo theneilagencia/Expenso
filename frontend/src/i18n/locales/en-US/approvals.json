@@ -1,0 +1,17 @@
+{
+  "title": "Approvals",
+  "queue": "Approval Queue",
+  "approve": "Approve",
+  "reject": "Reject",
+  "requestEdit": "Request Correction",
+  "approveConfirm": "Are you sure you want to approve this request?",
+  "rejectReason": "Rejection Reason",
+  "rejectReasonMin": "Rejection reason must be at least 50 characters",
+  "correctionComment": "Correction Details",
+  "correctionCommentMin": "Correction details must be at least 30 characters",
+  "approved": "Request approved successfully",
+  "rejected": "Request rejected",
+  "correctionRequested": "Correction requested",
+  "slaWarning": "SLA deadline approaching",
+  "slaExpired": "SLA deadline exceeded"
+}

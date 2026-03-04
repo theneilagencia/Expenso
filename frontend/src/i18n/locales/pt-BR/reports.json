@@ -1,0 +1,20 @@
+{
+  "title": "Relat\u00f3rios",
+  "summary": "Resumo",
+  "narrative": "Relat\u00f3rio Narrativo",
+  "export": "Exportar Relat\u00f3rio",
+  "dateRange": "Per\u00edodo",
+  "department": "Departamento",
+  "category": "Categoria",
+  "totalExpenses": "Total de Despesas",
+  "totalApproved": "Total Aprovado",
+  "totalRejected": "Total Rejeitado",
+  "totalPending": "Total Pendente",
+  "averageProcessingTime": "Tempo M\u00e9dio de Processamento",
+  "topCategories": "Principais Categorias",
+  "topDepartments": "Principais Departamentos",
+  "exportCSV": "Exportar CSV",
+  "exportXLSX": "Exportar XLSX",
+  "exportPDF": "Exportar PDF",
+  "generating": "Gerando relat\u00f3rio..."
+}
