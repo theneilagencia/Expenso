@@ -24,6 +24,10 @@ celery_app.conf.beat_schedule = {
         "task": "app.workers.tasks.ai_tasks.run_strategist_analysis",
         "schedule": 86400.0,  # daily
     },
+    "sla-check-hourly": {
+        "task": "app.workers.tasks.ai_tasks.check_sla",
+        "schedule": 3600.0,  # hourly
+    },
 }
 
 celery_app.autodiscover_tasks(["app.workers.tasks"])

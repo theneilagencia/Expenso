@@ -31,6 +31,10 @@ $font-size-xl: 1.25rem;
 $font-size-2xl: 1.5rem;
 $font-size-3xl: 1.875rem;
 
+// Accent
+$accent: #8b5cf6;
+$black: #000000;
+
 // Spacing
 $spacing-xs: 0.25rem;
 $spacing-sm: 0.5rem;
@@ -38,6 +42,14 @@ $spacing-md: 1rem;
 $spacing-lg: 1.5rem;
 $spacing-xl: 2rem;
 $spacing-2xl: 3rem;
+
+// Spacing aliases (shorthand)
+$space-xs: $spacing-xs;
+$space-sm: $spacing-sm;
+$space-md: $spacing-md;
+$space-lg: $spacing-lg;
+$space-xl: $spacing-xl;
+$space-2xl: $spacing-2xl;
 
 // Border radius
 $radius-sm: 0.25rem;

@@ -4,6 +4,9 @@
   "approve": "Approve",
   "reject": "Reject",
   "requestEdit": "Request Correction",
+  "confirmReject": "Confirm Rejection",
+  "confirmEdit": "Request Correction",
+  "commentPlaceholder": "Add your comment or reason...",
   "approveConfirm": "Are you sure you want to approve this request?",
   "rejectReason": "Rejection Reason",
   "rejectReasonMin": "Rejection reason must be at least 50 characters",
@@ -13,5 +16,11 @@
   "rejected": "Request rejected",
   "correctionRequested": "Correction requested",
   "slaWarning": "SLA deadline approaching",
-  "slaExpired": "SLA deadline exceeded"
+  "slaExpired": "SLA deadline exceeded",
+  "noPending": "No pending approvals",
+  "pendingCount": "{count} pending approvals",
+  "department": "Department",
+  "requester": "Requester",
+  "submittedDate": "Submitted Date",
+  "slaRemaining": "SLA Remaining"
 }
