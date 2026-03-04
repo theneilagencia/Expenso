@@ -1,17 +1,17 @@
 """Seed database with default data. Idempotent — safe to run multiple times."""
-import uuid
-import sys
 import os
+import sys
+import uuid
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from sqlalchemy.orm import Session
-from app.db.session import SessionLocal
+
 from app.core.security import hash_password
-from app.models.user import User
+from app.db.session import SessionLocal
 from app.models.expense_category import ExpenseCategory
 from app.models.sla_config import SLAConfig
-
+from app.models.user import User
 
 CATEGORIES = [
     {"name": "Meals & Entertainment", "icon": "\U0001f37d", "limit_per_request": 700, "limit_per_month": 2000, "max_days_to_submit": 90, "ai_attention_score": 50, "sort_order": 1},

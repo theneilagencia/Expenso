@@ -14,5 +14,20 @@
   "selectRequests": "Select requests for batch payment",
   "paymentConfirm": "Confirm payment of {amount} via {method}?",
   "paymentSuccess": "Payment processed successfully",
-  "paymentFailed": "Payment failed. Please try again."
+  "paymentFailed": "Payment failed. Please try again.",
+  "selectAll": "Select All",
+  "selected": "{count} selected",
+  "processSelected": "Process Selected",
+  "tabs": {
+    "pending": "Pending",
+    "processing": "Processing",
+    "completed": "Completed",
+    "failed": "Failed"
+  },
+  "status": {
+    "SCHEDULED": "Scheduled",
+    "PROCESSING": "Processing",
+    "COMPLETED": "Completed",
+    "FAILED": "Failed"
+  }
 }

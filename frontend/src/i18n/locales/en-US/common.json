@@ -1,9 +1,11 @@
 {
   "save": "Save",
+  "saving": "Saving...",
   "cancel": "Cancel",
   "confirm": "Confirm",
   "back": "Back",
   "next": "Next",
+  "previous": "Previous",
   "delete": "Delete",
   "edit": "Edit",
   "create": "Create",
@@ -28,5 +30,65 @@
   "of": "of",
   "showing": "Showing",
   "results": "results",
-  "perPage": "per page"
+  "perPage": "per page",
+  "reset": "Reset",
+  "resetFilters": "Reset filters",
+  "sortAscending": "Sort ascending",
+  "sortDescending": "Sort descending",
+  "noResults": "No results found",
+  "areYouSure": "Are you sure?",
+  "thisActionCannot": "This action cannot be undone.",
+  "send": "Send",
+  "submit": "Submit",
+  "submitting": "Submitting...",
+  "active": "Active",
+  "inactive": "Inactive",
+  "notFound": "Page not found",
+  "backToDashboard": "Back to Dashboard",
+  "welcome": "Welcome, {name}",
+  "settings": "Settings",
+  "profile": "Profile",
+  "language": "Language",
+  "changePassword": "Change Password",
+  "currentPassword": "Current Password",
+  "newPassword": "New Password",
+  "confirmPassword": "Confirm Password",
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "requests": "Requests",
+    "approvals": "Approvals",
+    "payments": "Payments",
+    "reports": "Reports",
+    "admin": "Administration",
+    "users": "Users",
+    "categories": "Categories",
+    "sla": "SLA",
+    "integrations": "Integrations",
+    "audit": "Audit",
+    "settings": "Settings",
+    "collapse": "Collapse menu",
+    "expand": "Expand menu"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "of": "of",
+    "goToPage": "Go to page {page}"
+  },
+  "emptyState": {
+    "title": "Nothing here yet",
+    "description": "There are no items to display."
+  },
+  "table": {
+    "loading": "Loading data...",
+    "empty": "No data available"
+  },
+  "toast": {
+    "close": "Close notification"
+  },
+  "confirm": {
+    "title": "Confirm action",
+    "message": "Are you sure you want to proceed?"
+  }
 }
