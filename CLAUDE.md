@@ -43,7 +43,10 @@
 
 ---
 
-## Sprint 1 Checklist
+## Sprint 1 — COMPLETED (2026-03-04)
+
+PR: https://github.com/theneilagencia/Expenso/pull/2
+Merge commit: `7e361f5`
 
 - [x] Monorepo folder structure
 - [x] CLAUDE.md
@@ -57,6 +60,25 @@
 - [x] render.yaml
 - [x] README.md
 - [x] .gitignore files
+- [x] Full API: auth, requests, payments, notifications, reports, audit, attachments
+- [x] Frontend: 20+ pages, 25+ components, full i18n (en-US + pt-BR)
+- [x] Backend tests: 60/60 passing (pytest + ruff)
+- [x] Frontend tests: 115/115 passing (vitest)
+- [x] CI/CD: all checks green
+
+---
+
+## Sprint 2 — TODO
+
+Branch: `feat/sprint-2-auth-rbac`
+
+- [ ] Advanced RBAC + granular permissions
+- [ ] Approval chain / delegation
+- [ ] AI Analyst Celery task (risk scoring)
+- [ ] AI Strategist Celery beat task (forecasts)
+- [ ] Email notifications (SMTP integration)
+- [ ] Dashboard charts (Chart.js/ECharts)
+- [ ] Performance optimization (pagination, caching)
 
 ---
 
