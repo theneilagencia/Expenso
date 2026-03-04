@@ -68,8 +68,8 @@ def run_strategist_analysis():
             model_used="stub",
             input_tokens=0,
             output_tokens=0,
-            recommendation="Stub: pending full Anthropic integration",
-            full_response={"departments": summary, "status": "stub"},
+            status="SUCCESS",
+            response={"departments": summary, "status": "stub"},
         )
         db.add(log)
         db.commit()

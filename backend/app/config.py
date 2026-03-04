@@ -28,6 +28,26 @@ class Settings(BaseSettings):
 
     ANTHROPIC_API_KEY: str = ""
 
+    # Password reset
+    PASSWORD_RESET_EXPIRE_HOURS: int = 2
+    FRONTEND_URL: str = "http://localhost:5173"
+
+    # SMTP (for password reset emails)
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM_EMAIL: str = "noreply@expenso.app"
+
+    # SSO — Azure AD
+    AZURE_AD_CLIENT_ID: str = ""
+    AZURE_AD_CLIENT_SECRET: str = ""
+    AZURE_AD_TENANT_ID: str = ""
+
+    # SSO — Google Workspace
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+
     model_config = {"env_file": ".env", "case_sensitive": True}
 
 

@@ -24,6 +24,11 @@ async def update_me(
             raise HTTPException(status_code=400, detail="Invalid locale")
         current_user.locale = request.locale
 
+    if request.full_name is not None:
+        if len(request.full_name.strip()) < 2:
+            raise HTTPException(status_code=400, detail="Name must be at least 2 characters")
+        current_user.full_name = request.full_name.strip()
+
     db.commit()
     db.refresh(current_user)
     return current_user
