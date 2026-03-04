@@ -1,9 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.v1.admin import categories as admin_categories
+from app.api.v1.admin import integrations as admin_integrations
+from app.api.v1.admin import sla as admin_sla
+from app.api.v1.admin import users as admin_users
+from app.api.v1.routers import ai, attachments, audit, auth, health, notifications, payments, reports, requests, users
 from app.config import settings
-from app.api.v1.routers import auth, users, health, requests, payments, ai, notifications, reports, audit, attachments
-from app.api.v1.admin import users as admin_users, categories as admin_categories, sla as admin_sla, integrations as admin_integrations
 
 app = FastAPI(
     title=settings.APP_NAME,

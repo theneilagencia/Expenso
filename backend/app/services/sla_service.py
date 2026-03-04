@@ -5,8 +5,8 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from app.models.expense_request import ExpenseRequest
-from app.models.sla_config import SLAConfig
 from app.models.notification import Notification
+from app.models.sla_config import SLAConfig
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ class SLAService:
 
         sla = (
             db.query(SLAConfig)
-            .filter(SLAConfig.status_type == expense.status, SLAConfig.is_active == True)
+            .filter(SLAConfig.status_type == expense.status, SLAConfig.is_active.is_(True))
             .first()
         )
         if not sla:
@@ -35,7 +35,7 @@ class SLAService:
         now = datetime.now(timezone.utc)
         violations = []
 
-        active_slas = db.query(SLAConfig).filter(SLAConfig.is_active == True).all()
+        active_slas = db.query(SLAConfig).filter(SLAConfig.is_active.is_(True)).all()
         status_types = [s.status_type for s in active_slas]
 
         overdue_requests = (
@@ -65,7 +65,7 @@ class SLAService:
         now = datetime.now(timezone.utc)
         warnings = []
 
-        active_slas = db.query(SLAConfig).filter(SLAConfig.is_active == True).all()
+        active_slas = db.query(SLAConfig).filter(SLAConfig.is_active.is_(True)).all()
         sla_map = {s.status_type: s for s in active_slas}
 
         for status_type, sla in sla_map.items():

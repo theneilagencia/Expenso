@@ -4,14 +4,14 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_db
 from app.core.security import get_current_user
+from app.dependencies import get_db
 from app.schemas.request import (
-    RequestCreate,
-    RequestUpdate,
-    RequestResponse,
-    RequestListResponse,
     ActionRequest,
+    RequestCreate,
+    RequestListResponse,
+    RequestResponse,
+    RequestUpdate,
 )
 from app.services.request_service import RequestService
 

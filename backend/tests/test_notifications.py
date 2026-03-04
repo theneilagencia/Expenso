@@ -1,7 +1,6 @@
 import uuid
 
 from app.models.notification import Notification
-from tests.conftest import auth_headers
 
 
 class TestListNotifications:
@@ -164,7 +163,7 @@ class TestMarkAllAsRead:
             db.query(Notification)
             .filter(
                 Notification.user_id == employee_user.id,
-                Notification.is_read == False,
+                Notification.is_read.is_(False),
             )
             .count()
         )

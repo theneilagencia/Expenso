@@ -2,16 +2,15 @@ import uuid
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_db
+from app.core.exceptions import NotFoundError, ValidationError
 from app.core.permissions import require_role
 from app.core.security import hash_password
-from app.core.exceptions import NotFoundError, ValidationError
-from app.models.user import User
+from app.dependencies import get_db
 from app.models.audit_log import AuditLog
-from pydantic import BaseModel, EmailStr, Field
-
+from app.models.user import User
 
 router = APIRouter()
 

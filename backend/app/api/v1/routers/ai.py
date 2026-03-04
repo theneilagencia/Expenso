@@ -5,8 +5,8 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_db
 from app.core.security import get_current_user
+from app.dependencies import get_db
 from app.services.ai_service import AIService
 
 router = APIRouter()

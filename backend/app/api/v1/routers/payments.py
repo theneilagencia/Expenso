@@ -2,15 +2,14 @@ import uuid
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Query, Request
-from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
-from app.dependencies import get_db
-from app.core.security import get_current_user
-from app.core.permissions import require_role
 from app.core.exceptions import NotFoundError, ValidationError
-from app.models.payment import Payment
+from app.core.permissions import require_role
+from app.dependencies import get_db
 from app.models.expense_request import ExpenseRequest
+from app.models.payment import Payment
 from app.services.request_service import RequestService
 
 router = APIRouter()

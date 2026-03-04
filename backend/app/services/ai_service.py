@@ -6,14 +6,14 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from app.config import settings
-from app.models.expense_request import ExpenseRequest
-from app.models.expense_category import ExpenseCategory
-from app.models.ai_analysis_log import AIAnalysisLog
 from app.integrations.anthropic.context_builder import (
-    build_assistant_context,
     build_analyst_context,
+    build_assistant_context,
     build_chatbot_context,
 )
+from app.models.ai_analysis_log import AIAnalysisLog
+from app.models.expense_category import ExpenseCategory
+from app.models.expense_request import ExpenseRequest
 
 logger = logging.getLogger(__name__)
 

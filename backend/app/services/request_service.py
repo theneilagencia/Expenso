@@ -1,15 +1,14 @@
 import uuid
 from datetime import datetime, timezone
-from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from app.core.exceptions import NotFoundError, ForbiddenError, ValidationError
-from app.core.state_machine import transition, RequestAction
-from app.models.expense_request import ExpenseRequest
+from app.core.exceptions import ForbiddenError, NotFoundError, ValidationError
+from app.core.state_machine import transition
 from app.models.audit_log import AuditLog
-from app.models.request_version import RequestVersion
+from app.models.expense_request import ExpenseRequest
 from app.models.request_comment import RequestComment
+from app.models.request_version import RequestVersion
 
 
 class RequestService:

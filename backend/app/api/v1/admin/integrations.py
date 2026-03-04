@@ -2,12 +2,12 @@ import uuid
 from typing import Optional
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
-from app.dependencies import get_db
-from app.core.permissions import require_role
 from app.core.exceptions import NotFoundError
+from app.core.permissions import require_role
+from app.dependencies import get_db
 from app.models.integration import Integration
 
 router = APIRouter()

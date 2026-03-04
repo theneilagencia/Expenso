@@ -5,8 +5,8 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
-from app.core.security import get_current_user
 from app.config import settings
+from app.core.security import get_current_user
 from app.dependencies import get_db
 from app.models.attachment import Attachment
 from app.models.expense_request import ExpenseRequest

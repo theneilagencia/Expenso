@@ -1,4 +1,3 @@
-from typing import Optional
 
 
 def build_assistant_context(

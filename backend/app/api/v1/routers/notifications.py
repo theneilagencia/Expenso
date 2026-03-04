@@ -3,8 +3,8 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_db
 from app.core.security import get_current_user
+from app.dependencies import get_db
 from app.models.notification import Notification
 
 router = APIRouter()
@@ -63,7 +63,7 @@ async def mark_all_as_read(
 ):
     db.query(Notification).filter(
         Notification.user_id == current_user.id,
-        Notification.is_read == False,
+        Notification.is_read.is_(False),
     ).update({"is_read": True})
     db.commit()
     return {"ok": True}
@@ -78,7 +78,7 @@ async def get_unread_count(
         db.query(Notification)
         .filter(
             Notification.user_id == current_user.id,
-            Notification.is_read == False,
+            Notification.is_read.is_(False),
         )
         .count()
     )

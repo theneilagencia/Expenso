@@ -1,39 +1,51 @@
 import sqlite3
 import uuid
-from datetime import datetime, timezone
 
 import pytest
+from fastapi import Depends, HTTPException
+from fastapi import status as http_status
+from fastapi.security import HTTPAuthorizationCredentials
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, event, String, Text, TypeDecorator
+from jose import JWTError, jwt
+from sqlalchemy import String, Text, create_engine
+from sqlalchemy.dialects.postgresql import JSONB as PG_JSONB
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.config import settings
+from app.core.security import (
+    create_access_token,
+    hash_password,
+    security_scheme,
+)
+from app.core.security import (
+    get_current_user as _orig_get_current_user,
+)
 from app.db.base import Base
 from app.dependencies import get_db
 from app.main import app
-from app.core.security import hash_password, create_access_token
 
 # Import all models so Base.metadata knows every table
-from app.models.user import User
+from app.models.ai_analysis_log import AIAnalysisLog  # noqa: F401
+from app.models.approval_policy import ApprovalPolicy  # noqa: F401
+from app.models.attachment import Attachment  # noqa: F401
+from app.models.audit_log import AuditLog
+from app.models.corporate_calendar import CorporateCalendar  # noqa: F401
+from app.models.cost_center import CostCenter  # noqa: F401
 from app.models.department import Department
-from app.models.cost_center import CostCenter
 from app.models.expense_category import ExpenseCategory
 from app.models.expense_request import ExpenseRequest
-from app.models.request_version import RequestVersion
-from app.models.audit_log import AuditLog
-from app.models.request_comment import RequestComment
-from app.models.attachment import Attachment
-from app.models.payment import Payment
-from app.models.sla_config import SLAConfig
-from app.models.approval_policy import ApprovalPolicy
-from app.models.integration import Integration
-from app.models.ai_analysis_log import AIAnalysisLog
-from app.models.vendor_list import VendorList
-from app.models.notification import Notification
-from app.models.corporate_calendar import CorporateCalendar
+from app.models.integration import Integration  # noqa: F401
+from app.models.notification import Notification  # noqa: F401
+from app.models.payment import Payment  # noqa: F401
+from app.models.request_comment import RequestComment  # noqa: F401
+from app.models.request_version import RequestVersion  # noqa: F401
+from app.models.sla_config import SLAConfig  # noqa: F401
+from app.models.user import User
+from app.models.vendor_list import VendorList  # noqa: F401
 
 # --- SQLite compatibility: map PostgreSQL types to SQLite-compatible types ---
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB as PG_JSONB
 
 # Register UUID adapter for sqlite3 so it stores as string
 sqlite3.register_adapter(uuid.UUID, lambda u: str(u))
@@ -76,14 +88,6 @@ app.dependency_overrides[get_db] = override_get_db
 
 
 # Override get_current_user for SQLite compatibility (UUID stored as string)
-from fastapi import HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from fastapi import Depends
-from jose import JWTError, jwt
-from app.config import settings
-from app.core.security import security_scheme, get_current_user as _orig_get_current_user
-
-
 def _test_get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security_scheme),
     db=Depends(override_get_db),
@@ -93,14 +97,20 @@ def _test_get_current_user(
         payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
         user_id = payload.get("sub")
         if user_id is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+            raise HTTPException(
+                status_code=http_status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+            )
     except JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        raise HTTPException(
+            status_code=http_status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        )
 
     # Compare as string for SQLite compatibility
     user = db.query(User).filter(User.id == user_id, User.deleted_at.is_(None)).first()
     if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+        raise HTTPException(
+            status_code=http_status.HTTP_401_UNAUTHORIZED, detail="User not found"
+        )
     return user
 
 
@@ -252,7 +262,7 @@ def sample_requests(db, employee_user, category):
         "PAID",
         "REJECTED",
     ]
-    for i, status in enumerate(statuses):
+    for i, req_status in enumerate(statuses):
         req = ExpenseRequest(
             id=uuid.uuid4(),
             employee_id=employee_user.id,
@@ -260,7 +270,7 @@ def sample_requests(db, employee_user, category):
             title=f"Expense {i + 1}",
             amount=100.0 * (i + 1),
             currency="BRL",
-            status=status,
+            status=req_status,
             ai_risk_score=20 * (i + 1) if i < 5 else None,
             ai_risk_level="LOW" if i < 2 else "MEDIUM" if i < 4 else "HIGH",
         )

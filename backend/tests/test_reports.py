@@ -1,4 +1,3 @@
-from tests.conftest import auth_headers
 
 
 class TestReportsDashboard:

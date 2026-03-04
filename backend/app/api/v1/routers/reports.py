@@ -9,11 +9,10 @@ from sqlalchemy.orm import Session
 
 from app.core.security import get_current_user
 from app.dependencies import get_db
-from app.models.expense_request import ExpenseRequest
-from app.models.expense_category import ExpenseCategory
 from app.models.department import Department
+from app.models.expense_category import ExpenseCategory
+from app.models.expense_request import ExpenseRequest
 from app.models.user import User
-from app.models.payment import Payment
 
 router = APIRouter()
 
