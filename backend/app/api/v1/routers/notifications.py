@@ -28,10 +28,10 @@ async def list_notifications(
                 "id": str(n.id),
                 "type": n.type,
                 "title": n.title,
-                "message": n.message,
+                "body": n.body,
                 "is_read": n.is_read,
-                "entity_type": n.entity_type,
-                "entity_id": n.entity_id,
+                "request_id": str(n.request_id) if n.request_id else None,
+                "channel": n.channel,
                 "created_at": str(n.created_at),
             }
             for n in notifications

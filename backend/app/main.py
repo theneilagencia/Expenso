@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.api.v1.routers import auth, users, health, requests, payments, ai, notifications
+from app.api.v1.routers import auth, users, health, requests, payments, ai, notifications, reports, audit, attachments
 from app.api.v1.admin import users as admin_users, categories as admin_categories, sla as admin_sla, integrations as admin_integrations
 
 app = FastAPI(
@@ -45,3 +45,12 @@ app.include_router(ai.router, prefix="/api/v1/ai", tags=["AI"])
 
 # Notifications
 app.include_router(notifications.router, prefix="/api/v1/notifications", tags=["Notifications"])
+
+# Reports
+app.include_router(reports.router, prefix="/api/v1/reports", tags=["Reports"])
+
+# Audit
+app.include_router(audit.router, prefix="/api/v1/audit", tags=["Audit"])
+
+# Attachments
+app.include_router(attachments.router, prefix="/api/v1", tags=["Attachments"])
