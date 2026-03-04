@@ -43,12 +43,11 @@ class TestListNotifications:
         db.add(n_admin)
         db.commit()
 
-        # The list endpoint references n.message, n.entity_type, n.entity_id
-        # which do not exist on the model. When there are rows to iterate,
-        # this will raise an AttributeError, resulting in a 500 response.
-        # This test documents the current (broken) behavior.
         resp = client.get("/api/v1/notifications", headers=employee_headers)
-        assert resp.status_code == 500
+        assert resp.status_code == 200
+        items = resp.json()["items"]
+        # Employee should only see their own 3 notifications, not the admin's
+        assert len(items) == 3
 
 
 class TestMarkAsRead:
@@ -72,8 +71,12 @@ class TestMarkAsRead:
         assert resp.status_code == 200
         assert resp.json()["ok"] is True
 
-        db.refresh(notif)
-        assert notif.is_read is True
+        # Use a fresh session to verify the API's changes
+        from tests.conftest import TestingSessionLocal
+        fresh_db = TestingSessionLocal()
+        updated = fresh_db.query(Notification).filter(Notification.id == str(notif.id)).first()
+        assert updated.is_read is True
+        fresh_db.close()
 
     def test_mark_already_read_notification(self, client, db, employee_user, employee_headers):
         """Marking an already-read notification should succeed idempotently."""

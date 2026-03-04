@@ -1,9 +1,10 @@
+import sqlite3
 import uuid
 from datetime import datetime, timezone
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event, String, Text, TypeDecorator
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -31,6 +32,28 @@ from app.models.vendor_list import VendorList
 from app.models.notification import Notification
 from app.models.corporate_calendar import CorporateCalendar
 
+# --- SQLite compatibility: map PostgreSQL types to SQLite-compatible types ---
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB as PG_JSONB
+
+# Register UUID adapter for sqlite3 so it stores as string
+sqlite3.register_adapter(uuid.UUID, lambda u: str(u))
+sqlite3.register_converter("UUID", lambda b: uuid.UUID(b.decode()))
+
+
+def _patch_pg_types():
+    """Patch PostgreSQL-specific column types for SQLite compatibility."""
+    for table in Base.metadata.tables.values():
+        for column in table.columns:
+            col_type = column.type
+            if isinstance(col_type, PG_UUID):
+                column.type = String(36)
+            elif isinstance(col_type, PG_JSONB):
+                column.type = Text()
+
+
+# Patch once at import time
+_patch_pg_types()
+
 TEST_DB_URL = "sqlite://"
 
 engine = create_engine(
@@ -50,6 +73,38 @@ def override_get_db():
 
 
 app.dependency_overrides[get_db] = override_get_db
+
+
+# Override get_current_user for SQLite compatibility (UUID stored as string)
+from fastapi import HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import Depends
+from jose import JWTError, jwt
+from app.config import settings
+from app.core.security import security_scheme, get_current_user as _orig_get_current_user
+
+
+def _test_get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security_scheme),
+    db=Depends(override_get_db),
+):
+    token = credentials.credentials
+    try:
+        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        user_id = payload.get("sub")
+        if user_id is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
+    # Compare as string for SQLite compatibility
+    user = db.query(User).filter(User.id == user_id, User.deleted_at.is_(None)).first()
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+    return user
+
+
+app.dependency_overrides[_orig_get_current_user] = _test_get_current_user
 
 
 @pytest.fixture(autouse=True)

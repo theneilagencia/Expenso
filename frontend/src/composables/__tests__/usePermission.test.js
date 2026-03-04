@@ -5,9 +5,14 @@ import { ref, computed } from 'vue'
 const mockUserRole = ref(null)
 
 vi.mock('@/stores/auth.store', () => ({
-  useAuthStore: () => ({
-    userRole: computed(() => mockUserRole.value)
-  })
+  useAuthStore: () => {
+    const store = {}
+    Object.defineProperty(store, 'userRole', {
+      get: () => mockUserRole.value,
+      enumerable: true
+    })
+    return store
+  }
 }))
 
 import { usePermission } from '../usePermission'

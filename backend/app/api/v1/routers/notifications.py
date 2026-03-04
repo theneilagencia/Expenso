@@ -47,7 +47,7 @@ async def mark_as_read(
 ):
     notification = (
         db.query(Notification)
-        .filter(Notification.id == notification_id, Notification.user_id == current_user.id)
+        .filter(Notification.id == str(notification_id), Notification.user_id == current_user.id)
         .first()
     )
     if notification:

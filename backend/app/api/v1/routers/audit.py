@@ -94,7 +94,7 @@ def get_audit_log(
         from fastapi import HTTPException, status
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin only")
 
-    log = db.query(AuditLog).filter(AuditLog.id == log_id).first()
+    log = db.query(AuditLog).filter(AuditLog.id == str(log_id)).first()
     if not log:
         from fastapi import HTTPException, status
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Audit log not found")

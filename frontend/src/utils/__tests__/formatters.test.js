@@ -65,7 +65,7 @@ describe('formatDate', () => {
   })
 
   it('should handle different months', () => {
-    const result = formatDate('2026-12-25')
+    const result = formatDate('2026-12-25T12:00:00Z')
     expect(result).toContain('Dec')
     expect(result).toContain('25')
     expect(result).toContain('2026')
