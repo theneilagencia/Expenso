@@ -1,263 +1,109 @@
-# Loquia
+# Expenso
 
-Projeto Next.js com integração de webhook para o Flow 1 do Manus.
+> Smart Expense Management Platform
 
-## Estrutura do Projeto
+Modular platform for expense control and employee reimbursement with AI-powered automation.
 
-```
-Loquia/
-├── app/
-│   ├── api/
-│   │   └── manus/
-│   │       ├── webhook/
-│   │       │   └── route.ts          # Endpoint do webhook
-│   │       ├── flow-config.ts        # Configuração e cliente
-│   │       ├── flow1-example.ts      # Exemplos de uso
-│   │       └── README.md            # Documentação da API
-│   ├── layout.tsx
-│   ├── page.tsx
-│   └── globals.css
-├── public/
-├── test-webhook.sh                   # Script de teste automatizado
-├── .env.example                      # Exemplo de variáveis de ambiente
-├── package.json
-└── README.md
-```
+## Tech Stack
 
-## Webhook Manus - Flow 1
+| Layer | Technologies |
+|-------|-------------|
+| Frontend | Vue 3, Vite, Pinia, Vue Router, vue-i18n, SCSS, Axios |
+| Backend | Python 3.11+, FastAPI, SQLAlchemy 2.x, Alembic, Celery |
+| Database | PostgreSQL 15 + pgvector |
+| Cache/Queue | Redis |
+| Storage | MinIO (S3-compatible) |
+| AI | Anthropic Claude (claude-sonnet-4-20250514) |
+| Infra | Docker, Render, GitHub Actions |
 
-Este projeto implementa um webhook para receber eventos de retorno do Flow 1 do Manus.
-
-### Endpoint de Produção
+## Architecture
 
 ```
-https://loquia.vercel.app/api/manus/webhook
+expenso/
+  frontend/     Vue 3 SPA (Composition API)
+  backend/      FastAPI REST API
+  infra/        Infrastructure configs
+  docs/         Documentation
+  .github/      CI/CD workflows
 ```
 
-### Funcionalidades
+## Languages
 
-- ✅ Recepção de eventos do Flow 1
-- ✅ Suporte a múltiplos tipos de eventos
-- ✅ Validação de payload
-- ✅ Sistema de retry automático
-- ✅ Health check
-- ✅ Logs detalhados
-- ✅ Tratamento de erros
+- English (en-US) - default
+- Portuguese (pt-BR)
 
-### Tipos de Eventos Suportados
+Language selector available on all screens including login.
 
-| Evento | Descrição |
-|--------|-----------|
-| `message_sent` | Mensagem enviada pelo Flow |
-| `state_updated` | Estado do Flow atualizado |
-| `flow_completed` | Flow concluído com sucesso |
-| `flow_error` | Erro ocorrido no Flow |
-| `step_started` | Passo iniciado |
-| `step_completed` | Passo concluído |
+## Prerequisites
 
-## Desenvolvimento
+- Docker & Docker Compose
+- Node.js 20+ with pnpm
+- Python 3.11+
 
-### Pré-requisitos
+## Local Setup
 
-- Node.js 18+ 
-- npm ou yarn
-
-### Instalação
+### With Docker (recommended)
 
 ```bash
-# Clonar o repositório
-git clone https://github.com/theneilagencia/Loquia.git
-cd Loquia
+# Copy env files
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env.local
 
-# Instalar dependências
-npm install
+# Start all services
+docker compose up -d
 
-# Copiar arquivo de ambiente (opcional)
+# Run migrations
+docker compose exec backend alembic upgrade head
+
+# Seed database
+docker compose exec backend python scripts/seed_db.py
+```
+
+Services:
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:8000
+- API Docs: http://localhost:8000/docs
+- MinIO Console: http://localhost:9001
+
+### Without Docker
+
+**Backend:**
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env  # edit with your values
+alembic upgrade head
+python scripts/seed_db.py
+uvicorn app.main:app --reload
+```
+
+**Frontend:**
+```bash
+cd frontend
+pnpm install
 cp .env.example .env.local
+pnpm dev
 ```
 
-### Executar em Desenvolvimento
+## Default Admin
 
-```bash
-npm run dev
-```
+- Email: `admin@expenso.io`
+- Password: `Admin@2026!`
+- Force password reset on first login
 
-O servidor estará disponível em [http://localhost:3000](http://localhost:3000)
+## Deploy (Render)
 
-### Testar o Webhook
+1. Connect GitHub repo to Render
+2. Use `render.yaml` for infrastructure as code
+3. Set secrets: `ANTHROPIC_API_KEY`, deploy hooks
+4. GitHub Actions handles CI/CD on push to `main`
 
-#### Teste Manual
+## Environment Variables
 
-```bash
-# Health check
-curl http://localhost:3000/api/manus/webhook
+See `backend/.env.example` and `frontend/.env.example` for all required variables.
 
-# Enviar evento de teste
-curl -X POST http://localhost:3000/api/manus/webhook \
-  -H "Content-Type: application/json" \
-  -d '{
-    "event_type": "message_sent",
-    "flow_id": "flow_1_test",
-    "data": {
-      "message": "Teste"
-    },
-    "timestamp": "2025-11-14T17:00:00.000Z",
-    "status": "success"
-  }'
-```
+## License
 
-#### Teste Automatizado
-
-```bash
-# Executar todos os testes
-./test-webhook.sh
-
-# Testar em produção
-WEBHOOK_URL=https://loquia.vercel.app ./test-webhook.sh
-```
-
-## Uso do Cliente Webhook
-
-### Importar
-
-```typescript
-import {
-  sendWebhookMessage,
-  updateWebhookState,
-  completeWebhookFlow,
-  reportWebhookError,
-} from '@/app/api/manus/flow-config';
-```
-
-### Exemplos
-
-```typescript
-// Enviar mensagem
-await sendWebhookMessage('flow_1_123', 'Processamento iniciado');
-
-// Atualizar estado
-await updateWebhookState('flow_1_123', {
-  progress: 50,
-  current_step: 'processing'
-});
-
-// Completar flow
-await completeWebhookFlow('flow_1_123', {
-  status: 'completed',
-  items_processed: 100
-});
-
-// Reportar erro
-await reportWebhookError('flow_1_123', 'Erro ao processar', {
-  error_code: 'PROCESSING_ERROR'
-});
-```
-
-Para mais exemplos, consulte `app/api/manus/flow1-example.ts`.
-
-## Deploy
-
-### Vercel (Recomendado)
-
-O projeto está configurado para deploy automático no Vercel:
-
-1. Faça push para o repositório GitHub
-2. O Vercel detectará automaticamente as mudanças
-3. O webhook estará disponível em `https://loquia.vercel.app/api/manus/webhook`
-
-### Variáveis de Ambiente
-
-Configure as seguintes variáveis no Vercel (se necessário):
-
-- `NODE_ENV`: `production`
-- `WEBHOOK_TIMEOUT`: `30000` (opcional)
-- `WEBHOOK_RETRY_ATTEMPTS`: `3` (opcional)
-
-## Documentação
-
-Para documentação detalhada da API do webhook, consulte:
-
-📖 [app/api/manus/README.md](app/api/manus/README.md)
-
-## Tecnologias
-
-- [Next.js 16](https://nextjs.org/) - Framework React
-- [TypeScript](https://www.typescriptlang.org/) - Tipagem estática
-- [Tailwind CSS](https://tailwindcss.com/) - Estilização
-- [Vercel](https://vercel.com/) - Hospedagem
-
-## Estrutura da API
-
-### GET /api/manus/webhook
-
-Retorna informações sobre o webhook (health check).
-
-**Resposta:**
-```json
-{
-  "service": "Loquia Webhook",
-  "endpoint": "/api/manus/webhook",
-  "status": "active",
-  "version": "1.0.0",
-  "supported_methods": ["POST"],
-  "timestamp": "2025-11-14T17:00:00.000Z"
-}
-```
-
-### POST /api/manus/webhook
-
-Recebe eventos do Flow 1.
-
-**Payload:**
-```json
-{
-  "event_type": "message_sent",
-  "flow_id": "flow_1_123",
-  "step_id": "step_1",
-  "data": { ... },
-  "timestamp": "2025-11-14T17:00:00.000Z",
-  "status": "success",
-  "message": "Mensagem opcional"
-}
-```
-
-**Resposta de Sucesso:**
-```json
-{
-  "success": true,
-  "message": "Evento processado com sucesso",
-  "event_id": "evt_...",
-  "received_at": "2025-11-14T17:00:00.000Z",
-  "result": { ... }
-}
-```
-
-**Resposta de Erro:**
-```json
-{
-  "success": false,
-  "error": "Descrição do erro",
-  "details": "Detalhes adicionais"
-}
-```
-
-## Próximos Passos
-
-- [ ] Implementar persistência de eventos em banco de dados
-- [ ] Adicionar autenticação (API key ou JWT)
-- [ ] Implementar sistema de filas para processamento assíncrono
-- [ ] Adicionar métricas e monitoramento
-- [ ] Criar dashboard para visualização de eventos
-- [ ] Implementar webhooks de saída (notificações)
-
-## Suporte
-
-Para dúvidas ou problemas:
-
-- Consulte a [documentação do Next.js](https://nextjs.org/docs)
-- Consulte a [documentação do Vercel](https://vercel.com/docs)
-- Abra uma issue no GitHub
-
-## Licença
-
-Este projeto é privado e de propriedade da The Neil Agência.
+Proprietary - All rights reserved.

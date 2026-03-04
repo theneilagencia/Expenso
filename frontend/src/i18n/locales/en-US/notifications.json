@@ -1,0 +1,13 @@
+{
+  "title": "Notifications",
+  "markRead": "Mark as read",
+  "markAllRead": "Mark all as read",
+  "noNotifications": "No notifications",
+  "requestSubmitted": "Request #{id} submitted successfully",
+  "requestApproved": "Request #{id} has been approved",
+  "requestRejected": "Request #{id} has been rejected",
+  "correctionRequested": "Correction requested for #{id}",
+  "paymentProcessed": "Payment for #{id} has been processed",
+  "slaReminder": "SLA reminder: Request #{id} needs attention",
+  "slaEscalation": "SLA escalation: Request #{id} deadline exceeded"
+}

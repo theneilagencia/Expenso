@@ -1,0 +1,18 @@
+{
+  "title": "Payments",
+  "process": "Process Payment",
+  "method": "Payment Method",
+  "revolut": "Revolut",
+  "pix": "PIX",
+  "payroll": "Payroll",
+  "scheduled": "Scheduled",
+  "processing": "Processing",
+  "completed": "Completed",
+  "failed": "Failed",
+  "retry": "Retry",
+  "batchPayment": "Batch Payment",
+  "selectRequests": "Select requests for batch payment",
+  "paymentConfirm": "Confirm payment of {amount} via {method}?",
+  "paymentSuccess": "Payment processed successfully",
+  "paymentFailed": "Payment failed. Please try again."
+}

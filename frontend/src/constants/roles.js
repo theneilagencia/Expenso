@@ -1,0 +1,13 @@
+export const ROLES = {
+  EMPLOYEE: 'EMPLOYEE',
+  MANAGER: 'MANAGER',
+  FINANCE: 'FINANCE',
+  ADMIN: 'ADMIN'
+}
+
+export const ROLE_HIERARCHY = {
+  ADMIN: 4,
+  FINANCE: 3,
+  MANAGER: 2,
+  EMPLOYEE: 1
+}

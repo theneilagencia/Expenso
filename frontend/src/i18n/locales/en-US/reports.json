@@ -1,0 +1,20 @@
+{
+  "title": "Reports",
+  "summary": "Summary",
+  "narrative": "Narrative Report",
+  "export": "Export Report",
+  "dateRange": "Date Range",
+  "department": "Department",
+  "category": "Category",
+  "totalExpenses": "Total Expenses",
+  "totalApproved": "Total Approved",
+  "totalRejected": "Total Rejected",
+  "totalPending": "Total Pending",
+  "averageProcessingTime": "Avg. Processing Time",
+  "topCategories": "Top Categories",
+  "topDepartments": "Top Departments",
+  "exportCSV": "Export CSV",
+  "exportXLSX": "Export XLSX",
+  "exportPDF": "Export PDF",
+  "generating": "Generating report..."
+}
