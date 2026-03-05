@@ -1,11 +1,13 @@
 import json
 import logging
+from datetime import datetime, timezone
 from typing import AsyncGenerator, Optional
 from uuid import UUID
 
 from sqlalchemy.orm import Session
 
 from app.config import settings
+from app.core.state_machine import transition
 from app.integrations.anthropic.context_builder import (
     build_analyst_context,
     build_assistant_context,
@@ -54,7 +56,7 @@ class AIService:
 
         request_data = {
             "title": expense.title,
-            "amount": str(expense.total_amount),
+            "amount": str(expense.amount),
             "currency": expense.currency or "BRL",
             "justification": expense.justification,
             "vendor_name": expense.vendor_name,
@@ -93,7 +95,7 @@ class AIService:
 
         request_data = {
             "title": expense.title,
-            "amount": str(expense.total_amount),
+            "amount": str(expense.amount),
             "currency": expense.currency or "BRL",
             "justification": expense.justification,
             "vendor_name": expense.vendor_name,
@@ -107,7 +109,7 @@ class AIService:
 
         previous_requests = (
             db.query(ExpenseRequest)
-            .filter(ExpenseRequest.user_id == expense.user_id, ExpenseRequest.id != expense.id)
+            .filter(ExpenseRequest.employee_id == expense.employee_id, ExpenseRequest.id != expense.id)
             .all()
         )
         history = [{"id": str(r.id)} for r in previous_requests]
@@ -116,7 +118,8 @@ class AIService:
 
         client = _get_client()
         if not client:
-            return None
+            _handle_ai_skip(expense, db)
+            return {"ai_skipped": True}
 
         try:
             response = client.messages.create(
@@ -139,18 +142,31 @@ class AIService:
                 model_used=MODEL,
                 input_tokens=response.usage.input_tokens,
                 output_tokens=response.usage.output_tokens,
-                risk_score=analysis.get("risk_score"),
-                quality_score=analysis.get("semantic_quality_score"),
-                recommendation=analysis.get("recommendation"),
-                full_response=analysis,
+                response=analysis,
+                status="SUCCESS",
             )
             db.add(log)
-            db.commit()
 
+            _apply_ai_results(expense, analysis)
+
+            recommendation = analysis.get("recommendation", "REVIEW").upper()
+            if recommendation == "BLOCK":
+                action = "ai_blocked"
+            else:
+                action = "ai_approved"
+
+            try:
+                new_status = transition(expense.status, action)
+                expense.status = new_status
+            except Exception:
+                logger.warning(f"State transition failed for request {request_id}, action={action}")
+
+            db.commit()
             return analysis
         except Exception as e:
             logger.error(f"AI analysis error: {e}")
-            return {"error": str(e)}
+            _handle_ai_skip(expense, db)
+            return {"ai_skipped": True, "error": str(e)}
 
     @staticmethod
     async def stream_chat(
@@ -192,11 +208,40 @@ class AIService:
         )
         if not log:
             return None
+        resp = log.response or {}
         return {
             "id": str(log.id),
-            "risk_score": log.risk_score,
-            "quality_score": log.quality_score,
-            "recommendation": log.recommendation,
-            "full_response": log.full_response,
+            "risk_score": resp.get("risk_score"),
+            "quality_score": resp.get("semantic_quality_score"),
+            "recommendation": resp.get("recommendation"),
+            "full_response": resp,
             "created_at": str(log.created_at),
         }
+
+
+def _apply_ai_results(expense: ExpenseRequest, analysis: dict):
+    expense.ai_risk_score = analysis.get("risk_score")
+    risk_score = expense.ai_risk_score
+    if risk_score is not None:
+        if risk_score >= 80:
+            expense.ai_risk_level = "HIGH"
+        elif risk_score >= 40:
+            expense.ai_risk_level = "MEDIUM"
+        else:
+            expense.ai_risk_level = "LOW"
+    expense.ai_recommendation = analysis.get("recommendation")
+    expense.ai_summary = analysis.get("summary")
+    expense.ai_attention_points = analysis.get("attention_points")
+    expense.ai_policy_violations = analysis.get("policy_violations")
+    expense.ai_analyzed_at = datetime.now(timezone.utc)
+
+
+def _handle_ai_skip(expense: ExpenseRequest, db: Session):
+    expense.ai_skipped = True
+    expense.ai_analyzed_at = datetime.now(timezone.utc)
+    try:
+        new_status = transition(expense.status, "ai_approved")
+        expense.status = new_status
+    except Exception:
+        logger.warning(f"AI skip transition failed for request {expense.id}")
+    db.commit()
