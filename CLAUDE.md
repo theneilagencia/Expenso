@@ -68,17 +68,42 @@ Merge commit: `7e361f5`
 
 ---
 
-## Sprint 2 — TODO
+## Sprint 2 — COMPLETED (2026-03-05)
 
+PR: https://github.com/theneilagencia/Expenso/pull/3
 Branch: `feat/sprint-2-auth-rbac`
 
-- [ ] Advanced RBAC + granular permissions
-- [ ] Approval chain / delegation
-- [ ] AI Analyst Celery task (risk scoring)
-- [ ] AI Strategist Celery beat task (forecasts)
-- [ ] Email notifications (SMTP integration)
-- [ ] Dashboard charts (Chart.js/ECharts)
-- [ ] Performance optimization (pagination, caching)
+- [x] JWT refresh tokens + token rotation
+- [x] Password reset flow (request + confirm)
+- [x] SSO/OAuth stub (Google provider)
+- [x] RBAC role guards (EMPLOYEE, MANAGER, FINANCE, ADMIN)
+- [x] Celery AI Analyst task stub (risk scoring)
+- [x] Celery AI Strategist beat task stub (department aggregation)
+- [x] Frontend: password reset views, SSO callback, enhanced auth
+- [x] Backend tests: 100/100 passing
+- [x] Frontend tests: 181/181 passing
+
+---
+
+## Sprint 3 — COMPLETED (2026-03-05)
+
+Branch: `feat/sprint-2-auth-rbac` (continuation)
+
+- [x] Fix ai_service.py field bugs (amount, employee_id, AIAnalysisLog fields)
+- [x] AI result writeback to ExpenseRequest + state transitions
+- [x] AI skip fallback (ai_skipped=True when unavailable)
+- [x] Rewrite sla_service.py with correct model fields
+- [x] Submit flow: justification validation, currency conversion, SLA deadlines
+- [x] Currency service (BRL/USD/EUR/GBP with hardcoded rates, TODO: BCB API)
+- [x] In-app notifications on all workflow transitions
+- [x] Email notification service (SMTP + Jinja2 templates, en-US + pt-BR)
+- [x] Async email dispatch via Celery task
+- [x] Public API: GET /options/categories, GET /options/cost-centers
+- [x] Frontend: dynamic categories/cost-centers from API
+- [x] RequestResponse schema: added amount_brl, exchange_rate, SLA, ai_skipped fields
+- [x] Backend tests: 137/137 passing (pytest + ruff clean)
+- [x] Frontend tests: 202/202 passing (vitest)
+- [x] Build: vite production build clean
 
 ---
 
@@ -149,6 +174,7 @@ All use UUID v4 PK, UTC timestamps, soft delete (except audit_logs — immutable
 - `POST /api/v1/auth/login|refresh|logout`
 - `GET|PATCH /api/v1/users/me`
 - `POST|GET /api/v1/requests` + `/{id}/submit|approve|reject|request-edit|cancel`
+- `GET /api/v1/requests/options/categories|cost-centers`
 - `POST|GET /api/v1/payments`
 - `GET /api/v1/ai/assist|chat` (SSE)
 - `GET /api/v1/reports/summary|narrative|export`
