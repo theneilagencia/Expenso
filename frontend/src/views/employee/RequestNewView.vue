@@ -343,13 +343,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import { useRequest } from '@/composables/useRequest'
 import { useFileUpload } from '@/composables/useFileUpload'
 import { useToast } from '@/composables/useToast'
+import { requestsService } from '@/services/requests'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -367,22 +368,21 @@ const steps = computed(() => [
   t('requests.stepReview')
 ])
 
-// Placeholder data - in production these would come from an API
-const categories = ref([
-  { id: 1, name: 'Travel' },
-  { id: 2, name: 'Office Supplies' },
-  { id: 3, name: 'Software' },
-  { id: 4, name: 'Equipment' },
-  { id: 5, name: 'Training' }
-])
+const categories = ref([])
+const costCenters = ref([])
 
-const costCenters = ref([
-  { id: 1, name: 'Engineering' },
-  { id: 2, name: 'Marketing' },
-  { id: 3, name: 'Sales' },
-  { id: 4, name: 'Operations' },
-  { id: 5, name: 'HR' }
-])
+onMounted(async () => {
+  try {
+    const [cats, ccs] = await Promise.all([
+      requestsService.listCategories(),
+      requestsService.listCostCenters()
+    ])
+    categories.value = cats
+    costCenters.value = ccs
+  } catch {
+    toast.error(t('common.error'))
+  }
+})
 
 const form = reactive({
   title: '',

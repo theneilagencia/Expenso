@@ -302,6 +302,7 @@ import { useRequest } from '@/composables/useRequest'
 import { useFileUpload } from '@/composables/useFileUpload'
 import { useToast } from '@/composables/useToast'
 import { REQUEST_STATUS } from '@/constants/status'
+import { requestsService } from '@/services/requests'
 
 const props = defineProps({
   id: {
@@ -326,22 +327,8 @@ const initialLoading = ref(true)
 const fileInput = ref(null)
 const newFiles = ref([])
 
-// Placeholder data - in production these would come from an API
-const categories = ref([
-  { id: 1, name: 'Travel' },
-  { id: 2, name: 'Office Supplies' },
-  { id: 3, name: 'Software' },
-  { id: 4, name: 'Equipment' },
-  { id: 5, name: 'Training' }
-])
-
-const costCenters = ref([
-  { id: 1, name: 'Engineering' },
-  { id: 2, name: 'Marketing' },
-  { id: 3, name: 'Sales' },
-  { id: 4, name: 'Operations' },
-  { id: 5, name: 'HR' }
-])
+const categories = ref([])
+const costCenters = ref([])
 
 const form = reactive({
   title: '',
@@ -462,7 +449,14 @@ function handleSubmit() {
 
 onMounted(async () => {
   try {
-    const data = await fetchRequest(props.id)
+    const [data, cats, ccs] = await Promise.all([
+      fetchRequest(props.id),
+      requestsService.listCategories(),
+      requestsService.listCostCenters()
+    ])
+
+    categories.value = cats
+    costCenters.value = ccs
 
     // Redirect if request is not editable
     const editableStatuses = [REQUEST_STATUS.DRAFT, REQUEST_STATUS.IN_CORRECTION]

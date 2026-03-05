@@ -48,6 +48,51 @@ async def list_requests(
     return RequestListResponse(data=requests, total=total, page=page, per_page=per_page)
 
 
+@router.get("/options/categories", summary="List active expense categories")
+async def list_categories(
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    from app.models.expense_category import ExpenseCategory
+    categories = (
+        db.query(ExpenseCategory)
+        .filter(ExpenseCategory.is_active.is_(True), ExpenseCategory.deleted_at.is_(None))
+        .order_by(ExpenseCategory.sort_order.asc())
+        .all()
+    )
+    return [
+        {
+            "id": str(c.id),
+            "name": c.name,
+            "icon": c.icon,
+            "limit_per_request": c.limit_per_request,
+            "min_justification_chars": c.min_justification_chars,
+        }
+        for c in categories
+    ]
+
+
+@router.get("/options/cost-centers", summary="List active cost centers")
+async def list_cost_centers(
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    from app.models.cost_center import CostCenter
+    centers = (
+        db.query(CostCenter)
+        .filter(CostCenter.is_active.is_(True), CostCenter.deleted_at.is_(None))
+        .all()
+    )
+    return [
+        {
+            "id": str(c.id),
+            "name": c.name,
+            "code": c.code,
+        }
+        for c in centers
+    ]
+
+
 @router.get("/{request_id}", response_model=RequestResponse, summary="Get expense request by ID")
 async def get_request(
     request_id: UUID,

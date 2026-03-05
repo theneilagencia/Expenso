@@ -54,5 +54,15 @@ export const requestsService = {
   async getVersions(id) {
     const { data } = await http.get(`/api/v1/requests/${id}/versions`)
     return data
+  },
+
+  async listCategories() {
+    const { data } = await http.get('/api/v1/requests/options/categories')
+    return data
+  },
+
+  async listCostCenters() {
+    const { data } = await http.get('/api/v1/requests/options/cost-centers')
+    return data
   }
 }
