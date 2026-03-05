@@ -1,0 +1,7 @@
+{% extends "email/base.html" %}
+{% block content %}
+<h2>Nova Solicitação Aguardando Aprovação</h2>
+<p>Olá {{ user_name }},</p>
+<p>Uma nova solicitação de reembolso de {{ requester_name }} requer sua análise e aprovação.</p>
+{% endblock %}
+{% block btn_text %}Revisar Solicitação{% endblock %}
