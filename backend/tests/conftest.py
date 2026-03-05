@@ -1,3 +1,4 @@
+import json
 import sqlite3
 import uuid
 
@@ -50,6 +51,10 @@ from app.models.vendor_list import VendorList  # noqa: F401
 # Register UUID adapter for sqlite3 so it stores as string
 sqlite3.register_adapter(uuid.UUID, lambda u: str(u))
 sqlite3.register_converter("UUID", lambda b: uuid.UUID(b.decode()))
+
+# Register dict/list adapter for sqlite3 so JSONB (patched to Text) works
+sqlite3.register_adapter(dict, lambda d: json.dumps(d))
+sqlite3.register_adapter(list, lambda val: json.dumps(val))
 
 
 def _patch_pg_types():
