@@ -348,9 +348,7 @@ class TestAnalysisEndpoints:
         """GET /api/v1/ai/analysis/{id} returns the stored analysis.
 
         Note: JSONB is patched to Text in SQLite, so response is stored as a
-        JSON string. The get_analysis service reads log.response which comes
-        back as a string. We store response as a JSON string to match SQLite
-        behaviour so the endpoint can parse it correctly.
+        JSON string. The get_analysis service now handles JSON string responses.
         """
         cat = _make_category(db)
         req = _make_request(db, employee_user.id, cat.id)
@@ -379,17 +377,8 @@ class TestAnalysisEndpoints:
         resp = client.get(f"/api/v1/ai/analysis/{req.id}", headers=employee_headers)
         assert resp.status_code == 200
         data = resp.json()
-        # On SQLite, log.response is a string so resp.get() won't work.
-        # The endpoint returns {"message": "No analysis available"} or the parsed result.
-        # Depending on implementation, verify the endpoint at least returns 200.
-        # If get_analysis handles string response, we check fields; otherwise
-        # we verify the fallback.
-        if "message" in data:
-            # Endpoint couldn't parse the string response — acceptable on SQLite
-            assert data["message"] == "No analysis available"
-        else:
-            assert data["risk_score"] == 30
-            assert data["recommendation"] == "APPROVE"
+        assert data["risk_score"] == 30
+        assert data["recommendation"] == "APPROVE"
 
     def test_get_analysis_no_data(self, client, db, employee_user, employee_headers):
         """GET /api/v1/ai/analysis/{id} with no log returns fallback message."""
@@ -403,20 +392,23 @@ class TestAnalysisEndpoints:
     def test_trigger_analysis_endpoint_returns_200(self, client, db, employee_user, employee_headers):
         """POST /api/v1/ai/analysis/{id} returns 200 with auth.
 
-        Note: On SQLite the endpoint's session cannot find the request by UUID
-        (UUID-to-String(36) comparison issue), so it returns the fallback
-        message. The full analysis pipeline is tested in TestAnalyzeRequest
-        via direct method calls.
+        Mocks the analysis service to avoid needing Claude API and pgvector.
         """
         cat = _make_category(db)
         req = _make_request(db, employee_user.id, cat.id)
 
-        resp = client.post(f"/api/v1/ai/analysis/{req.id}", headers=employee_headers)
+        mock_result = {
+            "risk_score": 20,
+            "risk_level": "LOW",
+            "recommendation": "APPROVE",
+            "recommendation_reason": "OK",
+        }
+
+        with patch.object(AIService, "analyze_request", return_value=mock_result):
+            resp = client.post(f"/api/v1/ai/analysis/{req.id}", headers=employee_headers)
         assert resp.status_code == 200
         data = resp.json()
-        # On SQLite, analyze_request returns None (UUID filter mismatch),
-        # so the endpoint returns the fallback.
-        assert "message" in data or "recommendation" in data
+        assert data["recommendation"] == "APPROVE"
 
     def test_trigger_analysis_endpoint_requires_auth(self, client):
         """POST /api/v1/ai/analysis/{id} requires authentication."""

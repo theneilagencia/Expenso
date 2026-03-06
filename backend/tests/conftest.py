@@ -8,7 +8,7 @@ from fastapi import status as http_status
 from fastapi.security import HTTPAuthorizationCredentials
 from fastapi.testclient import TestClient
 from jose import JWTError, jwt
-from sqlalchemy import String, Text, create_engine
+from sqlalchemy import String, Text, TypeDecorator, create_engine
 from sqlalchemy.dialects.postgresql import JSONB as PG_JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import sessionmaker
@@ -46,6 +46,7 @@ from app.models.request_version import RequestVersion  # noqa: F401
 from app.models.sla_config import SLAConfig  # noqa: F401
 from app.models.user import User
 from app.models.vendor_list import VendorList  # noqa: F401
+from app.models.webhook_config import WebhookConfig  # noqa: F401
 
 # Disable rate limiting in tests
 limiter.enabled = False
@@ -61,6 +62,24 @@ sqlite3.register_adapter(dict, lambda d: json.dumps(d))
 sqlite3.register_adapter(list, lambda val: json.dumps(val))
 
 
+class UUIDString(TypeDecorator):
+    """Store UUID as String(36) with proper bind-parameter conversion.
+
+    Ensures uuid.UUID objects are converted to strings before binding,
+    which is necessary for SQLite where the UUID column is stored as text.
+    """
+    impl = String(36)
+    cache_ok = True
+
+    def process_bind_param(self, value, dialect):
+        if value is not None:
+            return str(value)
+        return value
+
+    def process_result_value(self, value, dialect):
+        return value  # Keep as string for SQLite compatibility
+
+
 def _patch_pg_types():
     """Patch PostgreSQL-specific column types for SQLite compatibility."""
     try:
@@ -72,7 +91,7 @@ def _patch_pg_types():
         for column in table.columns:
             col_type = column.type
             if isinstance(col_type, PG_UUID):
-                column.type = String(36)
+                column.type = UUIDString()
             elif isinstance(col_type, PG_JSONB):
                 column.type = Text()
             elif PG_Vector and isinstance(col_type, PG_Vector):

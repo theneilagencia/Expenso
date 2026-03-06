@@ -430,6 +430,12 @@ class AIService:
         if not log:
             return None
         resp = log.response or {}
+        # Handle case where response is stored as JSON string (e.g. SQLite)
+        if isinstance(resp, str):
+            try:
+                resp = json.loads(resp)
+            except (json.JSONDecodeError, TypeError):
+                resp = {}
         return {
             "id": str(log.id),
             "risk_score": resp.get("risk_score"),
