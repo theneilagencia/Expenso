@@ -170,6 +170,35 @@ Branch: `feat/sprint-2-auth-rbac` (continuation)
 
 ---
 
+## Sprint 7 — COMPLETED (2026-03-05)
+
+Branch: `feat/sprint-2-auth-rbac` (continuation)
+
+- [x] Revolut Business API client (JWT RS256, httpx, 30s timeout)
+- [x] Revolut webhook HMAC-SHA256 signature validation
+- [x] RevolutGateway: complete stub → real HTTP calls (MockGateway fallback preserved)
+- [x] Revolut status mapping (pending/completed/failed/declined/reverted/cancelled)
+- [x] Payment status poll Celery beat task (10 min, webhook fallback)
+- [x] Config: REVOLUT_CLIENT_ID, REVOLUT_PRIVATE_KEY, REVOLUT_WEBHOOK_SECRET
+- [x] Batch payment endpoint (POST /payments/batch) — PIX/PAYROLL instant, REVOLUT async
+- [x] Enhanced payment list: filters (status, method, date_from, date_to, employee_id)
+- [x] Enriched payment responses (request_title, requester_name, department, category)
+- [x] Webhook HMAC validation for Revolut provider
+- [x] Webhook state transitions (completed→PAID, failed→FAILED+retry)
+- [x] XLSX payment export (openpyxl, StreamingResponse)
+- [x] PaymentsView: KPI cards (pending/processing/paid/failed)
+- [x] PaymentsView: retry button for FAILED payments
+- [x] PaymentsView: method selector in batch bar (REVOLUT/PIX/PAYROLL)
+- [x] PaymentsView: XLSX export button
+- [x] PaymentsView: dynamic currency formatting (per-payment currency)
+- [x] payments.js: retry, batchProcess, getStatus, exportXlsx methods
+- [x] i18n payments: complete keys (kpi, table, detail, messages — en-US + pt-BR)
+- [x] Backend tests: 240/240 passing (pytest + ruff clean)
+- [x] Frontend tests: 243/243 passing (vitest)
+- [x] Build: vite production build clean
+
+---
+
 ## Code Conventions
 
 ### Backend (Python)
