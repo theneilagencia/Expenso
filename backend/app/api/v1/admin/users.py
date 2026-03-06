@@ -1,13 +1,13 @@
 import uuid
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, File, Query, UploadFile
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import NotFoundError, ValidationError
 from app.core.permissions import require_role
-from app.core.security import hash_password
+from app.core.security import create_access_token, hash_password
 from app.dependencies import get_db
 from app.models.audit_log import AuditLog
 from app.models.user import User
@@ -155,3 +155,59 @@ async def delete_user(
 
     db.commit()
     return {"id": str(user.id), "status": "deleted"}
+
+
+@router.post("/import", status_code=200, summary="Bulk import users from XLSX")
+async def import_users(
+    file: UploadFile = File(...),
+    current_user=Depends(require_role("ADMIN")),
+    db: Session = Depends(get_db),
+):
+    from app.services.user_import_service import UserImportService
+
+    contents = await file.read()
+    result = UserImportService.parse_xlsx(contents, db)
+    return result
+
+
+@router.post("/{user_id}/impersonate", summary="Start impersonation session")
+async def impersonate_user(
+    user_id: str,
+    current_user=Depends(require_role("ADMIN")),
+    db: Session = Depends(get_db),
+):
+    target = db.query(User).filter(
+        User.id == uuid.UUID(user_id), User.deleted_at.is_(None)
+    ).first()
+    if not target:
+        raise NotFoundError("User")
+
+    # Create special impersonation token
+    token = create_access_token({
+        "sub": str(target.id),
+        "role": target.role,
+        "impersonated_by": str(current_user.id),
+        "read_only": True,
+    })
+
+    # Audit log
+    audit = AuditLog(
+        id=uuid.uuid4(),
+        actor_id=current_user.id,
+        actor_role=current_user.role,
+        action="IMPERSONATION_START",
+        justification=f"Impersonating user {target.email}",
+    )
+    db.add(audit)
+    db.commit()
+
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "impersonating": {
+            "id": str(target.id),
+            "full_name": target.full_name,
+            "email": target.email,
+            "role": target.role,
+        },
+    }
