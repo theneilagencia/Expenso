@@ -132,9 +132,6 @@ const textClasses = computed(() => [
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/tokens';
-@import '@/styles/mixins';
-
 .bts-text {
   font-family: var(--font-family-primary);
   margin: 0;

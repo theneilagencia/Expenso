@@ -1,17 +1,14 @@
 <template>
-  <span
-    class="app-badge"
-    :class="[
-      `app-badge--${variant}`,
-      `app-badge--${size}`
-    ]"
-  >
+  <BtsBadge :variant="mappedVariant" :class="sizeClass">
     <slot />
-  </span>
+  </BtsBadge>
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue'
+import { BtsBadge } from '@/design-system'
+
+const props = defineProps({
   variant: {
     type: String,
     default: 'neutral',
@@ -23,57 +20,30 @@ defineProps({
     validator: (val) => ['sm', 'md'].includes(val)
   }
 })
+
+const mappedVariant = computed(() => {
+  const variantMap = {
+    primary: 'primary',
+    success: 'success',
+    warning: 'warning',
+    danger: 'danger',
+    info: 'info',
+    neutral: 'default'
+  }
+  return variantMap[props.variant] || 'default'
+})
+
+const sizeClass = computed(() => `app-badge--${props.size}`)
 </script>
 
 <style lang="scss" scoped>
-.app-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 500;
-  border-radius: $radius-full;
-  white-space: nowrap;
+.app-badge--sm {
+  padding: 1px 6px;
+  font-size: 11px;
+}
 
-  &--sm {
-    padding: 1px $spacing-sm;
-    font-size: $font-size-xs;
-    line-height: 1.5;
-  }
-
-  &--md {
-    padding: $spacing-xs $spacing-sm;
-    font-size: $font-size-xs;
-    line-height: 1.5;
-  }
-
-  &--primary {
-    background-color: $primary-light;
-    color: $primary-dark;
-  }
-
-  &--success {
-    background-color: rgba($success, 0.1);
-    color: $success;
-  }
-
-  &--warning {
-    background-color: rgba($warning, 0.1);
-    color: darken($warning, 10%);
-  }
-
-  &--danger {
-    background-color: rgba($danger, 0.1);
-    color: $danger;
-  }
-
-  &--info {
-    background-color: rgba($info, 0.1);
-    color: $info;
-  }
-
-  &--neutral {
-    background-color: $gray-100;
-    color: $gray-600;
-  }
+.app-badge--md {
+  padding: 2px 8px;
+  font-size: 12px;
 }
 </style>

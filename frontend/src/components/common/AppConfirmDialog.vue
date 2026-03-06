@@ -1,39 +1,41 @@
 <template>
-  <AppModal
-    :visible="visible"
+  <BtsDialog
+    :modelValue="visible"
     :title="title || t('common.confirm.title')"
     size="sm"
-    @update:visible="handleVisibilityChange"
+    @update:modelValue="handleVisibilityChange"
   >
     <p class="app-confirm-dialog__message">
       {{ message || t('common.confirm.message') }}
     </p>
 
     <template #footer>
-      <button
-        class="app-confirm-dialog__btn app-confirm-dialog__btn--cancel"
+      <BtsButton
+        variant="secondary"
+        size="sm"
         @click="handleCancel"
       >
         {{ cancelText || t('common.cancel') }}
-      </button>
-      <button
-        class="app-confirm-dialog__btn"
-        :class="`app-confirm-dialog__btn--${variant}`"
+      </BtsButton>
+      <BtsButton
+        :variant="mappedVariant"
+        size="sm"
         @click="handleConfirm"
       >
         {{ confirmText || t('common.confirm') }}
-      </button>
+      </BtsButton>
     </template>
-  </AppModal>
+  </BtsDialog>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import AppModal from './AppModal.vue'
+import { BtsDialog, BtsButton } from '@/design-system'
 
 const { t } = useI18n()
 
-defineProps({
+const props = defineProps({
   visible: {
     type: Boolean,
     default: false
@@ -63,6 +65,10 @@ defineProps({
 
 const emit = defineEmits(['confirm', 'cancel', 'update:visible'])
 
+const mappedVariant = computed(() => {
+  return props.variant === 'danger' ? 'danger' : 'primary'
+})
+
 function handleConfirm() {
   emit('confirm')
   emit('update:visible', false)
@@ -84,53 +90,10 @@ function handleVisibilityChange(val) {
 <style lang="scss" scoped>
 .app-confirm-dialog {
   &__message {
-    font-size: $font-size-sm;
-    color: $gray-600;
+    font-size: 14px;
+    color: var(--color-text-primary, $gray-600);
     line-height: 1.6;
     margin: 0;
-  }
-
-  &__btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 38px;
-    padding: 0 $spacing-lg;
-    border: none;
-    border-radius: $radius-md;
-    font-size: $font-size-sm;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s ease;
-
-    &--cancel {
-      background-color: $white;
-      color: $gray-700;
-      border: 1px solid $gray-300;
-
-      &:hover {
-        background-color: $gray-50;
-        border-color: $gray-400;
-      }
-    }
-
-    &--danger {
-      background-color: $danger;
-      color: $white;
-
-      &:hover {
-        background-color: darken($danger, 8%);
-      }
-    }
-
-    &--warning {
-      background-color: $warning;
-      color: $white;
-
-      &:hover {
-        background-color: darken($warning, 8%);
-      }
-    }
   }
 }
 </style>

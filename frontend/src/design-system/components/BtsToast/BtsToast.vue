@@ -19,7 +19,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
-import BtsStatusIcon from '@/components/BtsStatusIcon/BtsStatusIcon.vue';
+import BtsStatusIcon from '../BtsStatusIcon/BtsStatusIcon.vue';
 
 const props = defineProps({
   variant: {

@@ -68,7 +68,7 @@
 
 <script setup>
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount, useId } from 'vue';
-import BtsIcon from '@/components/BtsIcon/BtsIcon.vue';
+import BtsIcon from '../BtsIcon/BtsIcon.vue';
 
 const props = defineProps({
   items: { type: Array, default: () => [] },

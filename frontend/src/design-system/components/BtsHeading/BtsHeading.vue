@@ -105,9 +105,6 @@ const headingClasses = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/tokens';
-@import '@/styles/mixins';
-
 .bts-heading {
   font-family: var(--font-family-primary);
   margin: 0;
