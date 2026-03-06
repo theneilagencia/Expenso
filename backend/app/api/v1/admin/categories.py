@@ -9,6 +9,7 @@ from app.core.exceptions import NotFoundError
 from app.core.permissions import require_role
 from app.dependencies import get_db
 from app.models.expense_category import ExpenseCategory
+from app.services.cache_service import cache_invalidate
 
 router = APIRouter()
 
@@ -62,6 +63,7 @@ async def create_category(
     cat = ExpenseCategory(id=uuid.uuid4(), **data.model_dump())
     db.add(cat)
     db.commit()
+    cache_invalidate("options:categories*")
     return {"id": str(cat.id), "name": cat.name}
 
 
@@ -84,6 +86,7 @@ async def update_category(
             setattr(cat, field, value)
 
     db.commit()
+    cache_invalidate("options:categories*")
     return {"id": str(cat.id), "name": cat.name, "status": "updated"}
 
 
@@ -104,4 +107,5 @@ async def delete_category(
     cat.deleted_at = datetime.now(timezone.utc)
     cat.is_active = False
     db.commit()
+    cache_invalidate("options:categories*")
     return {"id": str(cat.id), "status": "deleted"}

@@ -88,7 +88,15 @@ async def list_payments(
     current_user=Depends(require_role("FINANCE", "ADMIN")),
     db: Session = Depends(get_db),
 ):
-    query = db.query(Payment).order_by(Payment.created_at.desc())
+    # Single JOIN query — eliminates N+1 (was 4 queries per row)
+    query = (
+        db.query(Payment, ExpenseRequest, User, ExpenseCategory, Department)
+        .outerjoin(ExpenseRequest, Payment.request_id == ExpenseRequest.id)
+        .outerjoin(User, ExpenseRequest.employee_id == User.id)
+        .outerjoin(ExpenseCategory, ExpenseRequest.category_id == ExpenseCategory.id)
+        .outerjoin(Department, User.department_id == Department.id)
+        .order_by(Payment.created_at.desc())
+    )
 
     if status:
         query = query.filter(Payment.revolut_status == status)
@@ -99,46 +107,46 @@ async def list_payments(
     if date_to:
         query = query.filter(Payment.created_at <= datetime.fromisoformat(date_to))
     if employee_id:
-        query = query.join(ExpenseRequest, Payment.request_id == ExpenseRequest.id).filter(
+        query = query.filter(ExpenseRequest.employee_id == employee_id)
+
+    # Count before pagination (use subquery for accuracy)
+    total = db.query(Payment.id).select_from(Payment)
+    if status:
+        total = total.filter(Payment.revolut_status == status)
+    if method:
+        total = total.filter(Payment.method == method)
+    if date_from:
+        total = total.filter(Payment.created_at >= datetime.fromisoformat(date_from))
+    if date_to:
+        total = total.filter(Payment.created_at <= datetime.fromisoformat(date_to))
+    if employee_id:
+        total = total.join(ExpenseRequest, Payment.request_id == ExpenseRequest.id).filter(
             ExpenseRequest.employee_id == employee_id
         )
+    total_count = total.count()
 
-    total = query.count()
-    payments = query.offset((page - 1) * per_page).limit(per_page).all()
+    rows = query.offset((page - 1) * per_page).limit(per_page).all()
 
-    # Enrich with request/employee data
     data = []
-    for p in payments:
-        req = db.query(ExpenseRequest).filter(ExpenseRequest.id == p.request_id).first()
-        employee = None
-        dept_name = None
-        cat_name = None
-        if req:
-            employee = db.query(User).filter(User.id == req.employee_id).first()
-            cat = db.query(ExpenseCategory).filter(ExpenseCategory.id == req.category_id).first()
-            cat_name = cat.name if cat else None
-            if employee:
-                dept = db.query(Department).filter(Department.id == employee.department_id).first()
-                dept_name = dept.name if dept else None
-
+    for payment, req, employee, category, dept in rows:
         data.append({
-            "id": str(p.id),
-            "request_id": str(p.request_id),
+            "id": str(payment.id),
+            "request_id": str(payment.request_id),
             "request_title": req.title if req else None,
             "requester_name": employee.full_name if employee else None,
-            "department": dept_name,
-            "category": cat_name,
-            "method": p.method,
-            "amount_paid": p.amount_paid,
-            "currency_paid": p.currency_paid,
-            "status": p.revolut_status,
-            "last_error": p.last_error,
-            "retry_count": p.retry_count,
-            "payment_date": p.payment_date.isoformat() if p.payment_date else None,
-            "created_at": p.created_at.isoformat() if p.created_at else None,
+            "department": dept.name if dept else None,
+            "category": category.name if category else None,
+            "method": payment.method,
+            "amount_paid": payment.amount_paid,
+            "currency_paid": payment.currency_paid,
+            "status": payment.revolut_status,
+            "last_error": payment.last_error,
+            "retry_count": payment.retry_count,
+            "payment_date": payment.payment_date.isoformat() if payment.payment_date else None,
+            "created_at": payment.created_at.isoformat() if payment.created_at else None,
         })
 
-    return {"data": data, "total": total, "page": page, "per_page": per_page}
+    return {"data": data, "total": total_count, "page": page, "per_page": per_page}
 
 
 @router.get("/export/xlsx", summary="Export payments as XLSX")

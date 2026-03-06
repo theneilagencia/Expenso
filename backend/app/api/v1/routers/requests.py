@@ -15,6 +15,7 @@ from app.schemas.request import (
     RequestUpdate,
 )
 from app.services.ai_service import AIService
+from app.services.cache_service import cache_get, cache_set
 from app.services.request_service import RequestService
 
 router = APIRouter()
@@ -57,6 +58,12 @@ async def list_categories(
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    # Redis cache — 1 hour TTL
+    cache_key = "options:categories"
+    cached = cache_get(cache_key)
+    if cached is not None:
+        return cached
+
     from app.models.expense_category import ExpenseCategory
     categories = (
         db.query(ExpenseCategory)
@@ -64,7 +71,7 @@ async def list_categories(
         .order_by(ExpenseCategory.sort_order.asc())
         .all()
     )
-    return [
+    result = [
         {
             "id": str(c.id),
             "name": c.name,
@@ -74,6 +81,8 @@ async def list_categories(
         }
         for c in categories
     ]
+    cache_set(cache_key, result, ttl=3600)
+    return result
 
 
 @router.get("/options/cost-centers", summary="List active cost centers")

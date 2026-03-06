@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.security import get_current_user
@@ -12,14 +12,19 @@ router = APIRouter()
 
 @router.get("")
 async def list_notifications(
+    page: int = Query(1, ge=1),
+    per_page: int = Query(50, ge=1, le=100),
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
+    base_query = db.query(Notification).filter(Notification.user_id == current_user.id)
+    total = base_query.count()
+
     notifications = (
-        db.query(Notification)
-        .filter(Notification.user_id == current_user.id)
+        base_query
         .order_by(Notification.created_at.desc())
-        .limit(50)
+        .offset((page - 1) * per_page)
+        .limit(per_page)
         .all()
     )
     return {
@@ -35,7 +40,10 @@ async def list_notifications(
                 "created_at": str(n.created_at),
             }
             for n in notifications
-        ]
+        ],
+        "total": total,
+        "page": page,
+        "per_page": per_page,
     }
 
 
