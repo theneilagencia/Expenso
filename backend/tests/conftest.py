@@ -155,8 +155,21 @@ app.dependency_overrides[_orig_get_current_user] = _test_get_current_user
 @pytest.fixture(autouse=True)
 def setup_db():
     Base.metadata.create_all(bind=engine)
+    # Clean stale data BEFORE each test (more reliable than teardown cleanup
+    # because SQLite StaticPool shares one connection across sessions)
+    with engine.begin() as conn:
+        for table in reversed(Base.metadata.sorted_tables):
+            conn.execute(table.delete())
+    # Flush Redis cache to prevent stale cached results between tests
+    # (CI has Redis running, so cache_get would return stale data)
+    from app.services.cache_service import _get_redis
+    try:
+        r = _get_redis()
+        if r:
+            r.flushdb()
+    except Exception:
+        pass
     yield
-    Base.metadata.drop_all(bind=engine)
 
 
 @pytest.fixture
