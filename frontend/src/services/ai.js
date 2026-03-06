@@ -116,5 +116,33 @@ export const aiService = {
   async getAIUsage(params = {}) {
     const { data } = await http.get('/api/v1/ai/admin/ai-usage', { params })
     return data
+  },
+
+  streamNarrativeReport(params, onChunk, onDone) {
+    const queryString = new URLSearchParams(
+      Object.fromEntries(
+        Object.entries(params).filter(([, v]) => v != null && v !== '')
+      )
+    ).toString()
+
+    return _createSSEStream(
+      `${http.defaults.baseURL}/api/v1/reports/narrative?${queryString}`,
+      {},
+      onChunk,
+      onDone
+    )
+  },
+
+  async generateSummary(requestId) {
+    const { data } = await http.post(`/api/v1/requests/${requestId}/ai-summary`)
+    return data
+  },
+
+  async suggestComment(requestId, action) {
+    const { data } = await http.post('/api/v1/ai/suggest-comment', {
+      request_id: requestId,
+      action
+    })
+    return data
   }
 }

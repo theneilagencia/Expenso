@@ -21,6 +21,13 @@
           >
             {{ t('reports.exportPdf') }}
           </button>
+          <button
+            class="reports__export-btn reports__export-btn--ai"
+            :disabled="narrativeLoading"
+            @click="handleGenerateNarrative"
+          >
+            {{ narrativeLoading ? t('reports.narrativeGenerating') : t('reports.generateNarrative') }}
+          </button>
         </div>
       </div>
 
@@ -99,6 +106,25 @@
             <MonthlyTrendChart :data="monthlyData" :loading="false" />
           </div>
         </div>
+
+        <!-- AI Narrative Report -->
+        <div
+          v-if="narrativeText || narrativeLoading"
+          class="reports__chart-card reports__chart-card--full reports__narrative-card"
+        >
+          <h3 class="reports__chart-title">{{ t('reports.narrativeTitle') }}</h3>
+          <div
+            v-if="narrativeLoading && !narrativeText"
+            class="reports__loading"
+          >
+            {{ t('reports.narrativeGenerating') }}
+          </div>
+          <div
+            v-else
+            class="reports__narrative-text"
+            v-text="narrativeText"
+          />
+        </div>
       </template>
     </div>
   </DefaultLayout>
@@ -112,6 +138,7 @@ import SpendingByCategoryChart from '@/components/charts/SpendingByCategoryChart
 import MonthlyTrendChart from '@/components/charts/MonthlyTrendChart.vue'
 import DepartmentComparisonChart from '@/components/charts/DepartmentComparisonChart.vue'
 import { reportsService } from '@/services/reports'
+import { aiService } from '@/services/ai'
 import { useToast } from '@/composables/useToast'
 
 const { t } = useI18n()
@@ -132,6 +159,8 @@ const dashboard = ref({
 const categoryData = ref([])
 const departmentData = ref([])
 const monthlyData = ref([])
+const narrativeText = ref('')
+const narrativeLoading = ref(false)
 
 const trendClass = computed(() => {
   const trend = dashboard.value.monthly_trend
@@ -216,6 +245,16 @@ function downloadBlob(data, filename, mimeType) {
   link.download = filename
   link.click()
   window.URL.revokeObjectURL(url)
+}
+
+function handleGenerateNarrative() {
+  narrativeText.value = ''
+  narrativeLoading.value = true
+  aiService.streamNarrativeReport(
+    getDateParams(),
+    (chunk) => { narrativeText.value += chunk.content || '' },
+    () => { narrativeLoading.value = false }
+  )
 }
 
 onMounted(() => {
@@ -402,6 +441,26 @@ onMounted(() => {
     font-weight: 600;
     color: $gray-800;
     margin-bottom: $spacing-md;
+  }
+
+  &__narrative-card {
+    margin-top: $spacing-lg;
+  }
+
+  &__narrative-text {
+    white-space: pre-wrap;
+    line-height: 1.7;
+    color: $gray-700;
+    font-size: $font-size-sm;
+  }
+
+  &__export-btn--ai {
+    background: $info;
+    color: $white;
+
+    &:hover:not(:disabled) {
+      background: darken($info, 8%);
+    }
   }
 
 }

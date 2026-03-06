@@ -43,6 +43,9 @@
     "totalSpending": "Gasto Total",
     "requests": "Solicitações"
   },
+  "generateNarrative": "Gerar Relatório IA",
+  "narrativeTitle": "Relatório Narrativo IA",
+  "narrativeGenerating": "Gerando relatório narrativo...",
   "messages": {
     "fetchError": "Falha ao carregar dados do relatório",
     "exported": "Relatório exportado com sucesso",

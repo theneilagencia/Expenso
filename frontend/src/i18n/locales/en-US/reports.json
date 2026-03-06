@@ -43,6 +43,9 @@
     "totalSpending": "Total Spending",
     "requests": "Requests"
   },
+  "generateNarrative": "Generate AI Report",
+  "narrativeTitle": "AI Narrative Report",
+  "narrativeGenerating": "Generating narrative report...",
   "messages": {
     "fetchError": "Failed to load report data",
     "exported": "Report exported successfully",

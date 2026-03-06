@@ -22,6 +22,11 @@ class ChatRequest(BaseModel):
     messages: list[dict]
 
 
+class SuggestCommentRequest(BaseModel):
+    request_id: UUID
+    action: str  # "approve", "reject", "request_edit"
+
+
 @router.get("/assist/{request_id}/stream")
 async def stream_assistance(
     request_id: UUID,
@@ -129,6 +134,20 @@ async def stream_chat(
             "X-Accel-Buffering": "no",
         },
     )
+
+
+@router.post("/suggest-comment")
+async def suggest_comment(
+    body: SuggestCommentRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Suggest an approval/rejection comment using AI Writer."""
+    locale = current_user.locale or "en-US"
+    result = AIService.suggest_comment(body.request_id, body.action, db, locale)
+    if not result:
+        return {"message": "Suggestion failed"}
+    return result
 
 
 @router.get("/strategist/report")

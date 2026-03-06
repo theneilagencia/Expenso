@@ -13,6 +13,7 @@ from app.schemas.request import (
     RequestResponse,
     RequestUpdate,
 )
+from app.services.ai_service import AIService
 from app.services.request_service import RequestService
 
 router = APIRouter()
@@ -255,3 +256,16 @@ async def get_versions(
         }
         for v in versions
     ]
+
+
+@router.post("/{request_id}/ai-summary")
+async def generate_ai_summary(
+    request_id: UUID,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Generate an AI summary for an expense request."""
+    result = AIService.generate_summary(request_id, db)
+    if not result:
+        return {"message": "Summary generation failed"}
+    return result

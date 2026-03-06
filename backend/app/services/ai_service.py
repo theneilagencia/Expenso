@@ -14,7 +14,9 @@ from app.integrations.anthropic.context_builder import (
     build_analyst_context,
     build_assistant_context,
     build_chatbot_context,
+    build_writer_context,
 )
+from app.integrations.anthropic.prompts.writer import WRITER_SYSTEM_PROMPT
 from app.models.ai_analysis_log import AIAnalysisLog
 from app.models.expense_category import ExpenseCategory
 from app.models.expense_request import ExpenseRequest
@@ -411,6 +413,169 @@ class AIService:
             "full_response": resp,
             "created_at": str(log.created_at),
         }
+
+    @staticmethod
+    async def stream_narrative(
+        report_data: dict, user_locale: str = "en-US"
+    ) -> AsyncGenerator[str, None]:
+        """Stream a narrative expense report using the Writer AI role."""
+        user_message = build_writer_context(
+            mode="narrative", data=report_data, user_locale=user_locale
+        )
+        system_prompt = WRITER_SYSTEM_PROMPT.get(user_locale, WRITER_SYSTEM_PROMPT["en-US"])
+
+        client = await _get_async_client()
+        if not client:
+            yield f"data: {json.dumps({'error': 'AI service unavailable'})}\n\n"
+            return
+
+        try:
+            async with client.messages.stream(
+                model=MODEL,
+                max_tokens=4096,
+                system=system_prompt,
+                messages=[{"role": "user", "content": user_message}],
+            ) as stream:
+                async for text in stream.text_stream:
+                    yield f"data: {json.dumps({'content': text})}\n\n"
+            yield f"data: {json.dumps({'done': True})}\n\n"
+        except Exception as e:
+            logger.error(f"AI narrative streaming error: {e}")
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+
+    @staticmethod
+    def generate_summary(request_id: UUID, db: Session) -> Optional[dict]:
+        """Generate an executive summary for an expense request using the Writer AI role."""
+        expense = db.query(ExpenseRequest).filter(ExpenseRequest.id == request_id).first()
+        if not expense:
+            return None
+
+        category = None
+        if expense.category_id:
+            category = (
+                db.query(ExpenseCategory)
+                .filter(ExpenseCategory.id == expense.category_id)
+                .first()
+            )
+
+        request_data = {
+            "title": expense.title,
+            "amount": str(expense.amount),
+            "currency": expense.currency or "BRL",
+            "status": expense.status,
+            "justification": expense.justification,
+            "vendor_name": expense.vendor_name,
+            "category_name": category.name if category else "N/A",
+            "ai_risk_score": expense.ai_risk_score,
+            "ai_risk_level": expense.ai_risk_level,
+            "ai_recommendation": expense.ai_recommendation,
+        }
+
+        user_message = build_writer_context(mode="summary", data=request_data)
+        system_prompt = WRITER_SYSTEM_PROMPT.get("en-US")
+
+        client = _get_client()
+        if not client:
+            return {"ai_skipped": True}
+
+        try:
+            start_time = time.monotonic()
+            response = client.messages.create(
+                model=MODEL,
+                max_tokens=1024,
+                system=system_prompt,
+                messages=[{"role": "user", "content": user_message}],
+            )
+            duration_ms = int((time.monotonic() - start_time) * 1000)
+
+            summary_text = response.content[0].text
+
+            log = AIAnalysisLog(
+                request_id=expense.id,
+                ai_role="WRITER",
+                model_used=MODEL,
+                input_tokens=response.usage.input_tokens,
+                output_tokens=response.usage.output_tokens,
+                response={"summary": summary_text},
+                duration_ms=duration_ms,
+                status="SUCCESS",
+            )
+            db.add(log)
+            db.commit()
+
+            return {"summary": summary_text}
+        except Exception as e:
+            logger.error(f"AI summary generation error: {e}")
+            return {"ai_skipped": True, "error": str(e)}
+
+    @staticmethod
+    def suggest_comment(
+        request_id: UUID, action: str, db: Session, user_locale: str = "en-US"
+    ) -> Optional[dict]:
+        """Suggest an approval/rejection comment using the Writer AI role."""
+        expense = db.query(ExpenseRequest).filter(ExpenseRequest.id == request_id).first()
+        if not expense:
+            return None
+
+        category = None
+        if expense.category_id:
+            category = (
+                db.query(ExpenseCategory)
+                .filter(ExpenseCategory.id == expense.category_id)
+                .first()
+            )
+
+        request_data = {
+            "title": expense.title,
+            "amount": str(expense.amount),
+            "currency": expense.currency or "BRL",
+            "justification": expense.justification,
+            "category_name": category.name if category else "N/A",
+            "ai_risk_score": expense.ai_risk_score,
+            "ai_recommendation": expense.ai_recommendation,
+            "action": action,
+        }
+
+        user_message = build_writer_context(
+            mode="suggest_comment", data=request_data, user_locale=user_locale
+        )
+        system_prompt = WRITER_SYSTEM_PROMPT.get(
+            user_locale, WRITER_SYSTEM_PROMPT["en-US"]
+        )
+
+        client = _get_client()
+        if not client:
+            return {"ai_skipped": True}
+
+        try:
+            start_time = time.monotonic()
+            response = client.messages.create(
+                model=MODEL,
+                max_tokens=512,
+                system=system_prompt,
+                messages=[{"role": "user", "content": user_message}],
+            )
+            duration_ms = int((time.monotonic() - start_time) * 1000)
+
+            suggestion_text = response.content[0].text
+
+            log = AIAnalysisLog(
+                request_id=expense.id,
+                ai_role="WRITER",
+                model_used=MODEL,
+                input_tokens=response.usage.input_tokens,
+                output_tokens=response.usage.output_tokens,
+                response={"suggestion": suggestion_text},
+                duration_ms=duration_ms,
+                status="SUCCESS",
+            )
+            db.add(log)
+            db.commit()
+
+            return {"suggestion": suggestion_text}
+        except Exception as e:
+            logger.error(f"AI suggest comment error: {e}")
+            return {"ai_skipped": True, "error": str(e)}
 
 
 def _apply_ai_results(expense: ExpenseRequest, analysis: dict):

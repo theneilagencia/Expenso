@@ -161,3 +161,101 @@ You can help users with:
 - Category information
 
 Be concise, friendly, and helpful. If you don't know something, say so."""
+
+
+def build_writer_context(
+    mode: str,
+    data: dict,
+    user_locale: str = "en-US",
+) -> str:
+    """Build context for the Writer AI role.
+
+    Modes:
+    - "narrative": Generate a narrative expense report from aggregated data.
+    - "summary": Generate an executive summary for a single request.
+    - "suggest_comment": Draft an approval/rejection comment.
+    """
+    locale_instruction = f"Respond in {'Portuguese (Brazil)' if user_locale == 'pt-BR' else 'English'}."
+
+    if mode == "narrative":
+        dashboard = data.get("dashboard", {})
+        categories = data.get("by_category", [])
+        departments = data.get("by_department", [])
+        period = data.get("period", "selected period")
+
+        cat_lines = "\n".join(
+            f"- {c.get('category', 'N/A')}: {c.get('count', 0)} requests, total {c.get('total', 0):,.2f}"
+            for c in categories
+        ) or "No category data."
+
+        dept_lines = "\n".join(
+            f"- {d.get('department', 'N/A')}: {d.get('count', 0)} requests, total {d.get('total', 0):,.2f}"
+            for d in departments
+        ) or "No department data."
+
+        return f"""Generate a professional narrative expense report for the {period}.
+{locale_instruction}
+
+Dashboard summary:
+- Total requests: {dashboard.get('total_requests', 0)}
+- Total amount: {dashboard.get('total_amount', 0):,.2f}
+- Average amount: {dashboard.get('average_amount', 0):,.2f}
+- Total paid: {dashboard.get('total_paid', 0):,.2f}
+- Total pending: {dashboard.get('total_pending', 0):,.2f}
+
+By category:
+{cat_lines}
+
+By department:
+{dept_lines}
+
+Write a clear, structured narrative report with:
+1. Executive summary
+2. Key findings and trends
+3. Category analysis
+4. Department comparison
+5. Recommendations
+
+Be concise and data-driven. Use specific numbers from the data."""
+
+    elif mode == "summary":
+        return f"""Generate a concise executive summary for this expense request.
+{locale_instruction}
+
+Request details:
+- Title: {data.get('title', 'N/A')}
+- Amount: {data.get('amount', 'N/A')} {data.get('currency', 'BRL')}
+- Status: {data.get('status', 'N/A')}
+- Justification: {data.get('justification', 'N/A')}
+- Vendor: {data.get('vendor_name', 'N/A')}
+- Category: {data.get('category_name', 'N/A')}
+- AI Risk Score: {data.get('ai_risk_score', 'N/A')}
+- AI Risk Level: {data.get('ai_risk_level', 'N/A')}
+- AI Recommendation: {data.get('ai_recommendation', 'N/A')}
+
+Write a 2-3 sentence executive summary highlighting key aspects for the reviewer."""
+
+    elif mode == "suggest_comment":
+        action = data.get("action", "approve")
+        action_label = {
+            "approve": "approval",
+            "reject": "rejection",
+            "request_edit": "correction request",
+        }.get(action, action)
+
+        return f"""Draft a professional {action_label} comment for this expense request.
+{locale_instruction}
+
+Request details:
+- Title: {data.get('title', 'N/A')}
+- Amount: {data.get('amount', 'N/A')} {data.get('currency', 'BRL')}
+- Justification: {data.get('justification', 'N/A')}
+- Category: {data.get('category_name', 'N/A')}
+- AI Risk Score: {data.get('ai_risk_score', 'N/A')}
+- AI Recommendation: {data.get('ai_recommendation', 'N/A')}
+
+Write a concise, professional comment suitable for a manager or finance reviewer.
+The comment should be ready to use as-is. Do not include greetings or sign-offs."""
+
+    else:
+        return f"Provide helpful text content.\n{locale_instruction}"
