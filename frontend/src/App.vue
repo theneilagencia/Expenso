@@ -24,6 +24,7 @@ const { initLocale } = useLocale()
 const authStore = useAuthStore()
 const aiStore = useAIStore()
 const chatLoading = ref(false)
+let activeStream = null
 
 onMounted(() => {
   initLocale()
@@ -32,16 +33,22 @@ onMounted(() => {
 function handleChatSend(message) {
   aiStore.addChatMessage({ role: 'user', content: message })
   chatLoading.value = true
+  let assistantContent = ''
 
-  aiService.sendChatMessage({ messages: aiStore.chatMessages })
-    .then(data => {
-      aiStore.addChatMessage({ role: 'assistant', content: data.content || data.message })
-    })
-    .catch(() => {
-      aiStore.addChatMessage({ role: 'assistant', content: 'Sorry, something went wrong.' })
-    })
-    .finally(() => {
+  if (activeStream) {
+    activeStream.close()
+  }
+
+  activeStream = aiService.streamChatWithAuth(
+    aiStore.chatMessages.filter(m => !m.streaming),
+    (chunk) => {
+      assistantContent += chunk.content || ''
+      aiStore.updateLastAssistantMessage(assistantContent)
+    },
+    () => {
       chatLoading.value = false
-    })
+      activeStream = null
+    }
+  )
 }
 </script>

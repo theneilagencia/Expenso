@@ -59,12 +59,19 @@ sqlite3.register_adapter(list, lambda val: json.dumps(val))
 
 def _patch_pg_types():
     """Patch PostgreSQL-specific column types for SQLite compatibility."""
+    try:
+        from pgvector.sqlalchemy import Vector as PG_Vector
+    except ImportError:
+        PG_Vector = None
+
     for table in Base.metadata.tables.values():
         for column in table.columns:
             col_type = column.type
             if isinstance(col_type, PG_UUID):
                 column.type = String(36)
             elif isinstance(col_type, PG_JSONB):
+                column.type = Text()
+            elif PG_Vector and isinstance(col_type, PG_Vector):
                 column.type = Text()
 
 

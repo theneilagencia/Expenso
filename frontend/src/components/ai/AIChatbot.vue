@@ -18,9 +18,9 @@
           class="chatbot__message"
           :class="`chatbot__message--${msg.role}`"
         >
-          {{ msg.content }}
+          {{ msg.content }}<span v-if="msg.streaming && loading" class="chatbot__cursor">|</span>
         </div>
-        <div v-if="loading" class="chatbot__typing">
+        <div v-if="loading && !messages.some(m => m.streaming)" class="chatbot__typing">
           <span></span><span></span><span></span>
         </div>
       </div>
@@ -207,6 +207,17 @@ watch(() => props.messages.length, async () => {
       &:disabled { opacity: 0.5; cursor: not-allowed; }
     }
   }
+}
+
+.chatbot__cursor {
+  animation: blink 0.7s infinite;
+  font-weight: 700;
+  color: $primary;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
 }
 
 @keyframes bounce {

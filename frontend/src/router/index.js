@@ -123,6 +123,12 @@ const routes = [
     component: () => import('@/views/admin/AuditView.vue'),
     meta: { requiresAuth: true, roles: [ROLES.ADMIN] }
   },
+  {
+    path: '/admin/ai-usage',
+    name: 'admin-ai-usage',
+    component: () => import('@/views/admin/AIUsageView.vue'),
+    meta: { requiresAuth: true, roles: [ROLES.ADMIN] }
+  },
 
   // Settings
   {

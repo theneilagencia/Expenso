@@ -25,5 +25,10 @@
   "assistantHint": "A IA pode ajudar a melhorar esta solicitação antes do envio.",
   "startAssistance": "Obter Sugestões da IA",
   "stop": "Parar",
-  "error": "Análise de IA falhou"
+  "error": "Análise de IA falhou",
+  "qualityWeak": "Fraco",
+  "qualityAdequate": "Adequado",
+  "qualityExcellent": "Excelente",
+  "qualityMeterLabel": "Qualidade da Solicitação",
+  "improveSuggestion": "Melhore a descrição e justificativa para aumentar a qualidade."
 }

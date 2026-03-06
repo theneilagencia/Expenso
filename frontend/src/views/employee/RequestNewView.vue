@@ -5,6 +5,9 @@
         <h2 class="request-new__title">{{ t('requests.new') }}</h2>
       </div>
 
+      <div class="request-new__content">
+      <div class="request-new__main">
+
       <div class="request-new__steps">
         <div
           v-for="(step, index) in steps"
@@ -338,17 +341,32 @@
           </div>
         </div>
       </form>
+      </div>
+
+      <div v-if="currentStep <= 1" class="request-new__sidebar">
+        <AIAssistantBox
+          :messages="aiAssistantMessages"
+          :is-assisting="isAssisting"
+          @start="handleStartAssistance"
+          @stop="handleStopAssistance"
+        />
+        <AIQualityMeter v-if="qualityScore > 0" :score="qualityScore" />
+      </div>
+      </div>
     </div>
   </DefaultLayout>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import AIAssistantBox from '@/components/ai/AIAssistantBox.vue'
+import AIQualityMeter from '@/components/ai/AIQualityMeter.vue'
 import { useRequest } from '@/composables/useRequest'
 import { useFileUpload } from '@/composables/useFileUpload'
+import { useAIAssistant } from '@/composables/useAIAssistant'
 import { useToast } from '@/composables/useToast'
 import { requestsService } from '@/services/requests'
 
@@ -356,6 +374,13 @@ const { t } = useI18n()
 const router = useRouter()
 const { loading, createRequest } = useRequest()
 const { uploading, progress, upload } = useFileUpload()
+const {
+  qualityScore,
+  assistantMessages: aiAssistantMessages,
+  isAssisting,
+  startAssistanceDraft,
+  stopAssistance,
+} = useAIAssistant()
 const toast = useToast()
 
 const currentStep = ref(0)
@@ -406,6 +431,24 @@ const selectedCategoryName = computed(() => {
 const selectedCostCenterName = computed(() => {
   return costCenters.value.find(c => c.id === form.cost_center_id)?.name || '-'
 })
+
+watch(
+  () => ({ description: form.description, justification: form.justification, category_id: form.category_id }),
+  (newVal) => {
+    if ((newVal.description?.length > 10) || (newVal.justification?.length > 10)) {
+      startAssistanceDraft({ ...form, totalAmount: totalAmount.value })
+    }
+  },
+  { deep: true }
+)
+
+function handleStartAssistance() {
+  startAssistanceDraft({ ...form, totalAmount: totalAmount.value })
+}
+
+function handleStopAssistance() {
+  stopAssistance()
+}
 
 function formatCurrency(value) {
   if (value == null) return '-'
@@ -482,8 +525,30 @@ function handleSubmit() {
 
 <style lang="scss" scoped>
 .request-new {
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0 auto;
+
+  &__content {
+    display: flex;
+    gap: $spacing-lg;
+  }
+
+  &__main {
+    flex: 1;
+    min-width: 0;
+    max-width: 900px;
+  }
+
+  &__sidebar {
+    width: 320px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+    position: sticky;
+    top: $spacing-lg;
+    align-self: flex-start;
+  }
 
   &__header {
     margin-bottom: $spacing-xl;

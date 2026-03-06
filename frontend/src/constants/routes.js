@@ -12,5 +12,6 @@ export const ROUTE_NAMES = {
   ADMIN_SLA: 'admin-sla',
   ADMIN_INTEGRATIONS: 'admin-integrations',
   ADMIN_AUDIT: 'admin-audit',
+  ADMIN_AI_USAGE: 'admin-ai-usage',
   REQUEST_EDIT: 'request-edit'
 }

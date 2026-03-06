@@ -62,5 +62,26 @@
     "entityId": "ID da Entidade",
     "details": "Detalhes",
     "export": "Exportar Log de Auditoria"
+  },
+  "aiUsage": {
+    "title": "Uso de IA",
+    "subtitle": "Monitore uso de tokens, custos e desempenho da IA",
+    "totalCalls": "Total de Chamadas",
+    "estimatedCost": "Custo Est.",
+    "avgLatency": "Latência Média",
+    "successRate": "Taxa de Sucesso",
+    "byRole": "Uso por Papel",
+    "role": "Papel",
+    "calls": "Chamadas",
+    "inputTokens": "Tokens de Entrada",
+    "outputTokens": "Tokens de Saída",
+    "errors": "Erros",
+    "dailyBreakdown": "Detalhamento Diário",
+    "date": "Data",
+    "last7d": "Últimos 7 dias",
+    "last30d": "Últimos 30 dias",
+    "last90d": "Últimos 90 dias",
+    "noData": "Nenhum dado de uso de IA disponível para este período.",
+    "fetchError": "Falha ao carregar dados de uso de IA."
   }
 }

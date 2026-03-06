@@ -25,5 +25,10 @@
   "assistantHint": "AI can help you improve this request before submitting.",
   "startAssistance": "Get AI Suggestions",
   "stop": "Stop",
-  "error": "AI analysis failed"
+  "error": "AI analysis failed",
+  "qualityWeak": "Weak",
+  "qualityAdequate": "Adequate",
+  "qualityExcellent": "Excellent",
+  "qualityMeterLabel": "Request Quality",
+  "improveSuggestion": "Improve your description and justification to increase quality."
 }

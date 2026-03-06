@@ -62,5 +62,26 @@
     "entityId": "Entity ID",
     "details": "Details",
     "export": "Export Audit Log"
+  },
+  "aiUsage": {
+    "title": "AI Usage",
+    "subtitle": "Monitor AI token usage, costs, and performance",
+    "totalCalls": "Total Calls",
+    "estimatedCost": "Est. Cost",
+    "avgLatency": "Avg Latency",
+    "successRate": "Success Rate",
+    "byRole": "Usage by Role",
+    "role": "Role",
+    "calls": "Calls",
+    "inputTokens": "Input Tokens",
+    "outputTokens": "Output Tokens",
+    "errors": "Errors",
+    "dailyBreakdown": "Daily Breakdown",
+    "date": "Date",
+    "last7d": "Last 7 days",
+    "last30d": "Last 30 days",
+    "last90d": "Last 90 days",
+    "noData": "No AI usage data available for this period.",
+    "fetchError": "Failed to load AI usage data."
   }
 }
