@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from app.api.v1.admin import categories as admin_categories
 from app.api.v1.admin import integrations as admin_integrations
@@ -7,6 +9,7 @@ from app.api.v1.admin import sla as admin_sla
 from app.api.v1.admin import users as admin_users
 from app.api.v1.routers import ai, attachments, audit, auth, health, notifications, payments, reports, requests, users
 from app.config import settings
+from app.core.rate_limit import limiter
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -15,6 +18,10 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+# Rate limiter
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,

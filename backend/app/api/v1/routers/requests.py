@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
+from app.core.rate_limit import limiter
 from app.core.security import get_current_user
 from app.dependencies import get_db
 from app.schemas.request import (
@@ -20,7 +21,9 @@ router = APIRouter()
 
 
 @router.post("", response_model=RequestResponse, status_code=201, summary="Create expense request")
+@limiter.limit("20/minute")
 async def create_request(
+    request: Request,
     data: RequestCreate,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),

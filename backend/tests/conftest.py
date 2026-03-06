@@ -15,6 +15,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.config import settings
+from app.core.rate_limit import limiter
 from app.core.security import (
     create_access_token,
     hash_password,
@@ -45,6 +46,9 @@ from app.models.request_version import RequestVersion  # noqa: F401
 from app.models.sla_config import SLAConfig  # noqa: F401
 from app.models.user import User
 from app.models.vendor_list import VendorList  # noqa: F401
+
+# Disable rate limiting in tests
+limiter.enabled = False
 
 # --- SQLite compatibility: map PostgreSQL types to SQLite-compatible types ---
 

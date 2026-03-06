@@ -2,13 +2,14 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy import Date, cast, func
 from sqlalchemy.orm import Session
 
 from app.core.permissions import require_role
+from app.core.rate_limit import limiter
 from app.core.security import get_current_user
 from app.dependencies import get_db
 from app.models.ai_analysis_log import AIAnalysisLog
@@ -28,7 +29,9 @@ class SuggestCommentRequest(BaseModel):
 
 
 @router.get("/assist/{request_id}/stream")
+@limiter.limit("30/minute")
 async def stream_assistance(
+    request: Request,
     request_id: UUID,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
@@ -46,7 +49,9 @@ async def stream_assistance(
 
 
 @router.get("/assist/stream")
+@limiter.limit("30/minute")
 async def stream_assistance_draft(
+    request: Request,
     description: str = Query(""),
     justification: str = Query(""),
     category_id: Optional[str] = Query(None),
@@ -114,7 +119,9 @@ async def trigger_analysis(
 
 
 @router.post("/chat/stream")
+@limiter.limit("20/minute")
 async def stream_chat(
+    request: Request,
     body: ChatRequest,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
@@ -137,7 +144,9 @@ async def stream_chat(
 
 
 @router.post("/suggest-comment")
+@limiter.limit("20/minute")
 async def suggest_comment(
+    request: Request,
     body: SuggestCommentRequest,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),

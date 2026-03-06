@@ -1,10 +1,11 @@
 import logging
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.config import settings
+from app.core.rate_limit import _get_ip, limiter
 from app.core.security import (
     create_access_token,
     create_password_reset_token,
@@ -49,7 +50,8 @@ def _build_token_response(user) -> TokenResponse:
 
 
 @router.post("/login", response_model=TokenResponse, summary="Authenticate user and return tokens")
-async def login(request: LoginRequest, db: Session = Depends(get_db)):
+@limiter.limit("5/minute", key_func=_get_ip)
+async def login(request: LoginRequest, http_request: Request, db: Session = Depends(get_db)):
     from app.models.user import User
 
     user = db.query(User).filter(User.email == request.email, User.deleted_at.is_(None)).first()
@@ -71,7 +73,8 @@ async def login(request: LoginRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/refresh", response_model=TokenResponse, summary="Refresh access token")
-async def refresh(request: RefreshRequest, db: Session = Depends(get_db)):
+@limiter.limit("10/minute", key_func=_get_ip)
+async def refresh(request: RefreshRequest, http_request: Request, db: Session = Depends(get_db)):
     from app.models.user import User
 
     payload = decode_refresh_token(request.refresh_token)
@@ -92,7 +95,8 @@ async def logout():
 
 
 @router.post("/password-reset/request", summary="Request password reset email")
-async def request_password_reset(request: PasswordResetRequest, db: Session = Depends(get_db)):
+@limiter.limit("3/minute", key_func=_get_ip)
+async def request_password_reset(request: PasswordResetRequest, http_request: Request, db: Session = Depends(get_db)):
     from app.models.user import User
 
     user = db.query(User).filter(User.email == request.email, User.deleted_at.is_(None)).first()
@@ -110,7 +114,8 @@ async def request_password_reset(request: PasswordResetRequest, db: Session = De
 
 
 @router.post("/password-reset/confirm", summary="Confirm password reset with token")
-async def confirm_password_reset(request: PasswordResetConfirm, db: Session = Depends(get_db)):
+@limiter.limit("5/minute", key_func=_get_ip)
+async def confirm_password_reset(request: PasswordResetConfirm, http_request: Request, db: Session = Depends(get_db)):
     from app.models.user import User
 
     user_id = decode_password_reset_token(request.token)

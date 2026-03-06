@@ -48,6 +48,12 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
 
+    # Rate limiting
+    RATE_LIMIT_ENABLED: bool = True
+
+    # Encryption
+    ENCRYPTION_KEY: str = ""
+
     # Payment gateway
     PAYMENT_GATEWAY: str = "mock"
     REVOLUT_API_KEY: str = ""
