@@ -20,6 +20,7 @@ from app.integrations.anthropic.prompts.writer import WRITER_SYSTEM_PROMPT
 from app.models.ai_analysis_log import AIAnalysisLog
 from app.models.expense_category import ExpenseCategory
 from app.models.expense_request import ExpenseRequest
+from app.models.vendor_list import VendorList
 from app.schemas.ai_analysis import AnalystResponse
 
 logger = logging.getLogger(__name__)
@@ -170,6 +171,25 @@ class AIService:
         # --- Hard policy checks (before Claude call) ---
         policy_violations = _run_hard_policy_checks(expense, category, db)
 
+        # --- Vendor blacklist/whitelist check ---
+        vendor_risk_adjustment = 0
+        if expense.vendor_name:
+            vendor_matches = (
+                db.query(VendorList)
+                .filter(
+                    VendorList.name.ilike(f"%{expense.vendor_name}%"),
+                    VendorList.deleted_at.is_(None),
+                )
+                .all()
+            )
+            for match in vendor_matches:
+                if match.list_type == "BLACKLIST":
+                    policy_violations.append(
+                        f"BLACKLISTED_VENDOR: Vendor {expense.vendor_name} is blacklisted: {match.reason or 'No reason provided'}"
+                    )
+                elif match.list_type == "WHITELIST":
+                    vendor_risk_adjustment -= 10
+
         # Add duplicate violations
         for dup in duplicates:
             if dup["similarity"] > 0.92:
@@ -295,6 +315,11 @@ class AIService:
                     analysis = raw_json
             else:
                 analysis = {"error": "Could not parse AI response"}
+
+            # Apply vendor whitelist risk adjustment
+            if vendor_risk_adjustment and "risk_score" in analysis:
+                adjusted = max(0, analysis["risk_score"] + vendor_risk_adjustment)
+                analysis["risk_score"] = adjusted
 
             log = AIAnalysisLog(
                 request_id=expense.id,
