@@ -133,6 +133,43 @@ Branch: `feat/sprint-2-auth-rbac` (continuation)
 
 ---
 
+## Sprint 5 — COMPLETED (2026-03-05)
+
+Branch: `feat/sprint-2-auth-rbac` (continuation)
+
+- [x] AI Analyst: full Claude API flow with policy engine hard checks
+- [x] AI Analyst: Pydantic AnalystResponse schema validation
+- [x] AI Analyst: pgvector duplicate detection (EmbeddingService)
+- [x] AI Analyst: prompt hash + duration_ms tracking in AIAnalysisLog
+- [x] AI Assistant: SSE streaming for request forms (saved + draft)
+- [x] AI Chatbot: SSE streaming with role-based context
+- [x] AI Writer: system prompts (en-US + pt-BR)
+- [x] AI suggest-comment endpoint
+- [x] AI admin usage dashboard endpoint + AdminAIUsageView
+- [x] 6 admin views complete (Users, Categories, SLA, Integrations, Audit, AI Usage)
+- [x] Backend tests: 200/200 passing (pytest + ruff clean)
+- [x] Frontend tests: 226/226 passing (vitest)
+- [x] Build: vite production build clean
+
+---
+
+## Sprint 6 — COMPLETED (2026-03-05)
+
+Branch: `feat/sprint-2-auth-rbac` (continuation)
+
+- [x] AI Writer: context builder (narrative, summary, suggest_comment modes)
+- [x] AI Writer: stream_narrative, generate_summary, suggest_comment service methods
+- [x] AI Writer: /reports/narrative SSE, /requests/{id}/ai-summary, /ai/suggest-comment endpoints
+- [x] AI Writer: ReportsView narrative panel + ApprovalDetailView summary & suggest buttons
+- [x] Strategist weekly Celery beat task (90-day window, week-over-week)
+- [x] NotificationDropdown component + DefaultLayout integration (30s polling)
+- [x] i18n: Writer + notification keys (en-US + pt-BR)
+- [x] Backend tests: 215/215 passing (pytest + ruff clean)
+- [x] Frontend tests: 235/235 passing (vitest)
+- [x] Build: vite production build clean
+
+---
+
 ## Code Conventions
 
 ### Backend (Python)
@@ -202,7 +239,8 @@ All use UUID v4 PK, UTC timestamps, soft delete (except audit_logs — immutable
 - `POST|GET /api/v1/requests` + `/{id}/submit|approve|reject|request-edit|cancel`
 - `GET /api/v1/requests/options/categories|cost-centers`
 - `POST|GET /api/v1/payments`
-- `GET /api/v1/ai/assist|chat` (SSE)
-- `GET /api/v1/reports/summary|narrative|export`
+- `GET /api/v1/ai/assist|chat` (SSE), `POST /ai/suggest-comment`
+- `GET /api/v1/reports/summary|export`, `GET /reports/narrative` (SSE)
+- `POST /api/v1/requests/{id}/ai-summary`
 - `CRUD /api/v1/admin/users|categories|sla|integrations`
 - `GET /health`
