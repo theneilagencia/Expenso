@@ -120,6 +120,110 @@ class PaymentService:
             self.db.commit()
             raise
 
+    def batch_process(
+        self,
+        request_ids: list[str],
+        processed_by: uuid.UUID,
+        method: str,
+        scheduled_date: str = None,
+    ) -> dict:
+        """Process a batch of payments. Returns processed/failed lists."""
+        processed = []
+        failed = []
+        total_amount = 0.0
+
+        for rid in request_ids:
+            try:
+                uuid.UUID(rid)  # validate format
+                req = self.db.query(ExpenseRequest).filter(
+                    ExpenseRequest.id == rid,
+                    ExpenseRequest.deleted_at.is_(None),
+                ).first()
+                if not req:
+                    failed.append({"request_id": rid, "error": "Request not found"})
+                    continue
+
+                if req.status not in ("PENDING_FINANCE", "IN_PAYMENT"):
+                    failed.append({"request_id": rid, "error": f"Invalid status: {req.status}"})
+                    continue
+
+                # Transition to IN_PAYMENT if still in PENDING_FINANCE
+                if req.status == "PENDING_FINANCE":
+                    from app.services.request_service import RequestService
+                    rs = RequestService(self.db)
+                    rs.perform_action(
+                        request_id=req.id,
+                        action="process_payment",
+                        actor_id=processed_by,
+                        actor_role="FINANCE",
+                    )
+                    self.db.refresh(req)
+
+                existing = self.db.query(Payment).filter(Payment.request_id == req.id).first()
+                if existing:
+                    failed.append({"request_id": rid, "error": "Payment already exists"})
+                    continue
+
+                sched_dt = None
+                if scheduled_date:
+                    sched_dt = datetime.fromisoformat(scheduled_date)
+
+                payment = Payment(
+                    id=uuid.uuid4(),
+                    request_id=req.id,
+                    processed_by=processed_by,
+                    method=method,
+                    amount_paid=req.amount,
+                    currency_paid=req.currency or "BRL",
+                    revolut_status="PROCESSING",
+                    scheduled_date=sched_dt,
+                )
+                self.db.add(payment)
+                self.db.flush()
+
+                # For PIX/PAYROLL: mark as completed immediately
+                if method in ("PIX", "PAYROLL"):
+                    payment.revolut_status = "completed"
+                    payment.payment_date = datetime.now(timezone.utc)
+                    payment.revolut_payment_id = f"{method.lower()}_{uuid.uuid4().hex[:12]}"
+
+                    from app.services.request_service import RequestService
+                    rs = RequestService(self.db)
+                    rs.perform_action(
+                        request_id=req.id,
+                        action="confirm_payment",
+                        actor_id=processed_by,
+                        actor_role="SYSTEM",
+                    )
+
+                processed.append({
+                    "request_id": rid,
+                    "payment_id": str(payment.id),
+                    "amount": float(payment.amount_paid),
+                })
+                total_amount += float(payment.amount_paid)
+
+            except Exception as e:
+                failed.append({"request_id": rid, "error": str(e)})
+
+        self.db.commit()
+
+        # For REVOLUT: dispatch async tasks for processing payments
+        if method == "REVOLUT":
+            for item in processed:
+                try:
+                    from app.workers.tasks.payment_tasks import process_payment
+                    process_payment.delay(item["payment_id"])
+                except Exception as e:
+                    logger.warning(f"Failed to dispatch batch payment task: {e}")
+
+        return {
+            "processed": processed,
+            "failed": failed,
+            "total_amount": total_amount,
+            "method": method,
+        }
+
     def retry_failed(self) -> int:
         """Retry payments that are eligible for retry."""
         now = datetime.now(timezone.utc)
