@@ -21,7 +21,8 @@
 - Vue 3 (Composition API) + Vite
 - JavaScript ES2022+
 - SCSS with `@/` alias → `src/`
-- BTS Design System
+- BTS Design System v1.3.0 (29 Bts* components, CSS custom properties, Font Awesome icons)
+- Token bridge: `_bts-bridge.scss` maps BTS tokens → Expenso SCSS variables
 - Pinia (state), Vue Router 4, Axios
 - vue-i18n v9 (en-US, pt-BR)
 - Vitest + Vue Testing Library
@@ -35,6 +36,8 @@
 - JWT: python-jose + passlib[bcrypt]
 - MinIO (S3-compatible storage)
 - Anthropic SDK (claude-sonnet-4-20250514)
+- pyotp + qrcode (TOTP MFA)
+- openpyxl (XLSX import/export)
 
 ### Infra
 - Docker + Docker Compose (dev)
@@ -241,6 +244,78 @@ Branch: `feat/sprint-2-auth-rbac` (continuation)
 
 ---
 
+## Sprint 9 — COMPLETED (2026-03-06)
+
+Branch: `feat/sprint-2-auth-rbac` (continuation)
+
+### BTS Design System Integration
+- [x] BTS Design System v1.3.0 installed (29 components: Avatar, Badge, Button, Dialog, Spinner, etc.)
+- [x] Token bridge (`_bts-bridge.scss`): maps BTS CSS custom properties → Expenso SCSS variables
+- [x] 8 App* components migrated to Bts* wrappers (AppBadge→BtsBadge, AppAvatar→BtsAvatar, AppModal→BtsDialog, AppLoader→BtsSpinner, AppConfirmDialog→BtsDialog+BtsButton, AppToast→BtsStatusIcon)
+- [x] Custom components restyled with BTS tokens (AppTable, AppPagination, AppEmptyState, etc.)
+
+### MFA/2FA (TOTP)
+- [x] TOTP enrollment: generate secret, QR code data URI, 6-digit verification
+- [x] Login flow: if `mfa_enabled` → return `mfa_token` (5min JWT) → verify endpoint → full tokens
+- [x] MFA setup/confirm/disable endpoints with rate limiting
+- [x] Frontend: MFASetupView (4-step enrollment), LoginView MFA challenge modal
+
+### Approval Policies by Value Range
+- [x] Admin CRUD for approval policies (name, department, min/max amount, approval flow JSONB)
+- [x] Soft delete support (deleted_at convention)
+- [x] Frontend: ApprovalPoliciesView with table, modal form, pagination
+
+### Holiday Calendar + Business Hours SLA
+- [x] Admin CRUD for corporate calendar (holidays: NATIONAL, STATE, COMPANY types)
+- [x] SLA business hours calculation: minute-by-minute advance skipping weekends, holidays, non-business hours
+- [x] SLA auto-escalation: ASSIGN_SUBSTITUTE, ESCALATE_DEPARTMENT, AUTO_APPROVE actions
+- [x] Frontend: CalendarView with holiday management
+
+### Manager Hierarchy Tree
+- [x] Department self-referential FK (`parent_department_id`)
+- [x] Recursive department tree API with nested users
+- [x] Frontend: HierarchyView with recursive DepartmentNode component, expand/collapse, edit parent modal
+
+### Vendor Whitelist/Blacklist
+- [x] Admin CRUD for vendor lists (WHITELIST/BLACKLIST, vendor name, category, reason)
+- [x] AI Analyst integration: blacklisted vendors → violation, whitelisted → risk -10
+- [x] Frontend: VendorsView with list type filter, badges
+
+### Bulk User Import + ERP Export
+- [x] XLSX import service: parse columns (full_name, email, role, department_code, cost_center_code), validate, batch create
+- [x] ERP export: GET /reports/erp-export generates XLSX (request_id, date, category, accounting_code, amount, cost_center, department)
+- [x] `accounting_code` field on expense categories
+
+### Custom Outbound Webhooks
+- [x] WebhookConfig model (url, events JSONB, secret for HMAC-SHA256, is_active)
+- [x] Webhook dispatch service with HMAC signing
+- [x] Admin CRUD + test endpoint
+- [x] Frontend: WebhooksView with event badges, test button
+
+### User Impersonation
+- [x] Admin-only impersonation: special JWT with `impersonated_by` + `read_only` claims
+- [x] Audit logging for IMPERSONATION_START
+- [x] Frontend: ImpersonationBanner component, impersonate button in UsersView
+
+### Alembic Migration 005
+- [x] `expense_categories.accounting_code` (String 50, nullable)
+- [x] `departments.parent_department_id` (UUID FK self-ref, nullable)
+- [x] `approval_policies.deleted_at` (DateTime, nullable)
+- [x] `webhook_configs` table (id, url, events JSONB, secret, is_active, created_by, timestamps)
+
+### Tests & Quality
+- [x] 77 new backend tests (382 total): MFA, approval policies, SLA, vendors, hierarchy, webhooks, impersonation, user import
+- [x] 54 new frontend tests (400 total): MFA service, admin views (5), MFASetupView, ImpersonationBanner
+- [x] Dependencies: pyotp, qrcode[pil], openpyxl (already present)
+
+### Final Counts
+- Backend tests: 382/382 passing (pytest + ruff clean)
+- Frontend tests: 400/400 passing (vitest)
+- Total: 782 tests
+- Vite build: clean
+
+---
+
 ## Code Conventions
 
 ### Backend (Python)
@@ -292,12 +367,12 @@ Fallback: if Claude API unavailable → `ai_skipped: true` → flow continues
 
 ---
 
-## Database — 17 Tables
+## Database — 18 Tables
 
 users, departments, cost_centers, expense_categories, expense_requests,
 request_versions, audit_logs, request_comments, attachments, payments,
 sla_configs, approval_policies, integrations, ai_analysis_logs,
-vendor_lists, notifications, corporate_calendar
+vendor_lists, notifications, corporate_calendar, webhook_configs
 
 All use UUID v4 PK, UTC timestamps, soft delete (except audit_logs — immutable).
 
@@ -305,21 +380,41 @@ All use UUID v4 PK, UTC timestamps, soft delete (except audit_logs — immutable
 
 ## Key API Endpoints
 
+### Auth & User
 - `POST /api/v1/auth/login|refresh|logout` (rate limited: 5-10/min)
 - `POST /api/v1/auth/password-reset/request|confirm` (rate limited: 3-5/min)
+- `POST /api/v1/auth/mfa/setup|confirm|verify`, `DELETE /api/v1/auth/mfa` (MFA/TOTP)
 - `GET|PATCH /api/v1/users/me`
 - `GET /api/v1/users/me/data-export` (LGPD data portability)
 - `DELETE /api/v1/users/me` (LGPD account anonymization)
+
+### Expense Requests & Payments
 - `POST|GET /api/v1/requests` + `/{id}/submit|approve|reject|request-edit|cancel`
 - `GET /api/v1/requests/options/categories|cost-centers` (cached 1h)
 - `POST|GET /api/v1/payments` + `/batch` + `/export/xlsx`
 - `POST /api/v1/payments/webhook/{provider}` (HMAC-SHA256)
+
+### AI
 - `GET /api/v1/ai/assist|chat` (SSE, rate limited: 20-30/min)
 - `POST /ai/suggest-comment`
 - `GET /api/v1/reports/summary|export`, `GET /reports/narrative` (SSE)
 - `POST /api/v1/requests/{id}/ai-summary`
+
+### Reports
+- `GET /api/v1/reports/erp-export` (XLSX, ADMIN/FINANCE)
+
+### Admin
 - `CRUD /api/v1/admin/users|categories|sla|integrations`
+- `POST /api/v1/admin/users/import` (XLSX bulk import, ADMIN)
+- `POST /api/v1/admin/users/{id}/impersonate` (ADMIN, audited)
+- `CRUD /api/v1/admin/approval-policies` (ADMIN)
+- `CRUD /api/v1/admin/calendar` (holiday management, ADMIN)
+- `CRUD /api/v1/admin/vendors` (whitelist/blacklist, ADMIN)
+- `GET /api/v1/admin/hierarchy` + `PATCH departments/{id}` (ADMIN)
+- `CRUD /api/v1/admin/webhooks` + `POST /{id}/test` (ADMIN)
 - `GET /api/v1/admin/system-status` (ADMIN: CPU, memory, queue)
+
+### Health
 - `GET /health` (DB, Redis, MinIO, Celery checks)
 
 ---
@@ -332,6 +427,30 @@ All use UUID v4 PK, UTC timestamps, soft delete (except audit_logs — immutable
 - **Upload Validation**: Magic byte inspection, extension blocklist, filename sanitization
 - **Credentials Encryption**: Fernet AES-128 for integration config
 - **Auth**: JWT HS256 (access 30min, refresh 7d) + bcrypt passwords
+- **MFA/2FA**: TOTP with pyotp (RFC 6238), QR enrollment, 5min MFA token
+
+### Approval Chain
+- `ApprovalPolicy` matched by `department_id` + amount range (`min_amount`–`max_amount`)
+- `approval_flow` JSONB defines chain: `["MANAGER", "FINANCE"]` or `["FINANCE", "ADMIN"]`
+- Manager substitute: `substitute_id` + `substitute_until` on User model
+- SLA escalation: auto-actions when overdue (ASSIGN_SUBSTITUTE, ESCALATE_DEPARTMENT, AUTO_APPROVE)
+
+### SLA Business Hours
+- `calculate_business_deadline()`: advances minute-by-minute
+- Skips: weekends (Sat/Sun), corporate calendar holidays, non-business hours
+- Configurable `business_start_hour`/`business_end_hour` per SLAConfig
+- Timezone-aware via SLAConfig.timezone field
+
+### Webhook Dispatch
+- `WebhookConfig` stores URL, events (JSONB array), HMAC secret
+- Events: `request.submitted`, `request.approved`, `payment.completed`, etc.
+- HMAC-SHA256 signature in `X-Webhook-Signature` header
+- Async dispatch via Celery task with retry
+
+### Impersonation
+- Admin generates special JWT: `{"sub": target_id, "impersonated_by": admin_id, "read_only": true}`
+- All mutations blocked during impersonation
+- Full audit trail: IMPERSONATION_START logged
 
 ### Performance
 - Payment list: single JOIN query (was N+1 with 4 queries/row)
@@ -356,8 +475,10 @@ All use UUID v4 PK, UTC timestamps, soft delete (except audit_logs — immutable
 1. Create model in `app/models/` with UUID PK + soft delete
 2. Create Alembic migration in `app/db/migrations/versions/`
 3. Create service in `app/services/` (business logic)
-4. Create router in `app/api/v1/routers/` (thin HTTP layer)
+4. Create router in `app/api/v1/routers/` or `app/api/v1/admin/` (thin HTTP layer)
 5. Register router in `app/main.py`
 6. Add schemas in `app/schemas/`
 7. Add tests in `tests/`
-8. Add i18n keys in `frontend/src/i18n/locales/{en-US,pt-BR}/`
+8. Add frontend service in `frontend/src/services/`
+9. Add view in `frontend/src/views/` + route in `router/index.js`
+10. Add i18n keys in `frontend/src/i18n/locales/{en-US,pt-BR}/`
