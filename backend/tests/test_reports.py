@@ -1,5 +1,3 @@
-
-
 class TestReportsDashboard:
     def test_dashboard_returns_summary(self, client, admin_headers, sample_requests):
         resp = client.get("/api/v1/reports/dashboard", headers=admin_headers)
