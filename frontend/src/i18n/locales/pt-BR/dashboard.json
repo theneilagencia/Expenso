@@ -1,0 +1,35 @@
+{
+  "welcome": "Bem-vindo, {name}",
+  "subtitle": "Aqui está sua visão geral de despesas",
+  "totalRequests": "Total de Solicitações",
+  "pendingRequests": "Pendentes",
+  "approvedRequests": "Aprovadas",
+  "totalAmount": "Valor Total",
+  "pendingApprovals": "Aprovações Pendentes",
+  "awaitingYourReview": "aguardando sua revisão",
+  "viewApprovals": "Ver Aprovações",
+  "slaAlerts": "Alertas de SLA",
+  "overdue": "Atrasado",
+  "quickActions": "Ações Rápidas",
+  "viewAllRequests": "Ver Todas as Solicitações",
+  "reviewApprovals": "Revisar Aprovações",
+  "settings": "Configurações",
+  "recentRequests": "Solicitações Recentes",
+  "viewAll": "Ver Todas",
+  "charts": {
+    "title": "Análises",
+    "spendingByCategory": "Gastos por Categoria",
+    "monthlyTrend": "Tendência Mensal",
+    "statusBreakdown": "Distribuição por Status",
+    "departmentComparison": "Comparação por Departamento"
+  },
+  "strategist": {
+    "title": "Insights Estratégicos de IA",
+    "noReport": "Nenhum relatório estratégico disponível ainda. A análise é executada diariamente.",
+    "trend": "Tendência de Gastos",
+    "recommendations": "Recomendações",
+    "forecast": "Previsão (Próximo Mês)",
+    "savings": "Oportunidades de Economia",
+    "generatedAt": "Gerado em"
+  }
+}

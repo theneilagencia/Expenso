@@ -107,6 +107,32 @@ Branch: `feat/sprint-2-auth-rbac` (continuation)
 
 ---
 
+## Sprint 4 — COMPLETED (2026-03-05)
+
+Branch: `feat/sprint-2-auth-rbac` (continuation)
+
+- [x] Dashboard Chart.js visualizations (4 components: Doughnut, Line, Bar×2)
+- [x] useChartData composable — parallel data fetching from report endpoints
+- [x] ReportsView upgraded: custom SCSS bars → Chart.js components
+- [x] AI Strategist: real Claude API call, context builder, JSON parsing, AIAnalysisLog storage
+- [x] Strategist fallback: stub result when Anthropic unavailable
+- [x] GET /api/v1/ai/strategist/report endpoint (MANAGER/FINANCE/ADMIN)
+- [x] StrategistInsightsCard dashboard component
+- [x] Payment gateway abstraction (ABC base → MockGateway + RevolutGateway stub)
+- [x] PaymentService: initiate_payment, process_via_gateway, retry_failed
+- [x] Payment Celery tasks + beat schedule (retry every 15 min)
+- [x] Enhanced payment router: status check, manual retry, webhook endpoint
+- [x] Redis cache service (non-blocking, graceful fallback)
+- [x] Report endpoint caching (dashboard 5 min, aggregated 10 min)
+- [x] Performance indexes migration (status+created, employee+status, ai_role+created, user+read)
+- [x] Dashboard + reports i18n (en-US + pt-BR)
+- [x] Payment + cache config settings
+- [x] Backend tests: 165/165 passing (pytest + ruff clean)
+- [x] Frontend tests: 218/218 passing (vitest)
+- [x] Build: vite production build clean
+
+---
+
 ## Code Conventions
 
 ### Backend (Python)

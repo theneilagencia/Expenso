@@ -1,9 +1,12 @@
+import json
 import logging
 
 from app.db.session import SessionLocal
 from app.workers.celery_app import celery_app
 
 logger = logging.getLogger(__name__)
+
+MODEL = "claude-sonnet-4-20250514"
 
 
 @celery_app.task(name="app.workers.tasks.ai_tasks.analyze_request")
@@ -31,51 +34,119 @@ def run_strategist_analysis():
     """Run daily strategist analysis for forecasting and optimization.
 
     AI Role: STRATEGIST — scheduled forecasts/optimization via Celery beat.
-    Aggregates expense data by department, identifies spending trends,
-    and generates optimization recommendations.
+    Aggregates expense data by department and category, then calls Claude API
+    for strategic insights, forecasts, and optimization recommendations.
     """
+    from sqlalchemy import func
+
+    from app.config import settings
+    from app.integrations.anthropic.context_builder import build_strategist_context
+    from app.integrations.anthropic.prompts.strategist import STRATEGIST_SYSTEM_PROMPT
     from app.models.ai_analysis_log import AIAnalysisLog
     from app.models.department import Department
+    from app.models.expense_category import ExpenseCategory
     from app.models.expense_request import ExpenseRequest
+    from app.models.user import User
 
     db = SessionLocal()
     try:
         logger.info("Running daily strategist analysis")
 
-        departments = db.query(Department).all()
-        summary = []
+        # Aggregate by department
+        departments = db.query(Department).filter(Department.deleted_at.is_(None)).all()
+        dept_summary = []
         for dept in departments:
             dept_requests = (
                 db.query(ExpenseRequest)
-                .filter(ExpenseRequest.deleted_at.is_(None))
+                .join(User, ExpenseRequest.employee_id == User.id)
+                .filter(
+                    User.department_id == dept.id,
+                    ExpenseRequest.deleted_at.is_(None),
+                )
                 .all()
             )
             total = sum(float(r.amount or 0) for r in dept_requests)
-            summary.append({
+            dept_summary.append({
                 "department_id": str(dept.id),
                 "department_name": dept.name,
                 "total_requests": len(dept_requests),
                 "total_amount": total,
             })
 
-        # TODO: Call Anthropic API with STRATEGIST prompt for department-level
-        # spending insights, forecasts, anomaly detection, and optimization
-        # recommendations. For now, log the aggregated data.
-        logger.info(f"Strategist aggregated {len(departments)} departments")
-
-        log = AIAnalysisLog(
-            ai_role="STRATEGIST",
-            model_used="stub",
-            input_tokens=0,
-            output_tokens=0,
-            status="SUCCESS",
-            response={"departments": summary, "status": "stub"},
+        # Aggregate by category
+        cat_rows = (
+            db.query(
+                ExpenseCategory.name,
+                func.count(ExpenseRequest.id).label("count"),
+                func.coalesce(func.sum(ExpenseRequest.amount), 0).label("total"),
+            )
+            .outerjoin(ExpenseRequest, ExpenseRequest.category_id == ExpenseCategory.id)
+            .filter(ExpenseCategory.deleted_at.is_(None))
+            .group_by(ExpenseCategory.id, ExpenseCategory.name)
+            .all()
         )
-        db.add(log)
-        db.commit()
+        cat_summary = [
+            {"category_name": row.name, "count": row.count, "total": float(row.total)}
+            for row in cat_rows
+        ]
 
-        logger.info("Strategist analysis completed")
-        return {"departments_analyzed": len(departments), "summary": summary}
+        # Build context and call Claude API
+        user_message = build_strategist_context(dept_summary, cat_summary)
+
+        client = None
+        if settings.ANTHROPIC_API_KEY:
+            try:
+                import anthropic
+                client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+            except Exception as e:
+                logger.warning(f"Failed to create Anthropic client: {e}")
+
+        if client:
+            response = client.messages.create(
+                model=MODEL,
+                max_tokens=4096,
+                system=STRATEGIST_SYSTEM_PROMPT["en-US"],
+                messages=[{"role": "user", "content": user_message}],
+            )
+
+            content = response.content[0].text
+            start = content.find("{")
+            end = content.rfind("}") + 1
+            analysis = {}
+            if start >= 0 and end > start:
+                try:
+                    analysis = json.loads(content[start:end])
+                except json.JSONDecodeError:
+                    logger.warning("Failed to parse strategist JSON, storing raw")
+                    analysis = {"raw_response": content}
+
+            log = AIAnalysisLog(
+                ai_role="STRATEGIST",
+                model_used=MODEL,
+                input_tokens=response.usage.input_tokens,
+                output_tokens=response.usage.output_tokens,
+                status="SUCCESS",
+                response=analysis,
+            )
+            db.add(log)
+            db.commit()
+
+            logger.info(f"Strategist analysis completed with {len(dept_summary)} departments")
+            return {"departments_analyzed": len(dept_summary), "analysis": analysis}
+        else:
+            # Fallback: store stub result when Anthropic unavailable
+            logger.info("Anthropic client unavailable, storing stub strategist result")
+            log = AIAnalysisLog(
+                ai_role="STRATEGIST",
+                model_used="stub",
+                input_tokens=0,
+                output_tokens=0,
+                status="SUCCESS",
+                response={"departments": dept_summary, "status": "stub"},
+            )
+            db.add(log)
+            db.commit()
+            return {"departments_analyzed": len(dept_summary), "summary": dept_summary}
     except Exception as e:
         logger.error(f"Strategist analysis failed: {e}")
         raise

@@ -62,6 +62,34 @@ Return a JSON object with EXACTLY these fields:
 }}"""
 
 
+def build_strategist_context(
+    department_summary: list,
+    category_summary: list = None,
+    period: str = "last 30 days",
+) -> str:
+    dept_lines = "\n".join(
+        f"- {d['department_name']}: {d['total_requests']} requests, total R$ {d['total_amount']:,.2f}"
+        for d in department_summary
+    )
+    cat_lines = ""
+    if category_summary:
+        cat_lines = "\n\nCategory breakdown:\n" + "\n".join(
+            f"- {c['category_name']}: {c['count']} requests, total R$ {c['total']:,.2f}"
+            for c in category_summary
+        )
+
+    total_amount = sum(d["total_amount"] for d in department_summary)
+    total_requests = sum(d["total_requests"] for d in department_summary)
+
+    return f"""Analysis period: {period}
+Total across all departments: {total_requests} requests, R$ {total_amount:,.2f}
+
+Department breakdown:
+{dept_lines}{cat_lines}
+
+Please analyze this data and return a JSON report with strategic insights."""
+
+
 def build_chatbot_context(user_locale: str = "en-US") -> str:
     locale_instruction = f"Respond in {'Portuguese (Brazil)' if user_locale == 'pt-BR' else 'English'}."
     return f"""You are Expenso Chatbot, an in-app assistant for expense management.

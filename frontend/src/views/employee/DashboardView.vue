@@ -100,6 +100,34 @@
         </div>
       </div>
 
+      <!-- Charts -->
+      <div class="dashboard__charts-section">
+        <h3 class="dashboard__section-title">{{ t('dashboard.charts.title') }}</h3>
+        <div class="dashboard__charts-grid">
+          <div class="dashboard__chart-card">
+            <h4 class="dashboard__chart-title">{{ t('dashboard.charts.spendingByCategory') }}</h4>
+            <SpendingByCategoryChart :data="categoryData" :loading="chartsLoading" />
+          </div>
+          <div class="dashboard__chart-card">
+            <h4 class="dashboard__chart-title">{{ t('dashboard.charts.monthlyTrend') }}</h4>
+            <MonthlyTrendChart :data="monthlyData" :loading="chartsLoading" />
+          </div>
+          <div class="dashboard__chart-card">
+            <h4 class="dashboard__chart-title">{{ t('dashboard.charts.statusBreakdown') }}</h4>
+            <StatusBreakdownChart :data="statusBreakdown" :loading="chartsLoading" />
+          </div>
+          <div v-if="canApprove()" class="dashboard__chart-card">
+            <h4 class="dashboard__chart-title">{{ t('dashboard.charts.departmentComparison') }}</h4>
+            <DepartmentComparisonChart :data="departmentData" :loading="chartsLoading" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Strategist Insights (MANAGER/FINANCE/ADMIN only) -->
+      <div v-if="canApprove()" class="dashboard__strategist-section">
+        <StrategistInsightsCard />
+      </div>
+
       <!-- Recent Requests -->
       <div class="dashboard__recent">
         <div class="dashboard__recent-header">
@@ -169,7 +197,13 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import SpendingByCategoryChart from '@/components/charts/SpendingByCategoryChart.vue'
+import MonthlyTrendChart from '@/components/charts/MonthlyTrendChart.vue'
+import StatusBreakdownChart from '@/components/charts/StatusBreakdownChart.vue'
+import DepartmentComparisonChart from '@/components/charts/DepartmentComparisonChart.vue'
+import StrategistInsightsCard from '@/components/dashboard/StrategistInsightsCard.vue'
 import { useRequest } from '@/composables/useRequest'
+import { useChartData } from '@/composables/useChartData'
 import { usePermission } from '@/composables/usePermission'
 import { useAuthStore } from '@/stores/auth.store'
 import { REQUEST_STATUS } from '@/constants/status'
@@ -178,6 +212,14 @@ const { t } = useI18n()
 const router = useRouter()
 const authStore = useAuthStore()
 const { loading, requests, fetchRequests } = useRequest()
+const {
+  loading: chartsLoading,
+  categoryData,
+  monthlyData,
+  departmentData,
+  statusBreakdown,
+  fetchChartData,
+} = useChartData()
 const { canApprove, isManager, isFinance, isAdmin } = usePermission()
 
 const userName = computed(() => authStore.user?.name || t('auth.welcomeBack'))
@@ -275,7 +317,10 @@ function computeStats(allRequests) {
 
 onMounted(async () => {
   try {
-    const data = await fetchRequests({ perPage: 50 })
+    const [data] = await Promise.all([
+      fetchRequests({ perPage: 50 }),
+      fetchChartData(),
+    ])
     computeStats(data?.items || requests.value || [])
   } catch {
     // Dashboard should still render even if fetch fails
@@ -517,6 +562,39 @@ onMounted(async () => {
     color: $gray-700;
     font-weight: 500;
     text-align: center;
+  }
+
+  &__strategist-section {
+    margin-bottom: $spacing-xl;
+  }
+
+  &__charts-section {
+    margin-bottom: $spacing-xl;
+  }
+
+  &__charts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-lg;
+
+    @media (max-width: $breakpoint-md) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__chart-card {
+    background: $white;
+    border: 1px solid $gray-200;
+    border-radius: $radius-lg;
+    padding: $spacing-lg;
+    box-shadow: $shadow-sm;
+  }
+
+  &__chart-title {
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $gray-700;
+    margin-bottom: $spacing-md;
   }
 
   &__recent {

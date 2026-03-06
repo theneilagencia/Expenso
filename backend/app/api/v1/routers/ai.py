@@ -5,8 +5,10 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.core.permissions import require_role
 from app.core.security import get_current_user
 from app.dependencies import get_db
+from app.models.ai_analysis_log import AIAnalysisLog
 from app.services.ai_service import AIService
 
 router = APIRouter()
@@ -73,3 +75,27 @@ async def stream_chat(
             "X-Accel-Buffering": "no",
         },
     )
+
+
+@router.get("/strategist/report")
+async def get_strategist_report(
+    db: Session = Depends(get_db),
+    current_user=Depends(require_role("MANAGER", "FINANCE", "ADMIN")),
+):
+    log = (
+        db.query(AIAnalysisLog)
+        .filter(
+            AIAnalysisLog.ai_role == "STRATEGIST",
+            AIAnalysisLog.status == "SUCCESS",
+        )
+        .order_by(AIAnalysisLog.created_at.desc())
+        .first()
+    )
+    if not log:
+        return {"message": "No report available"}
+    return {
+        "id": str(log.id),
+        "report": log.response,
+        "model_used": log.model_used,
+        "created_at": log.created_at.isoformat() if log.created_at else None,
+    }

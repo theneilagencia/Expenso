@@ -1,0 +1,35 @@
+{
+  "welcome": "Welcome, {name}",
+  "subtitle": "Here's your expense overview",
+  "totalRequests": "Total Requests",
+  "pendingRequests": "Pending",
+  "approvedRequests": "Approved",
+  "totalAmount": "Total Amount",
+  "pendingApprovals": "Pending Approvals",
+  "awaitingYourReview": "awaiting your review",
+  "viewApprovals": "View Approvals",
+  "slaAlerts": "SLA Alerts",
+  "overdue": "Overdue",
+  "quickActions": "Quick Actions",
+  "viewAllRequests": "View All Requests",
+  "reviewApprovals": "Review Approvals",
+  "settings": "Settings",
+  "recentRequests": "Recent Requests",
+  "viewAll": "View All",
+  "charts": {
+    "title": "Analytics",
+    "spendingByCategory": "Spending by Category",
+    "monthlyTrend": "Monthly Trend",
+    "statusBreakdown": "Status Breakdown",
+    "departmentComparison": "Department Comparison"
+  },
+  "strategist": {
+    "title": "AI Strategic Insights",
+    "noReport": "No strategist report available yet. The analysis runs daily.",
+    "trend": "Spending Trend",
+    "recommendations": "Recommendations",
+    "forecast": "Forecast (Next Month)",
+    "savings": "Savings Opportunities",
+    "generatedAt": "Generated at"
+  }
+}

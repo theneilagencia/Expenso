@@ -13,8 +13,13 @@ from app.models.department import Department
 from app.models.expense_category import ExpenseCategory
 from app.models.expense_request import ExpenseRequest
 from app.models.user import User
+from app.services.cache_service import cache_get, cache_set
 
 router = APIRouter()
+
+
+def _cache_key(endpoint: str, date_from=None, date_to=None, department_id=None):
+    return f"reports:{endpoint}:{date_from or ''}:{date_to or ''}:{department_id or ''}"
 
 
 def _base_query(db: Session, date_from=None, date_to=None, department_id=None):
@@ -38,6 +43,11 @@ def get_dashboard(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
+    key = _cache_key("dashboard", date_from, date_to, department_id)
+    cached = cache_get(key)
+    if cached is not None:
+        return cached
+
     q = _base_query(db, date_from, date_to, department_id)
 
     total_requests = q.count()
@@ -62,7 +72,7 @@ def get_dashboard(
         func.coalesce(func.avg(ExpenseRequest.ai_risk_score), 0)
     ).scalar()
 
-    return {
+    result = {
         "total_requests": total_requests,
         "total_amount": float(total_amount),
         "average_amount": round(float(avg_amount), 2),
@@ -71,6 +81,8 @@ def get_dashboard(
         "average_risk_score": round(float(avg_risk), 1),
         "status_breakdown": {s: c for s, c in status_counts},
     }
+    cache_set(key, result, ttl=300)
+    return result
 
 
 @router.get("/by-category")
@@ -81,6 +93,11 @@ def get_by_category(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
+    key = _cache_key("by-category", date_from, date_to, department_id)
+    cached = cache_get(key)
+    if cached is not None:
+        return cached
+
     q = db.query(
         ExpenseCategory.name,
         func.count(ExpenseRequest.id).label("count"),
@@ -101,7 +118,7 @@ def get_by_category(
 
     rows = q.group_by(ExpenseCategory.id, ExpenseCategory.name).order_by(func.sum(ExpenseRequest.amount).desc().nullslast()).all()
 
-    return [
+    result = [
         {
             "category": row.name,
             "count": row.count,
@@ -110,6 +127,8 @@ def get_by_category(
         }
         for row in rows
     ]
+    cache_set(key, result, ttl=600)
+    return result
 
 
 @router.get("/by-department")
@@ -119,6 +138,11 @@ def get_by_department(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
+    key = _cache_key("by-department", date_from, date_to)
+    cached = cache_get(key)
+    if cached is not None:
+        return cached
+
     q = db.query(
         Department.name,
         func.count(ExpenseRequest.id).label("count"),
@@ -137,7 +161,7 @@ def get_by_department(
 
     rows = q.group_by(Department.id, Department.name).order_by(func.sum(ExpenseRequest.amount).desc().nullslast()).all()
 
-    return [
+    result = [
         {
             "department": row.name,
             "count": row.count,
@@ -146,6 +170,8 @@ def get_by_department(
         }
         for row in rows
     ]
+    cache_set(key, result, ttl=600)
+    return result
 
 
 @router.get("/by-month")
@@ -156,6 +182,11 @@ def get_by_month(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
+    key = _cache_key("by-month", date_from, date_to, department_id)
+    cached = cache_get(key)
+    if cached is not None:
+        return cached
+
     year_col = extract("year", ExpenseRequest.created_at).label("year")
     month_col = extract("month", ExpenseRequest.created_at).label("month")
 
@@ -177,7 +208,7 @@ def get_by_month(
 
     rows = q.group_by(year_col, month_col).order_by(year_col, month_col).all()
 
-    return [
+    result = [
         {
             "year": int(row.year),
             "month": int(row.month),
@@ -186,6 +217,8 @@ def get_by_month(
         }
         for row in rows
     ]
+    cache_set(key, result, ttl=600)
+    return result
 
 
 @router.get("/export/csv")

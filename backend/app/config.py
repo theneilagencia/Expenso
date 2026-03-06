@@ -48,6 +48,13 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
 
+    # Payment gateway
+    PAYMENT_GATEWAY: str = "mock"
+    REVOLUT_API_KEY: str = ""
+    REVOLUT_API_URL: str = "https://sandbox-b2b.revolut.com/api/1.0"
+    PAYMENT_MAX_RETRIES: int = 3
+    PAYMENT_RETRY_DELAY_MINUTES: int = 15
+
     model_config = {"env_file": ".env", "case_sensitive": True}
 
 
