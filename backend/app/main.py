@@ -9,6 +9,7 @@ from app.api.v1.admin import sla as admin_sla
 from app.api.v1.admin import users as admin_users
 from app.api.v1.routers import ai, attachments, audit, auth, health, notifications, payments, reports, requests, users
 from app.config import settings
+from app.core.middleware import SecurityHeadersMiddleware
 from app.core.rate_limit import limiter
 
 app = FastAPI(
@@ -22,6 +23,9 @@ app = FastAPI(
 # Rate limiter
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Security headers (outermost middleware — runs on every response)
+app.add_middleware(SecurityHeadersMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
