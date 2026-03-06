@@ -60,6 +60,39 @@ def decode_refresh_token(token: str) -> dict:
         )
 
 
+def create_mfa_token(user_id: str) -> str:
+    """Create a short-lived MFA challenge token (expires in 5 minutes)."""
+    to_encode = {
+        "sub": user_id,
+        "type": "mfa",
+        "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
+    }
+    return jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+
+
+def decode_mfa_token(token: str) -> str:
+    """Decode an MFA challenge token. Returns user_id or raises HTTPException."""
+    try:
+        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        if payload.get("type") != "mfa":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid MFA token type",
+            )
+        user_id = payload.get("sub")
+        if user_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid MFA token",
+            )
+        return user_id
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired MFA token",
+        )
+
+
 def create_password_reset_token(user_id: str) -> str:
     """Create a short-lived token for password reset (expires in PASSWORD_RESET_EXPIRE_HOURS)."""
     to_encode = {

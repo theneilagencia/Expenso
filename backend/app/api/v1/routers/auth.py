@@ -8,8 +8,10 @@ from app.config import settings
 from app.core.rate_limit import _get_ip, limiter
 from app.core.security import (
     create_access_token,
+    create_mfa_token,
     create_password_reset_token,
     create_refresh_token,
+    decode_mfa_token,
     decode_password_reset_token,
     decode_refresh_token,
     get_current_user,
@@ -20,12 +22,18 @@ from app.dependencies import get_db
 from app.schemas.auth import (
     ChangePasswordRequest,
     LoginRequest,
+    MFAConfirmRequest,
+    MFADisableRequest,
+    MFALoginResponse,
+    MFASetupResponse,
+    MFAVerifyRequest,
     PasswordResetConfirm,
     PasswordResetRequest,
     RefreshRequest,
     SSOLoginRequest,
     TokenResponse,
 )
+from app.services.mfa_service import MFAService
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +57,7 @@ def _build_token_response(user) -> TokenResponse:
     )
 
 
-@router.post("/login", response_model=TokenResponse, summary="Authenticate user and return tokens")
+@router.post("/login", response_model=None, summary="Authenticate user and return tokens")
 @limiter.limit("5/minute", key_func=_get_ip)
 async def login(request: LoginRequest, http_request: Request, db: Session = Depends(get_db)):
     from app.models.user import User
@@ -68,6 +76,11 @@ async def login(request: LoginRequest, http_request: Request, db: Session = Depe
 
     user.last_login_at = datetime.now(timezone.utc)
     db.commit()
+
+    # If MFA is enabled, return MFA challenge instead of full tokens
+    if user.mfa_enabled and user.mfa_secret:
+        mfa_token = create_mfa_token(str(user.id))
+        return MFALoginResponse(mfa_required=True, mfa_token=mfa_token)
 
     return _build_token_response(user)
 
@@ -151,6 +164,123 @@ async def change_password(
     db.commit()
 
     return {"message": "Password changed successfully"}
+
+
+@router.post("/mfa/verify", response_model=TokenResponse, summary="Verify MFA code and return tokens")
+@limiter.limit("5/minute", key_func=_get_ip)
+async def mfa_verify(request: MFAVerifyRequest, http_request: Request, db: Session = Depends(get_db)):
+    from app.models.user import User
+
+    user_id = decode_mfa_token(request.mfa_token)
+    user = db.query(User).filter(User.id == user_id, User.deleted_at.is_(None)).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"error": "USER_NOT_FOUND", "message": "User not found"},
+        )
+    if not user.mfa_enabled or not user.mfa_secret:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"error": "MFA_NOT_ENABLED", "message": "MFA is not enabled for this user"},
+        )
+
+    if not MFAService.verify_totp(user.mfa_secret, request.code):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"error": "INVALID_MFA_CODE", "message": "Invalid MFA code"},
+        )
+
+    return _build_token_response(user)
+
+
+@router.post("/mfa/setup", response_model=MFASetupResponse, summary="Setup MFA for current user")
+@limiter.limit("3/minute", key_func=_get_ip)
+async def mfa_setup(
+    request: Request,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    from app.models.user import User
+
+    if current_user.mfa_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"error": "MFA_ALREADY_ENABLED", "message": "MFA is already enabled"},
+        )
+
+    secret = MFAService.generate_secret()
+
+    # Store the secret temporarily so confirm can validate it
+    user = db.query(User).filter(User.id == current_user.id).first()
+    user.mfa_secret = secret
+    db.commit()
+
+    qr_data_uri = MFAService.generate_qr_data_uri(current_user.email, secret)
+
+    return MFASetupResponse(secret=secret, qr_data_uri=qr_data_uri)
+
+
+@router.post("/mfa/confirm", summary="Confirm MFA setup with first TOTP code")
+async def mfa_confirm(
+    request: MFAConfirmRequest,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    from app.models.user import User
+
+    if current_user.mfa_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"error": "MFA_ALREADY_ENABLED", "message": "MFA is already enabled"},
+        )
+
+    if not current_user.mfa_secret:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"error": "MFA_NOT_SETUP", "message": "Call /auth/mfa/setup first"},
+        )
+
+    if not MFAService.verify_totp(current_user.mfa_secret, request.code):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"error": "INVALID_MFA_CODE", "message": "Invalid MFA code"},
+        )
+
+    user = db.query(User).filter(User.id == current_user.id).first()
+    user.mfa_enabled = True
+    db.commit()
+
+    logger.info(f"MFA enabled for user {current_user.email}")
+    return {"message": "MFA enabled successfully"}
+
+
+@router.delete("/mfa", summary="Disable MFA for current user")
+async def mfa_disable(
+    request: MFADisableRequest,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    from app.models.user import User
+
+    if not current_user.mfa_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"error": "MFA_NOT_ENABLED", "message": "MFA is not enabled"},
+        )
+
+    if not verify_password(request.current_password, current_user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"error": "INVALID_PASSWORD", "message": "Current password is incorrect"},
+        )
+
+    user = db.query(User).filter(User.id == current_user.id).first()
+    user.mfa_enabled = False
+    user.mfa_secret = None
+    db.commit()
+
+    logger.info(f"MFA disabled for user {current_user.email}")
+    return {"message": "MFA disabled successfully"}
 
 
 @router.post("/sso/login", response_model=TokenResponse, summary="Login via SSO provider")

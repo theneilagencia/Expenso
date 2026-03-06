@@ -41,3 +41,26 @@ class SSOLoginRequest(BaseModel):
 
 class DeleteAccountRequest(BaseModel):
     current_password: str
+
+
+class MFASetupResponse(BaseModel):
+    secret: str
+    qr_data_uri: str
+
+
+class MFAVerifyRequest(BaseModel):
+    mfa_token: str
+    code: str = Field(..., min_length=6, max_length=6)
+
+
+class MFAConfirmRequest(BaseModel):
+    code: str = Field(..., min_length=6, max_length=6)
+
+
+class MFADisableRequest(BaseModel):
+    current_password: str
+
+
+class MFALoginResponse(BaseModel):
+    mfa_required: bool = True
+    mfa_token: str
