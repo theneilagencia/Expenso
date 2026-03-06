@@ -129,6 +129,44 @@ const routes = [
     component: () => import('@/views/admin/AIUsageView.vue'),
     meta: { requiresAuth: true, roles: [ROLES.ADMIN] }
   },
+  {
+    path: '/admin/approval-policies',
+    name: 'admin-approval-policies',
+    component: () => import('@/views/admin/ApprovalPoliciesView.vue'),
+    meta: { requiresAuth: true, roles: [ROLES.ADMIN] }
+  },
+  {
+    path: '/admin/calendar',
+    name: 'admin-calendar',
+    component: () => import('@/views/admin/CalendarView.vue'),
+    meta: { requiresAuth: true, roles: [ROLES.ADMIN] }
+  },
+  {
+    path: '/admin/vendors',
+    name: 'admin-vendors',
+    component: () => import('@/views/admin/VendorsView.vue'),
+    meta: { requiresAuth: true, roles: [ROLES.ADMIN] }
+  },
+  {
+    path: '/admin/hierarchy',
+    name: 'admin-hierarchy',
+    component: () => import('@/views/admin/HierarchyView.vue'),
+    meta: { requiresAuth: true, roles: [ROLES.ADMIN] }
+  },
+  {
+    path: '/admin/webhooks',
+    name: 'admin-webhooks',
+    component: () => import('@/views/admin/WebhooksView.vue'),
+    meta: { requiresAuth: true, roles: [ROLES.ADMIN] }
+  },
+
+  // Profile
+  {
+    path: '/profile/mfa',
+    name: 'profile-mfa',
+    component: () => import('@/views/profile/MFASetupView.vue'),
+    meta: { requiresAuth: true }
+  },
 
   // Settings
   {

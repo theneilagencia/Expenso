@@ -11,12 +11,30 @@ vi.mock('@/composables/useAuth', () => ({
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({ push: (...args) => mockRouterPush(...args) }),
+  createRouter: () => ({
+    beforeEach: vi.fn(),
+    push: vi.fn(),
+    install: vi.fn(),
+  }),
+  createWebHistory: () => ({}),
 }))
 
 vi.mock('@/services/auth', () => ({
   authService: {
     getSSOConfig: (...args) => mockGetSSOConfig(...args),
   },
+}))
+
+vi.mock('@/services/mfa', () => ({
+  mfaService: {
+    verify: vi.fn(),
+  },
+}))
+
+vi.mock('@/stores/auth.store', () => ({
+  useAuthStore: () => ({
+    setAuth: vi.fn(),
+  }),
 }))
 
 vi.mock('vue-i18n', () => ({

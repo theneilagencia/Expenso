@@ -1,6 +1,6 @@
 <template>
   <AuthLayout>
-    <form class="login-form" @submit.prevent="handleLogin">
+    <form v-if="!mfaRequired" class="login-form" @submit.prevent="handleLogin">
       <div class="login-form__field">
         <label for="email">{{ t('auth.email') }}</label>
         <input
@@ -43,6 +43,37 @@
         </button>
       </div>
     </form>
+
+    <!-- MFA Verification -->
+    <form v-else class="login-form" @submit.prevent="handleMFAVerify">
+      <h3 class="login-form__mfa-title">{{ t('auth.mfa.verifyTitle') }}</h3>
+      <p class="login-form__mfa-text">{{ t('auth.mfa.verifyDescription') }}</p>
+      <div class="login-form__field">
+        <label for="mfa-code">{{ t('auth.mfa.totpCode') }}</label>
+        <input
+          id="mfa-code"
+          v-model="mfaCode"
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]{6}"
+          maxlength="6"
+          :placeholder="t('auth.mfa.codePlaceholder')"
+          class="login-form__mfa-input"
+          required
+        />
+      </div>
+      <p v-if="error" class="login-form__error">{{ error }}</p>
+      <button type="submit" class="login-form__submit" :disabled="loading || mfaCode.length !== 6">
+        {{ loading ? t('common.loading') : t('auth.mfa.verify') }}
+      </button>
+      <button
+        type="button"
+        class="login-form__back-btn"
+        @click="cancelMFA"
+      >
+        {{ t('auth.backToLogin') }}
+      </button>
+    </form>
   </AuthLayout>
 </template>
 
@@ -52,17 +83,24 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import { authService } from '@/services/auth'
+import { mfaService } from '@/services/mfa'
+import { useAuthStore } from '@/stores/auth.store'
 import AuthLayout from '@/layouts/AuthLayout.vue'
 
 const { t } = useI18n()
 const router = useRouter()
 const { login } = useAuth()
+const authStore = useAuthStore()
 
 const email = ref('')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
 const ssoProviders = ref([])
+
+const mfaRequired = ref(false)
+const mfaToken = ref('')
+const mfaCode = ref('')
 
 onMounted(async () => {
   try {
@@ -77,13 +115,46 @@ async function handleLogin() {
   error.value = ''
   loading.value = true
   try {
-    await login(email.value, password.value)
-    router.push({ name: 'dashboard' })
+    const data = await login(email.value, password.value)
+    if (data?.mfa_required) {
+      mfaRequired.value = true
+      mfaToken.value = data.mfa_token
+      mfaCode.value = ''
+    } else {
+      router.push({ name: 'dashboard' })
+    }
   } catch (e) {
-    error.value = t('auth.invalidCredentials')
+    if (e?.response?.data?.mfa_required) {
+      mfaRequired.value = true
+      mfaToken.value = e.response.data.mfa_token
+      mfaCode.value = ''
+    } else {
+      error.value = t('auth.invalidCredentials')
+    }
   } finally {
     loading.value = false
   }
+}
+
+async function handleMFAVerify() {
+  error.value = ''
+  loading.value = true
+  try {
+    const data = await mfaService.verify(mfaToken.value, mfaCode.value)
+    authStore.setAuth(data)
+    router.push({ name: 'dashboard' })
+  } catch {
+    error.value = t('auth.mfa.invalidCode')
+  } finally {
+    loading.value = false
+  }
+}
+
+function cancelMFA() {
+  mfaRequired.value = false
+  mfaToken.value = ''
+  mfaCode.value = ''
+  error.value = ''
 }
 
 function handleSSO(provider) {
@@ -209,6 +280,44 @@ function handleSSO(provider) {
 
     &:hover {
       background: $gray-50;
+    }
+  }
+
+  &__mfa-title {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    color: $gray-800;
+    margin-bottom: $spacing-xs;
+    text-align: center;
+  }
+
+  &__mfa-text {
+    font-size: $font-size-sm;
+    color: $gray-500;
+    text-align: center;
+    margin-bottom: $spacing-lg;
+  }
+
+  &__mfa-input {
+    text-align: center;
+    font-size: $font-size-xl;
+    letter-spacing: 0.5em;
+  }
+
+  &__back-btn {
+    display: block;
+    width: 100%;
+    margin-top: $spacing-md;
+    padding: $spacing-sm $spacing-md;
+    background: none;
+    color: $primary;
+    border: none;
+    font-size: $font-size-sm;
+    cursor: pointer;
+    text-align: center;
+
+    &:hover {
+      text-decoration: underline;
     }
   }
 }
