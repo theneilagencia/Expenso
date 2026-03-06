@@ -199,6 +199,48 @@ Branch: `feat/sprint-2-auth-rbac` (continuation)
 
 ---
 
+## Sprint 8 — COMPLETED (2026-03-06)
+
+Branch: `feat/sprint-2-auth-rbac` (continuation)
+
+### Security
+- [x] Rate limiting with slowapi (Redis-backed): login 5/min, refresh 10/min, password reset 3/min, requests 20/min, AI 20-30/min
+- [x] SecurityHeadersMiddleware: X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy
+- [x] HSTS + CSP headers in production (DEBUG=False)
+- [x] Production error handler — suppresses stack traces
+- [x] Upload validation: magic byte content inspection (python-magic), executable extension blocklist, filename sanitization, 10 files/request limit
+- [x] Fernet encryption for integration credentials (ENCRYPTION_KEY config)
+- [x] GET /integrations/{id} with decrypted config (ADMIN only)
+
+### Performance
+- [x] Fix N+1 in payments list: single JOIN query (Payment+Request+User+Category+Department)
+- [x] 5 partial indexes (Alembic migration 004): manager_pending, finance_pending, audit_logs, notifications_unread, employee_requests
+- [x] Redis cache for categories list (1h TTL + invalidation on admin CRUD)
+- [x] Notifications endpoint: pagination metadata (total, page, per_page)
+
+### LGPD Compliance
+- [x] GET /users/me/data-export: async Celery task → ZIP (profile, requests, logs, payments, notifications)
+- [x] DELETE /users/me: account anonymization (email, name, password cleared, requests cancelled). Only EMPLOYEE can self-delete.
+- [x] data_retention_cleanup: monthly Celery beat task (hard-deletes records > 5 years, never audit_logs)
+- [x] DeleteAccountRequest schema with password verification
+
+### Monitoring
+- [x] Enriched /health: DB, Redis, MinIO, Celery checks → healthy/degraded/unhealthy
+- [x] GET /api/v1/admin/system-status (ADMIN): CPU%, memory%, Celery queues, Redis memory, DB pool
+
+### Tests & Documentation
+- [x] 65 new backend tests (305 total): security headers, encryption, upload validation, LGPD, health, N+1 fix
+- [x] 103 new frontend tests (346 total): stores (notifications, ui, requests), services (payments, notifications, reports), utils (currency, date, validators)
+- [x] CLAUDE.md: architecture section, Sprint 8 summary, updated endpoints
+- [x] Dependencies: slowapi, openpyxl, python-magic, psutil
+
+### Final Counts
+- Backend tests: 305/305 passing (pytest + ruff clean)
+- Frontend tests: 346/346 passing (vitest)
+- Total: 651 tests
+
+---
+
 ## Code Conventions
 
 ### Backend (Python)
@@ -263,13 +305,59 @@ All use UUID v4 PK, UTC timestamps, soft delete (except audit_logs — immutable
 
 ## Key API Endpoints
 
-- `POST /api/v1/auth/login|refresh|logout`
+- `POST /api/v1/auth/login|refresh|logout` (rate limited: 5-10/min)
+- `POST /api/v1/auth/password-reset/request|confirm` (rate limited: 3-5/min)
 - `GET|PATCH /api/v1/users/me`
+- `GET /api/v1/users/me/data-export` (LGPD data portability)
+- `DELETE /api/v1/users/me` (LGPD account anonymization)
 - `POST|GET /api/v1/requests` + `/{id}/submit|approve|reject|request-edit|cancel`
-- `GET /api/v1/requests/options/categories|cost-centers`
-- `POST|GET /api/v1/payments`
-- `GET /api/v1/ai/assist|chat` (SSE), `POST /ai/suggest-comment`
+- `GET /api/v1/requests/options/categories|cost-centers` (cached 1h)
+- `POST|GET /api/v1/payments` + `/batch` + `/export/xlsx`
+- `POST /api/v1/payments/webhook/{provider}` (HMAC-SHA256)
+- `GET /api/v1/ai/assist|chat` (SSE, rate limited: 20-30/min)
+- `POST /ai/suggest-comment`
 - `GET /api/v1/reports/summary|export`, `GET /reports/narrative` (SSE)
 - `POST /api/v1/requests/{id}/ai-summary`
 - `CRUD /api/v1/admin/users|categories|sla|integrations`
-- `GET /health`
+- `GET /api/v1/admin/system-status` (ADMIN: CPU, memory, queue)
+- `GET /health` (DB, Redis, MinIO, Celery checks)
+
+---
+
+## Architecture
+
+### Security Layers
+- **Rate Limiting**: slowapi + Redis (per-IP for public, per-user for auth)
+- **Security Headers**: X-Content-Type-Options, X-Frame-Options, HSTS, CSP
+- **Upload Validation**: Magic byte inspection, extension blocklist, filename sanitization
+- **Credentials Encryption**: Fernet AES-128 for integration config
+- **Auth**: JWT HS256 (access 30min, refresh 7d) + bcrypt passwords
+
+### Performance
+- Payment list: single JOIN query (was N+1 with 4 queries/row)
+- 5 partial indexes for common filtered queries
+- Redis cache: categories (1h), reports (5-10min)
+- Consistent pagination on all list endpoints
+
+### LGPD Compliance
+- Data export: ZIP with profile, requests, logs, payments, notifications
+- Account anonymization: email/name/password cleared, requests cancelled
+- Data retention: monthly Celery task purges records > 5 years
+- Audit logs: immutable, never deleted
+
+### External Dependencies & Mocking
+- **Anthropic**: mock with `ANTHROPIC_API_KEY=""` → ai_skipped fallback
+- **Revolut**: mock with `REVOLUT_API_KEY=""` → MockGateway
+- **Redis**: graceful fallback → cache miss returns None
+- **MinIO**: required for attachments, optional for data export
+- **SMTP**: logged if not configured
+
+### Adding a New Module
+1. Create model in `app/models/` with UUID PK + soft delete
+2. Create Alembic migration in `app/db/migrations/versions/`
+3. Create service in `app/services/` (business logic)
+4. Create router in `app/api/v1/routers/` (thin HTTP layer)
+5. Register router in `app/main.py`
+6. Add schemas in `app/schemas/`
+7. Add tests in `tests/`
+8. Add i18n keys in `frontend/src/i18n/locales/{en-US,pt-BR}/`
