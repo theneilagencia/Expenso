@@ -83,5 +83,171 @@
     "last90d": "Last 90 days",
     "noData": "No AI usage data available for this period.",
     "fetchError": "Failed to load AI usage data."
+  },
+  "approvalPolicies": {
+    "title": "Approval Policies",
+    "subtitle": "Manage expense approval rules and workflows",
+    "create": "Create Policy",
+    "empty": "No approval policies configured.",
+    "editPolicy": "Edit Policy",
+    "createPolicy": "Create Policy",
+    "table": {
+      "name": "Name",
+      "department": "Department",
+      "minAmount": "Min Amount",
+      "maxAmount": "Max Amount",
+      "approvalFlow": "Approval Flow",
+      "active": "Active"
+    },
+    "form": {
+      "name": "Policy Name",
+      "department": "Department",
+      "allDepartments": "All Departments",
+      "minAmount": "Minimum Amount",
+      "maxAmount": "Maximum Amount",
+      "approvalFlow": "Approval Flow (JSON)",
+      "approvalFlowPlaceholder": "[\"MANAGER\", \"FINANCE\"]"
+    },
+    "messages": {
+      "fetchError": "Failed to load approval policies.",
+      "created": "Approval policy created successfully.",
+      "updated": "Approval policy updated successfully.",
+      "deleted": "Approval policy deleted successfully.",
+      "saveError": "Failed to save approval policy.",
+      "deleteError": "Failed to delete approval policy.",
+      "deleteConfirm": "Are you sure you want to delete this approval policy? This action cannot be undone."
+    }
+  },
+  "calendar": {
+    "title": "Corporate Calendar",
+    "subtitle": "Manage holidays and non-working days",
+    "create": "Add Holiday",
+    "empty": "No holidays configured.",
+    "editHoliday": "Edit Holiday",
+    "createHoliday": "Add Holiday",
+    "table": {
+      "date": "Date",
+      "name": "Name",
+      "type": "Type",
+      "stateCode": "State Code"
+    },
+    "form": {
+      "date": "Date",
+      "name": "Holiday Name",
+      "type": "Type",
+      "stateCode": "State Code",
+      "stateCodePlaceholder": "e.g. SP"
+    },
+    "types": {
+      "NATIONAL": "National",
+      "STATE": "State",
+      "COMPANY": "Company"
+    },
+    "messages": {
+      "fetchError": "Failed to load holidays.",
+      "created": "Holiday created successfully.",
+      "updated": "Holiday updated successfully.",
+      "deleted": "Holiday deleted successfully.",
+      "saveError": "Failed to save holiday.",
+      "deleteError": "Failed to delete holiday.",
+      "deleteConfirm": "Are you sure you want to delete this holiday? This action cannot be undone."
+    }
+  },
+  "vendors": {
+    "title": "Vendor Lists",
+    "subtitle": "Manage vendor whitelist and blacklist",
+    "create": "Add Vendor",
+    "empty": "No vendors configured.",
+    "editVendor": "Edit Vendor",
+    "createVendor": "Add Vendor",
+    "allTypes": "All Types",
+    "table": {
+      "name": "Name",
+      "document": "Document",
+      "listType": "List Type",
+      "category": "Category",
+      "reason": "Reason",
+      "validFrom": "Valid From",
+      "validUntil": "Valid Until"
+    },
+    "form": {
+      "name": "Vendor Name",
+      "document": "Document (CNPJ/CPF)",
+      "listType": "List Type",
+      "category": "Category",
+      "reason": "Reason",
+      "validFrom": "Valid From",
+      "validUntil": "Valid Until"
+    },
+    "listTypes": {
+      "WHITELIST": "Whitelist",
+      "BLACKLIST": "Blacklist"
+    },
+    "messages": {
+      "fetchError": "Failed to load vendors.",
+      "created": "Vendor added successfully.",
+      "updated": "Vendor updated successfully.",
+      "deleted": "Vendor removed successfully.",
+      "saveError": "Failed to save vendor.",
+      "deleteError": "Failed to delete vendor.",
+      "deleteConfirm": "Are you sure you want to remove this vendor? This action cannot be undone."
+    }
+  },
+  "hierarchy": {
+    "title": "Organization Hierarchy",
+    "subtitle": "View department structure and team members",
+    "empty": "No departments found.",
+    "editParent": "Edit Parent",
+    "user": "user",
+    "users": "users",
+    "roles": {
+      "ADMIN": "Admin",
+      "FINANCE": "Finance",
+      "MANAGER": "Manager",
+      "EMPLOYEE": "Employee"
+    },
+    "form": {
+      "department": "Department",
+      "parentDepartment": "Parent Department",
+      "noParent": "No Parent (Root)"
+    },
+    "messages": {
+      "fetchError": "Failed to load organization hierarchy.",
+      "updated": "Department parent updated successfully.",
+      "saveError": "Failed to update department."
+    }
+  },
+  "webhooks": {
+    "title": "Webhooks",
+    "subtitle": "Manage webhook endpoints for event notifications",
+    "create": "Add Webhook",
+    "empty": "No webhooks configured.",
+    "editWebhook": "Edit Webhook",
+    "createWebhook": "Add Webhook",
+    "test": "Test",
+    "testing": "Testing...",
+    "table": {
+      "url": "URL",
+      "events": "Events",
+      "active": "Active",
+      "lastStatus": "Last Status"
+    },
+    "form": {
+      "url": "Webhook URL",
+      "events": "Events"
+    },
+    "messages": {
+      "fetchError": "Failed to load webhooks.",
+      "created": "Webhook created successfully.",
+      "updated": "Webhook updated successfully.",
+      "deleted": "Webhook deleted successfully.",
+      "saveError": "Failed to save webhook.",
+      "deleteError": "Failed to delete webhook.",
+      "deleteConfirm": "Are you sure you want to delete this webhook? This action cannot be undone.",
+      "toggled": "Webhook status updated.",
+      "toggleError": "Failed to update webhook status.",
+      "testSuccess": "Webhook test sent successfully.",
+      "testFailed": "Webhook test failed."
+    }
   }
 }
