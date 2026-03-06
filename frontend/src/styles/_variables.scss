@@ -1,49 +1,58 @@
-// Colors
-$primary: #2563eb;
-$primary-dark: #1d4ed8;
-$primary-light: #dbeafe;
-$secondary: #64748b;
-$success: #16a34a;
-$warning: #f59e0b;
-$danger: #dc2626;
-$info: #0ea5e9;
+// ============================================
+// Expenso Design Tokens
+// Derived from BTS Global Corp Design System v1.3.0
+// https://storybook-dev.btsglobalcorp.com
+//
+// Variable names are kept for backward compatibility.
+// Values are aligned with BTS Foundation tokens.
+// ============================================
 
-// Neutrals
-$white: #ffffff;
-$gray-50: #f8fafc;
-$gray-100: #f1f5f9;
-$gray-200: #e2e8f0;
-$gray-300: #cbd5e1;
-$gray-400: #94a3b8;
-$gray-500: #64748b;
-$gray-600: #475569;
-$gray-700: #334155;
-$gray-800: #1e293b;
-$gray-900: #0f172a;
+// --- Primary Brand (BTS) ---
+$primary: #1B5AB4;         // BTS Blue Highlight
+$primary-dark: #1B3857;    // BTS Blue D03
+$primary-light: #63C9F3;   // BTS Blue 505
+$secondary: #2A7BA1;       // BTS Blue C04
+$accent: #0C80A5;          // BTS Blue 503
 
-// Typography
-$font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-$font-size-xs: 0.75rem;
-$font-size-sm: 0.875rem;
-$font-size-base: 1rem;
-$font-size-lg: 1.125rem;
-$font-size-xl: 1.25rem;
-$font-size-2xl: 1.5rem;
-$font-size-3xl: 1.875rem;
+// --- Feedback / Semantic ---
+$success: #2E8B2E;         // BTS feedback.success.base
+$warning: #FFD700;         // BTS feedback.warning.base
+$danger: #E63939;          // BTS feedback.error.base
+$info: #0C80A5;            // BTS feedback.info.base
 
-// Accent
-$accent: #8b5cf6;
-$black: #000000;
+// --- Neutrals (BTS Neutral Scale) ---
+$white: #FFFFFF;           // BTS neutral.white
+$gray-50: #F4F4F4;        // BTS bg.paper
+$gray-100: #E4E4E4;       // BTS neutral.grayLight
+$gray-200: #C9C9C9;       // BTS neutral.graySemiLight
+$gray-300: #C6C6C6;       // BTS neutral.grayBase
+$gray-400: #B2B2B2;       // BTS secondary.gray506
+$gray-500: #9B9B9B;       // BTS neutral.graySemiDark
+$gray-600: #595757;       // BTS neutral.grayDark
+$gray-700: #474747;       // interpolated
+$gray-800: #333333;       // BTS neutral.black
+$gray-900: #000000;       // BTS primary.black
+$black: #000000;           // BTS primary.black
 
-// Spacing
-$spacing-xs: 0.25rem;
-$spacing-sm: 0.5rem;
-$spacing-md: 1rem;
-$spacing-lg: 1.5rem;
-$spacing-xl: 2rem;
-$spacing-2xl: 3rem;
+// --- Typography (BTS Inter) ---
+$font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+$font-size-xs: 0.75rem;    // 12px - Caption
+$font-size-sm: 0.875rem;   // 14px - Body Small
+$font-size-base: 1rem;     // 16px - Body Default
+$font-size-lg: 1.25rem;    // 20px - Subtitle
+$font-size-xl: 1.5rem;     // 24px - Heading 4
+$font-size-2xl: 1.75rem;   // 28px - Heading 3
+$font-size-3xl: 2rem;      // 32px - Heading 2
 
-// Spacing aliases (shorthand)
+// --- Spacing (BTS 4px base scale) ---
+$spacing-xs: 0.25rem;      // 4px  - BTS spacing.1
+$spacing-sm: 0.5rem;       // 8px  - BTS spacing.2
+$spacing-md: 1rem;         // 16px - BTS spacing.4
+$spacing-lg: 1.5rem;       // 24px - BTS spacing.6
+$spacing-xl: 2rem;         // 32px - BTS spacing.8
+$spacing-2xl: 3rem;        // 48px - BTS spacing.12
+
+// Aliases
 $space-xs: $spacing-xs;
 $space-sm: $spacing-sm;
 $space-md: $spacing-md;
@@ -51,25 +60,25 @@ $space-lg: $spacing-lg;
 $space-xl: $spacing-xl;
 $space-2xl: $spacing-2xl;
 
-// Border radius
-$radius-sm: 0.25rem;
-$radius-md: 0.375rem;
-$radius-lg: 0.5rem;
-$radius-xl: 0.75rem;
-$radius-full: 9999px;
+// --- Border Radius (BTS) ---
+$radius-sm: 0.125rem;      // 2px  - BTS borderRadius.sm
+$radius-md: 0.375rem;      // 6px  - BTS borderRadius.md
+$radius-lg: 0.5rem;        // 8px  - BTS borderRadius.lg
+$radius-xl: 0.75rem;       // 12px - BTS borderRadius.xl
+$radius-full: 9999px;      // BTS borderRadius.full
 
-// Shadows
-$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+// --- Shadows (BTS) ---
+$shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 
-// Breakpoints
+// --- Breakpoints ---
 $breakpoint-sm: 640px;
 $breakpoint-md: 768px;
 $breakpoint-lg: 1024px;
 $breakpoint-xl: 1280px;
 
-// Z-index
+// --- Z-index ---
 $z-dropdown: 1000;
 $z-modal: 1050;
 $z-toast: 1100;

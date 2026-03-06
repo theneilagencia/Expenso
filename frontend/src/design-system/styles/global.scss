@@ -1,0 +1,151 @@
+/**
+ * Global Styles
+ * BTS Global Corp Design System
+ *
+ * Princípios visuais: Sofisticado, moderno, confiável
+ * Tipografia: Inter (Clean, legível, modular)
+ *
+ * Estilos globais e reset CSS.
+ */
+
+// ============================================
+// GOOGLE FONTS - Inter
+// ============================================
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+@import './tokens';
+@import './mixins';
+
+// ============================================
+// CSS RESET
+// ============================================
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-default);
+}
+
+// ============================================
+// TYPOGRAPHY
+// ============================================
+
+h1 {
+  @include heading-1;
+}
+
+h2 {
+  @include heading-2;
+}
+
+h3 {
+  @include heading-3;
+}
+
+h4 {
+  @include heading-4;
+}
+
+h5 {
+  @include heading-5;
+}
+
+h6 {
+  @include heading-6;
+}
+
+p {
+  @include body-1;
+}
+
+small {
+  @include caption;
+}
+
+// ============================================
+// LINKS
+// ============================================
+
+a {
+  color: var(--color-text-link);
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--color-text-link-hover);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+// ============================================
+// BUTTONS
+// ============================================
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+// ============================================
+// FORMS
+// ============================================
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+// ============================================
+// IMAGES
+// ============================================
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+// ============================================
+// LISTS
+// ============================================
+
+ul,
+ol {
+  list-style: none;
+}
+
