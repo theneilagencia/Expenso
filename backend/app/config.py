@@ -52,6 +52,9 @@ class Settings(BaseSettings):
     PAYMENT_GATEWAY: str = "mock"
     REVOLUT_API_KEY: str = ""
     REVOLUT_API_URL: str = "https://sandbox-b2b.revolut.com/api/1.0"
+    REVOLUT_CLIENT_ID: str = ""
+    REVOLUT_PRIVATE_KEY: str = ""
+    REVOLUT_WEBHOOK_SECRET: str = ""
     PAYMENT_MAX_RETRIES: int = 3
     PAYMENT_RETRY_DELAY_MINUTES: int = 15
 
