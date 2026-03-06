@@ -2,8 +2,38 @@
   <DefaultLayout>
     <div class="payments">
       <div class="payments__header">
-        <h2 class="payments__title">{{ t('payments.title') }}</h2>
-        <p class="payments__subtitle">{{ t('payments.subtitle') }}</p>
+        <div class="payments__header-left">
+          <h2 class="payments__title">{{ t('payments.title') }}</h2>
+          <p class="payments__subtitle">{{ t('payments.subtitle') }}</p>
+        </div>
+        <button
+          class="payments__export-btn"
+          @click="handleExportXlsx"
+        >
+          {{ t('payments.exportXlsx') }}
+        </button>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="payments__kpis">
+        <div class="payments__kpi payments__kpi--pending">
+          <span class="payments__kpi-label">{{ t('payments.kpi.totalPending') }}</span>
+          <span class="payments__kpi-value">{{ formatCurrency(kpis.totalPending, 'BRL') }}</span>
+          <span class="payments__kpi-count">{{ kpis.pendingCount }}</span>
+        </div>
+        <div class="payments__kpi payments__kpi--processing">
+          <span class="payments__kpi-label">{{ t('payments.kpi.processingCount') }}</span>
+          <span class="payments__kpi-value">{{ kpis.processingCount }}</span>
+        </div>
+        <div class="payments__kpi payments__kpi--completed">
+          <span class="payments__kpi-label">{{ t('payments.kpi.totalPaid') }}</span>
+          <span class="payments__kpi-value">{{ formatCurrency(kpis.totalPaid, 'BRL') }}</span>
+          <span class="payments__kpi-count">{{ kpis.completedCount }}</span>
+        </div>
+        <div class="payments__kpi payments__kpi--failed">
+          <span class="payments__kpi-label">{{ t('payments.kpi.failedCount') }}</span>
+          <span class="payments__kpi-value">{{ kpis.failedCount }}</span>
+        </div>
       </div>
 
       <!-- Tab Navigation -->
@@ -30,8 +60,16 @@
         class="payments__batch"
       >
         <span class="payments__batch-count">
-          {{ t('payments.selectedCount', { count: selectedIds.length }) }}
+          {{ t('payments.selectedCount', { count: selectedIds.length, amount: formatCurrency(selectedTotal, 'BRL') }) }}
         </span>
+        <select
+          v-model="batchMethod"
+          class="payments__batch-method"
+        >
+          <option value="REVOLUT">{{ t('payments.revolut') }}</option>
+          <option value="PIX">{{ t('payments.pix') }}</option>
+          <option value="PAYROLL">{{ t('payments.payroll') }}</option>
+        </select>
         <button
           class="payments__batch-btn"
           :disabled="processingBatch"
@@ -103,14 +141,14 @@
               <td class="payments__td">{{ payment.request_title }}</td>
               <td class="payments__td">{{ payment.requester_name }}</td>
               <td class="payments__td payments__td--right">
-                {{ formatCurrency(payment.amount) }}
+                {{ formatCurrency(payment.amount_paid, payment.currency_paid) }}
               </td>
               <td class="payments__td">
-                <span :class="['payments__status', `payments__status--${payment.status?.toLowerCase()}`]">
+                <span :class="['payments__status', `payments__status--${normalizeStatus(payment.status)}`]">
                   {{ t(`payments.status.${payment.status}`) }}
                 </span>
               </td>
-              <td class="payments__td">{{ payment.payment_method || '-' }}</td>
+              <td class="payments__td">{{ payment.method || '-' }}</td>
               <td class="payments__td">{{ formatDate(payment.created_at) }}</td>
               <td class="payments__td">
                 <button
@@ -119,6 +157,13 @@
                   @click.stop="processSingle(payment)"
                 >
                   {{ t('payments.process') }}
+                </button>
+                <button
+                  v-if="payment.status === PAYMENT_STATUS.FAILED"
+                  class="payments__action-btn payments__action-btn--retry"
+                  @click.stop="retryPayment(payment)"
+                >
+                  {{ t('payments.retry') }}
                 </button>
               </td>
             </tr>
@@ -145,15 +190,15 @@
                     </div>
                     <div class="payments__detail-item">
                       <span class="payments__detail-label">{{ t('payments.detail.processedAt') }}</span>
-                      <span class="payments__detail-value">{{ formatDate(payment.processed_at) }}</span>
+                      <span class="payments__detail-value">{{ formatDate(payment.payment_date) }}</span>
                     </div>
                     <div
-                      v-if="payment.failure_reason"
+                      v-if="payment.last_error"
                       class="payments__detail-item payments__detail-item--full"
                     >
                       <span class="payments__detail-label">{{ t('payments.detail.failureReason') }}</span>
                       <span class="payments__detail-value payments__detail-value--danger">
-                        {{ payment.failure_reason }}
+                        {{ payment.last_error }}
                       </span>
                     </div>
                   </div>
@@ -208,6 +253,7 @@ const activeTab = ref('pending')
 const selectedIds = ref([])
 const expandedId = ref(null)
 const processingBatch = ref(false)
+const batchMethod = ref('REVOLUT')
 
 const tabStatusMap = {
   pending: PAYMENT_STATUS.SCHEDULED,
@@ -225,7 +271,7 @@ const tabs = computed(() => [
 
 const filteredPayments = computed(() => {
   const status = tabStatusMap[activeTab.value]
-  return payments.value.filter(p => p.status === status)
+  return payments.value.filter(p => normalizeStatus(p.status) === normalizeStatus(status))
 })
 
 const allSelected = computed(() => {
@@ -233,17 +279,45 @@ const allSelected = computed(() => {
     filteredPayments.value.every(p => selectedIds.value.includes(p.id))
 })
 
+const selectedTotal = computed(() => {
+  return filteredPayments.value
+    .filter(p => selectedIds.value.includes(p.id))
+    .reduce((sum, p) => sum + (p.amount_paid || 0), 0)
+})
+
+const kpis = computed(() => {
+  const all = payments.value
+  const pendingList = all.filter(p => normalizeStatus(p.status) === 'scheduled')
+  const processingList = all.filter(p => normalizeStatus(p.status) === 'processing')
+  const completedList = all.filter(p => normalizeStatus(p.status) === 'completed')
+  const failedList = all.filter(p => normalizeStatus(p.status) === 'failed')
+
+  return {
+    totalPending: pendingList.reduce((sum, p) => sum + (p.amount_paid || 0), 0),
+    pendingCount: pendingList.length,
+    processingCount: processingList.length,
+    totalPaid: completedList.reduce((sum, p) => sum + (p.amount_paid || 0), 0),
+    completedCount: completedList.length,
+    failedCount: failedList.length
+  }
+})
+
+function normalizeStatus(status) {
+  if (!status) return ''
+  return status.toLowerCase()
+}
+
 function countByStatus(status) {
-  return payments.value.filter(p => p.status === status).length
+  return payments.value.filter(p => normalizeStatus(p.status) === normalizeStatus(status)).length
 }
 
 async function fetchPayments(params = {}) {
   loading.value = true
   try {
-    const data = await paymentsService.list(params)
-    payments.value = data.items || data
-    if (data.meta?.total) {
-      setTotal(data.meta.total)
+    const data = await paymentsService.list({ ...params, per_page: 100 })
+    payments.value = data.data || data.items || data
+    if (data.total) {
+      setTotal(data.total)
     }
   } catch {
     toast.error(t('payments.messages.fetchError'))
@@ -285,7 +359,7 @@ function toggleExpand(id) {
 
 async function processSingle(payment) {
   try {
-    await paymentsService.process(payment.id, {})
+    await paymentsService.process(payment.request_id, { method: batchMethod.value })
     toast.success(t('payments.messages.processed'))
     await fetchPayments()
   } catch {
@@ -293,13 +367,28 @@ async function processSingle(payment) {
   }
 }
 
+async function retryPayment(payment) {
+  try {
+    await paymentsService.retry(payment.id)
+    toast.success(t('payments.messages.retrySuccess'))
+    await fetchPayments()
+  } catch {
+    toast.error(t('payments.messages.retryError'))
+  }
+}
+
 async function processSelected() {
   processingBatch.value = true
   try {
-    await Promise.all(
-      selectedIds.value.map(id => paymentsService.process(id, {}))
-    )
-    toast.success(t('payments.messages.batchProcessed', { count: selectedIds.value.length }))
+    const result = await paymentsService.batchProcess({
+      request_ids: selectedIds.value.map(id => {
+        const p = payments.value.find(pay => pay.id === id)
+        return p?.request_id || id
+      }),
+      method: batchMethod.value
+    })
+    const count = result.processed?.length || selectedIds.value.length
+    toast.success(t('payments.messages.batchProcessed', { count }))
     selectedIds.value = []
     await fetchPayments()
   } catch {
@@ -309,11 +398,19 @@ async function processSelected() {
   }
 }
 
-function formatCurrency(value) {
+async function handleExportXlsx() {
+  try {
+    await paymentsService.exportXlsx()
+  } catch {
+    toast.error(t('payments.messages.fetchError'))
+  }
+}
+
+function formatCurrency(value, currency = 'BRL') {
   if (value == null) return '-'
   return new Intl.NumberFormat(undefined, {
     style: 'currency',
-    currency: 'EUR'
+    currency: currency || 'BRL'
   }).format(value)
 }
 
@@ -339,6 +436,9 @@ onMounted(() => {
 <style lang="scss" scoped>
 .payments {
   &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     margin-bottom: $spacing-xl;
   }
 
@@ -351,6 +451,77 @@ onMounted(() => {
   &__subtitle {
     color: $gray-500;
     margin-top: $spacing-xs;
+  }
+
+  &__export-btn {
+    padding: $spacing-sm $spacing-lg;
+    background: $white;
+    color: $gray-700;
+    border: 1px solid $gray-300;
+    border-radius: $radius-md;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background: $gray-50;
+      border-color: $primary;
+      color: $primary;
+    }
+  }
+
+  &__kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: $spacing-lg;
+    margin-bottom: $spacing-xl;
+  }
+
+  &__kpi {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    padding: $spacing-lg;
+    background: $white;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-sm;
+    border-left: 4px solid transparent;
+
+    &--pending {
+      border-left-color: $warning;
+    }
+
+    &--processing {
+      border-left-color: $info;
+    }
+
+    &--completed {
+      border-left-color: $success;
+    }
+
+    &--failed {
+      border-left-color: $danger;
+    }
+  }
+
+  &__kpi-label {
+    font-size: $font-size-xs;
+    color: $gray-500;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  &__kpi-value {
+    font-size: $font-size-xl;
+    font-weight: 700;
+    color: $gray-900;
+  }
+
+  &__kpi-count {
+    font-size: $font-size-sm;
+    color: $gray-500;
   }
 
   &__tabs {
@@ -417,6 +588,16 @@ onMounted(() => {
     font-size: $font-size-sm;
     color: $primary-dark;
     font-weight: 500;
+  }
+
+  &__batch-method {
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid $gray-300;
+    border-radius: $radius-md;
+    font-size: $font-size-sm;
+    color: $gray-700;
+    background: $white;
+    cursor: pointer;
   }
 
   &__batch-btn {
@@ -549,6 +730,14 @@ onMounted(() => {
 
     &:hover {
       background: $primary-dark;
+    }
+
+    &--retry {
+      background: $warning;
+
+      &:hover {
+        background: darken($warning, 10%);
+      }
     }
   }
 

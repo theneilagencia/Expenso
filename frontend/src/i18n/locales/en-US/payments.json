@@ -1,5 +1,6 @@
 {
   "title": "Payments",
+  "subtitle": "Manage and process expense payments",
   "process": "Process Payment",
   "method": "Payment Method",
   "revolut": "Revolut",
@@ -17,7 +18,12 @@
   "paymentFailed": "Payment failed. Please try again.",
   "selectAll": "Select All",
   "selected": "{count} selected",
+  "selectedCount": "{count} selected · Total: {amount}",
   "processSelected": "Process Selected",
+  "empty": "No payments found",
+  "exportXlsx": "Export XLSX",
+  "methodSelect": "Payment Method",
+  "batchConfirm": "Process {count} payments via {method}?",
   "tabs": {
     "pending": "Pending",
     "processing": "Processing",
@@ -28,6 +34,38 @@
     "SCHEDULED": "Scheduled",
     "PROCESSING": "Processing",
     "COMPLETED": "Completed",
+    "completed": "Completed",
     "FAILED": "Failed"
+  },
+  "kpi": {
+    "totalPending": "Total Pending",
+    "totalPaid": "Total Paid",
+    "failedCount": "Failed",
+    "processingCount": "Processing"
+  },
+  "table": {
+    "title": "Request",
+    "requester": "Requester",
+    "amount": "Amount",
+    "status": "Status",
+    "method": "Method",
+    "date": "Date",
+    "actions": "Actions"
+  },
+  "detail": {
+    "requestId": "Request ID",
+    "department": "Department",
+    "category": "Category",
+    "processedAt": "Processed At",
+    "failureReason": "Failure Reason"
+  },
+  "messages": {
+    "fetchError": "Failed to load payments",
+    "processed": "Payment processed successfully",
+    "processError": "Failed to process payment",
+    "batchProcessed": "{count} payments processed successfully",
+    "batchError": "Batch processing failed",
+    "retrySuccess": "Payment retry dispatched",
+    "retryError": "Failed to retry payment"
   }
 }
