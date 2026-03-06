@@ -28,6 +28,10 @@ celery_app.conf.beat_schedule = {
         "task": "app.workers.tasks.ai_tasks.check_sla",
         "schedule": 3600.0,  # hourly
     },
+    "strategist-weekly-analysis": {
+        "task": "app.workers.tasks.ai_tasks.run_strategist_weekly",
+        "schedule": 604800.0,  # weekly
+    },
     "payment-retry-every-15min": {
         "task": "app.workers.tasks.payment_tasks.retry_failed_payments",
         "schedule": 900.0,  # every 15 minutes
