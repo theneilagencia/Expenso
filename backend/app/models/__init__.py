@@ -15,10 +15,11 @@ from app.models.request_version import RequestVersion
 from app.models.sla_config import SLAConfig
 from app.models.user import User
 from app.models.vendor_list import VendorList
+from app.models.webhook_config import WebhookConfig
 
 __all__ = [
     "User", "Department", "CostCenter", "ExpenseCategory", "ExpenseRequest",
     "RequestVersion", "AuditLog", "RequestComment", "Attachment", "Payment",
     "SLAConfig", "ApprovalPolicy", "Integration", "AIAnalysisLog",
-    "VendorList", "Notification", "CorporateCalendar",
+    "VendorList", "Notification", "CorporateCalendar", "WebhookConfig",
 ]
