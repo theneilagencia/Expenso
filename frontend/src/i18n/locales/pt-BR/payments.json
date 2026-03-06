@@ -1,5 +1,6 @@
 {
   "title": "Pagamentos",
+  "subtitle": "Gerenciar e processar pagamentos de despesas",
   "process": "Processar Pagamento",
   "method": "Método de Pagamento",
   "revolut": "Revolut",
@@ -17,7 +18,12 @@
   "paymentFailed": "Pagamento falhou. Tente novamente.",
   "selectAll": "Selecionar Todos",
   "selected": "{count} selecionados",
+  "selectedCount": "{count} selecionados · Total: {amount}",
   "processSelected": "Processar Selecionados",
+  "empty": "Nenhum pagamento encontrado",
+  "exportXlsx": "Exportar XLSX",
+  "methodSelect": "Método de Pagamento",
+  "batchConfirm": "Processar {count} pagamentos via {method}?",
   "tabs": {
     "pending": "Pendentes",
     "processing": "Processando",
@@ -28,6 +34,38 @@
     "SCHEDULED": "Agendado",
     "PROCESSING": "Processando",
     "COMPLETED": "Concluído",
+    "completed": "Concluído",
     "FAILED": "Falhou"
+  },
+  "kpi": {
+    "totalPending": "Total Pendente",
+    "totalPaid": "Total Pago",
+    "failedCount": "Falhas",
+    "processingCount": "Processando"
+  },
+  "table": {
+    "title": "Solicitação",
+    "requester": "Solicitante",
+    "amount": "Valor",
+    "status": "Status",
+    "method": "Método",
+    "date": "Data",
+    "actions": "Ações"
+  },
+  "detail": {
+    "requestId": "ID da Solicitação",
+    "department": "Departamento",
+    "category": "Categoria",
+    "processedAt": "Processado Em",
+    "failureReason": "Motivo da Falha"
+  },
+  "messages": {
+    "fetchError": "Falha ao carregar pagamentos",
+    "processed": "Pagamento processado com sucesso",
+    "processError": "Falha ao processar pagamento",
+    "batchProcessed": "{count} pagamentos processados com sucesso",
+    "batchError": "Processamento em lote falhou",
+    "retrySuccess": "Reprocessamento do pagamento iniciado",
+    "retryError": "Falha ao tentar reprocessar pagamento"
   }
 }

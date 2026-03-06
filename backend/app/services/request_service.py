@@ -1,3 +1,4 @@
+import logging
 import uuid
 from datetime import datetime, timezone
 
@@ -6,9 +7,16 @@ from sqlalchemy.orm import Session
 from app.core.exceptions import ForbiddenError, NotFoundError, ValidationError
 from app.core.state_machine import transition
 from app.models.audit_log import AuditLog
+from app.models.expense_category import ExpenseCategory
 from app.models.expense_request import ExpenseRequest
+from app.models.notification import Notification
 from app.models.request_comment import RequestComment
 from app.models.request_version import RequestVersion
+from app.models.user import User
+from app.services.currency_service import convert_to_brl
+from app.services.sla_service import SLAService
+
+logger = logging.getLogger(__name__)
 
 
 class RequestService:
@@ -96,6 +104,10 @@ class RequestService:
         if action in ("request_edit",) and (not comment or len(comment) < 30):
             raise ValidationError("Correction comment must be at least 30 characters")
 
+        # Submit-specific validations and enrichments
+        if action == "submit":
+            self._validate_and_enrich_submit(req)
+
         # Perform state transition
         new_status = transition(req.status, action)
         req.status = new_status
@@ -116,7 +128,102 @@ class RequestService:
 
         self.db.commit()
         self.db.refresh(req)
+
+        # Post-commit: notifications and async tasks
+        self._dispatch_notifications(req, action, actor_id)
+        if action == "submit":
+            self._dispatch_ai_task(req)
+
         return req
+
+    def _validate_and_enrich_submit(self, req: ExpenseRequest):
+        """Validate justification and enrich with currency/SLA on submit."""
+        # 1. Validate justification per category
+        min_chars = 20
+        if req.category_id:
+            category = self.db.query(ExpenseCategory).filter(
+                ExpenseCategory.id == req.category_id
+            ).first()
+            if category and category.min_justification_chars:
+                min_chars = category.min_justification_chars
+
+        if not req.justification or len(req.justification.strip()) < min_chars:
+            raise ValidationError(
+                f"Justification must be at least {min_chars} characters"
+            )
+
+        # 2. Calculate amount_brl and exchange_rate
+        currency = req.currency or "BRL"
+        amount_brl, rate = convert_to_brl(req.amount, currency)
+        req.amount_brl = amount_brl
+        req.exchange_rate = rate
+
+        # 3. Calculate SLA deadlines
+        SLAService.set_deadlines_on_submit(req, self.db)
+
+    def _dispatch_ai_task(self, req: ExpenseRequest):
+        """Dispatch Celery AI analysis task. Non-blocking on failure."""
+        try:
+            from app.workers.tasks.ai_tasks import analyze_request
+            analyze_request.delay(str(req.id))
+        except Exception as e:
+            logger.warning(f"Failed to dispatch AI task for request {req.id}: {e}")
+            req.ai_skipped = True
+            self.db.commit()
+
+    def _dispatch_notifications(self, req: ExpenseRequest, action: str, actor_id: uuid.UUID):
+        """Create in-app notifications and dispatch email tasks."""
+        notify_user_id = None
+        notif_type = None
+        title = ""
+        body = ""
+
+        if action == "submit":
+            # Notify the employee's manager
+            employee = self.db.query(User).filter(User.id == req.employee_id).first()
+            if employee and employee.manager_id:
+                notify_user_id = employee.manager_id
+                notif_type = "NEW_PENDING_APPROVAL"
+                title = f"New request pending approval: {req.title}"
+                body = "A new expense request requires your review."
+        elif action in ("approve", "confirm_payment"):
+            notify_user_id = req.employee_id
+            notif_type = "REQUEST_APPROVED" if action == "approve" else "PAYMENT_CONFIRMED"
+            title = f"Request {action.replace('_', ' ')}: {req.title}"
+            body = f"Your expense request has been {action.replace('_', ' ')}."
+        elif action == "reject":
+            notify_user_id = req.employee_id
+            notif_type = "REQUEST_REJECTED"
+            title = f"Request rejected: {req.title}"
+            body = "Your expense request has been rejected."
+        elif action == "request_edit":
+            notify_user_id = req.employee_id
+            notif_type = "CORRECTION_REQUESTED"
+            title = f"Correction requested: {req.title}"
+            body = "Your expense request needs corrections."
+
+        if notify_user_id and notif_type:
+            self._create_notification(notify_user_id, req.id, notif_type, title, body)
+            self._dispatch_email_task(notify_user_id, req.id, notif_type)
+
+    def _create_notification(self, user_id, request_id, notif_type, title, body):
+        notification = Notification(
+            user_id=user_id,
+            request_id=request_id,
+            type=notif_type,
+            title=title,
+            body=body,
+        )
+        self.db.add(notification)
+        self.db.commit()
+
+    def _dispatch_email_task(self, user_id, request_id, event_type):
+        """Dispatch async email notification. Non-blocking on failure."""
+        try:
+            from app.workers.tasks.email_tasks import send_notification_email
+            send_notification_email.delay(str(user_id), str(request_id), event_type)
+        except Exception as e:
+            logger.warning(f"Failed to dispatch email task: {e}")
 
     def _validate_action_permission(self, req, action, actor_id, actor_role):
         if action in ("submit", "resubmit", "cancel"):

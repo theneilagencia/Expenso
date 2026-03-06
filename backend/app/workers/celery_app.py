@@ -28,6 +28,22 @@ celery_app.conf.beat_schedule = {
         "task": "app.workers.tasks.ai_tasks.check_sla",
         "schedule": 3600.0,  # hourly
     },
+    "strategist-weekly-analysis": {
+        "task": "app.workers.tasks.ai_tasks.run_strategist_weekly",
+        "schedule": 604800.0,  # weekly
+    },
+    "payment-retry-every-15min": {
+        "task": "app.workers.tasks.payment_tasks.retry_failed_payments",
+        "schedule": 900.0,  # every 15 minutes
+    },
+    "payment-status-poll-10min": {
+        "task": "app.workers.tasks.payment_tasks.poll_payment_status",
+        "schedule": 600.0,  # every 10 minutes
+    },
+    "data-retention-monthly": {
+        "task": "app.workers.tasks.lgpd_tasks.data_retention_cleanup",
+        "schedule": 2592000.0,  # every 30 days
+    },
 }
 
 celery_app.autodiscover_tasks(["app.workers.tasks"])

@@ -49,6 +49,13 @@ class RequestResponse(BaseModel):
     ai_summary: Optional[str] = None
     ai_attention_points: Optional[list] = None
     ai_policy_violations: Optional[list] = None
+    ai_analyzed_at: Optional[datetime] = None
+    ai_skipped: Optional[bool] = None
+    amount_brl: Optional[float] = None
+    exchange_rate: Optional[float] = None
+    manager_sla_due_at: Optional[datetime] = None
+    finance_sla_due_at: Optional[datetime] = None
+    correction_sla_due_at: Optional[datetime] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
 

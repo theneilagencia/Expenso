@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
+from app.core.rate_limit import limiter
 from app.core.security import get_current_user
 from app.dependencies import get_db
 from app.schemas.request import (
@@ -13,13 +14,17 @@ from app.schemas.request import (
     RequestResponse,
     RequestUpdate,
 )
+from app.services.ai_service import AIService
+from app.services.cache_service import cache_get, cache_set
 from app.services.request_service import RequestService
 
 router = APIRouter()
 
 
 @router.post("", response_model=RequestResponse, status_code=201, summary="Create expense request")
+@limiter.limit("20/minute")
 async def create_request(
+    request: Request,
     data: RequestCreate,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -46,6 +51,59 @@ async def list_requests(
         per_page=per_page,
     )
     return RequestListResponse(data=requests, total=total, page=page, per_page=per_page)
+
+
+@router.get("/options/categories", summary="List active expense categories")
+async def list_categories(
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    # Redis cache — 1 hour TTL
+    cache_key = "options:categories"
+    cached = cache_get(cache_key)
+    if cached is not None:
+        return cached
+
+    from app.models.expense_category import ExpenseCategory
+    categories = (
+        db.query(ExpenseCategory)
+        .filter(ExpenseCategory.is_active.is_(True), ExpenseCategory.deleted_at.is_(None))
+        .order_by(ExpenseCategory.sort_order.asc())
+        .all()
+    )
+    result = [
+        {
+            "id": str(c.id),
+            "name": c.name,
+            "icon": c.icon,
+            "limit_per_request": c.limit_per_request,
+            "min_justification_chars": c.min_justification_chars,
+        }
+        for c in categories
+    ]
+    cache_set(cache_key, result, ttl=3600)
+    return result
+
+
+@router.get("/options/cost-centers", summary="List active cost centers")
+async def list_cost_centers(
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    from app.models.cost_center import CostCenter
+    centers = (
+        db.query(CostCenter)
+        .filter(CostCenter.is_active.is_(True), CostCenter.deleted_at.is_(None))
+        .all()
+    )
+    return [
+        {
+            "id": str(c.id),
+            "name": c.name,
+            "code": c.code,
+        }
+        for c in centers
+    ]
 
 
 @router.get("/{request_id}", response_model=RequestResponse, summary="Get expense request by ID")
@@ -210,3 +268,16 @@ async def get_versions(
         }
         for v in versions
     ]
+
+
+@router.post("/{request_id}/ai-summary")
+async def generate_ai_summary(
+    request_id: UUID,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Generate an AI summary for an expense request."""
+    result = AIService.generate_summary(request_id, db)
+    if not result:
+        return {"message": "Summary generation failed"}
+    return result

@@ -1,23 +1,23 @@
 {
-  "title": "Administração",
+  "title": "Administra\u00e7\u00e3o",
   "users": {
-    "title": "Usuários",
-    "add": "Adicionar Usuário",
-    "edit": "Editar Usuário",
+    "title": "Usu\u00e1rios",
+    "add": "Adicionar Usu\u00e1rio",
+    "edit": "Editar Usu\u00e1rio",
     "fullName": "Nome Completo",
     "email": "Email",
     "role": "Perfil",
     "password": "Senha",
     "department": "Departamento",
     "status": "Status",
-    "lastLogin": "Último Acesso",
+    "lastLogin": "\u00daltimo Acesso",
     "activate": "Ativar",
     "deactivate": "Desativar",
-    "import": "Importar Usuários",
-    "export": "Exportar Usuários",
+    "import": "Importar Usu\u00e1rios",
+    "export": "Exportar Usu\u00e1rios",
     "resetPassword": "Redefinir Senha",
     "roles": {
-      "EMPLOYEE": "Funcionário",
+      "EMPLOYEE": "Funcion\u00e1rio",
       "MANAGER": "Gestor",
       "FINANCE": "Financeiro",
       "ADMIN": "Administrador"
@@ -28,14 +28,14 @@
     "add": "Adicionar Categoria",
     "edit": "Editar Categoria",
     "name": "Nome",
-    "description": "Descrição",
-    "maxAmount": "Valor Máximo por Solicitação",
+    "description": "Descri\u00e7\u00e3o",
+    "maxAmount": "Valor M\u00e1ximo por Solicita\u00e7\u00e3o",
     "requiresReceipt": "Requer Comprovante",
     "status": "Status",
     "expenseCount": "Qtd. de Despesas"
   },
   "sla": {
-    "title": "Configuração de SLA",
+    "title": "Configura\u00e7\u00e3o de SLA",
     "name": "Nome",
     "statusType": "Tipo de Status",
     "warningHours": "Alerta (horas)",
@@ -43,24 +43,211 @@
     "active": "Ativo"
   },
   "integrations": {
-    "title": "Integrações",
-    "add": "Adicionar Integração",
+    "title": "Integra\u00e7\u00f5es",
+    "add": "Adicionar Integra\u00e7\u00e3o",
     "configure": "Configurar",
-    "testConnection": "Testar Conexão",
+    "testConnection": "Testar Conex\u00e3o",
     "testing": "Testando...",
     "connected": "Conectado",
     "disconnected": "Desconectado",
-    "connectionSuccess": "Conexão bem-sucedida",
-    "connectionFailed": "Falha na conexão"
+    "connectionSuccess": "Conex\u00e3o bem-sucedida",
+    "connectionFailed": "Falha na conex\u00e3o"
   },
   "audit": {
     "title": "Log de Auditoria",
     "timestamp": "Data/Hora",
-    "user": "Usuário",
-    "action": "Ação",
+    "user": "Usu\u00e1rio",
+    "action": "A\u00e7\u00e3o",
     "entityType": "Tipo de Entidade",
     "entityId": "ID da Entidade",
     "details": "Detalhes",
     "export": "Exportar Log de Auditoria"
+  },
+  "aiUsage": {
+    "title": "Uso de IA",
+    "subtitle": "Monitore uso de tokens, custos e desempenho da IA",
+    "totalCalls": "Total de Chamadas",
+    "estimatedCost": "Custo Est.",
+    "avgLatency": "Lat\u00eancia M\u00e9dia",
+    "successRate": "Taxa de Sucesso",
+    "byRole": "Uso por Papel",
+    "role": "Papel",
+    "calls": "Chamadas",
+    "inputTokens": "Tokens de Entrada",
+    "outputTokens": "Tokens de Sa\u00edda",
+    "errors": "Erros",
+    "dailyBreakdown": "Detalhamento Di\u00e1rio",
+    "date": "Data",
+    "last7d": "\u00daltimos 7 dias",
+    "last30d": "\u00daltimos 30 dias",
+    "last90d": "\u00daltimos 90 dias",
+    "noData": "Nenhum dado de uso de IA dispon\u00edvel para este per\u00edodo.",
+    "fetchError": "Falha ao carregar dados de uso de IA."
+  },
+  "approvalPolicies": {
+    "title": "Pol\u00edticas de Aprova\u00e7\u00e3o",
+    "subtitle": "Gerencie regras e fluxos de aprova\u00e7\u00e3o de despesas",
+    "create": "Criar Pol\u00edtica",
+    "empty": "Nenhuma pol\u00edtica de aprova\u00e7\u00e3o configurada.",
+    "editPolicy": "Editar Pol\u00edtica",
+    "createPolicy": "Criar Pol\u00edtica",
+    "table": {
+      "name": "Nome",
+      "department": "Departamento",
+      "minAmount": "Valor M\u00ednimo",
+      "maxAmount": "Valor M\u00e1ximo",
+      "approvalFlow": "Fluxo de Aprova\u00e7\u00e3o",
+      "active": "Ativo"
+    },
+    "form": {
+      "name": "Nome da Pol\u00edtica",
+      "department": "Departamento",
+      "allDepartments": "Todos os Departamentos",
+      "minAmount": "Valor M\u00ednimo",
+      "maxAmount": "Valor M\u00e1ximo",
+      "approvalFlow": "Fluxo de Aprova\u00e7\u00e3o (JSON)",
+      "approvalFlowPlaceholder": "[\"MANAGER\", \"FINANCE\"]"
+    },
+    "messages": {
+      "fetchError": "Falha ao carregar pol\u00edticas de aprova\u00e7\u00e3o.",
+      "created": "Pol\u00edtica de aprova\u00e7\u00e3o criada com sucesso.",
+      "updated": "Pol\u00edtica de aprova\u00e7\u00e3o atualizada com sucesso.",
+      "deleted": "Pol\u00edtica de aprova\u00e7\u00e3o exclu\u00edda com sucesso.",
+      "saveError": "Falha ao salvar pol\u00edtica de aprova\u00e7\u00e3o.",
+      "deleteError": "Falha ao excluir pol\u00edtica de aprova\u00e7\u00e3o.",
+      "deleteConfirm": "Tem certeza que deseja excluir esta pol\u00edtica? Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita."
+    }
+  },
+  "calendar": {
+    "title": "Calend\u00e1rio Corporativo",
+    "subtitle": "Gerencie feriados e dias n\u00e3o \u00fateis",
+    "create": "Adicionar Feriado",
+    "empty": "Nenhum feriado configurado.",
+    "editHoliday": "Editar Feriado",
+    "createHoliday": "Adicionar Feriado",
+    "table": {
+      "date": "Data",
+      "name": "Nome",
+      "type": "Tipo",
+      "stateCode": "UF"
+    },
+    "form": {
+      "date": "Data",
+      "name": "Nome do Feriado",
+      "type": "Tipo",
+      "stateCode": "UF",
+      "stateCodePlaceholder": "ex: SP"
+    },
+    "types": {
+      "NATIONAL": "Nacional",
+      "STATE": "Estadual",
+      "COMPANY": "Empresa"
+    },
+    "messages": {
+      "fetchError": "Falha ao carregar feriados.",
+      "created": "Feriado criado com sucesso.",
+      "updated": "Feriado atualizado com sucesso.",
+      "deleted": "Feriado exclu\u00eddo com sucesso.",
+      "saveError": "Falha ao salvar feriado.",
+      "deleteError": "Falha ao excluir feriado.",
+      "deleteConfirm": "Tem certeza que deseja excluir este feriado? Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita."
+    }
+  },
+  "vendors": {
+    "title": "Listas de Fornecedores",
+    "subtitle": "Gerencie listas de fornecedores aprovados e bloqueados",
+    "create": "Adicionar Fornecedor",
+    "empty": "Nenhum fornecedor configurado.",
+    "editVendor": "Editar Fornecedor",
+    "createVendor": "Adicionar Fornecedor",
+    "allTypes": "Todos os Tipos",
+    "table": {
+      "name": "Nome",
+      "document": "Documento",
+      "listType": "Tipo de Lista",
+      "category": "Categoria",
+      "reason": "Motivo",
+      "validFrom": "V\u00e1lido De",
+      "validUntil": "V\u00e1lido At\u00e9"
+    },
+    "form": {
+      "name": "Nome do Fornecedor",
+      "document": "Documento (CNPJ/CPF)",
+      "listType": "Tipo de Lista",
+      "category": "Categoria",
+      "reason": "Motivo",
+      "validFrom": "V\u00e1lido De",
+      "validUntil": "V\u00e1lido At\u00e9"
+    },
+    "listTypes": {
+      "WHITELIST": "Aprovados",
+      "BLACKLIST": "Bloqueados"
+    },
+    "messages": {
+      "fetchError": "Falha ao carregar fornecedores.",
+      "created": "Fornecedor adicionado com sucesso.",
+      "updated": "Fornecedor atualizado com sucesso.",
+      "deleted": "Fornecedor removido com sucesso.",
+      "saveError": "Falha ao salvar fornecedor.",
+      "deleteError": "Falha ao excluir fornecedor.",
+      "deleteConfirm": "Tem certeza que deseja remover este fornecedor? Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita."
+    }
+  },
+  "hierarchy": {
+    "title": "Hierarquia Organizacional",
+    "subtitle": "Visualize a estrutura de departamentos e membros",
+    "empty": "Nenhum departamento encontrado.",
+    "editParent": "Editar Superior",
+    "user": "usu\u00e1rio",
+    "users": "usu\u00e1rios",
+    "roles": {
+      "ADMIN": "Administrador",
+      "FINANCE": "Financeiro",
+      "MANAGER": "Gestor",
+      "EMPLOYEE": "Funcion\u00e1rio"
+    },
+    "form": {
+      "department": "Departamento",
+      "parentDepartment": "Departamento Superior",
+      "noParent": "Nenhum (Raiz)"
+    },
+    "messages": {
+      "fetchError": "Falha ao carregar hierarquia organizacional.",
+      "updated": "Departamento superior atualizado com sucesso.",
+      "saveError": "Falha ao atualizar departamento."
+    }
+  },
+  "webhooks": {
+    "title": "Webhooks",
+    "subtitle": "Gerencie endpoints de webhook para notifica\u00e7\u00f5es de eventos",
+    "create": "Adicionar Webhook",
+    "empty": "Nenhum webhook configurado.",
+    "editWebhook": "Editar Webhook",
+    "createWebhook": "Adicionar Webhook",
+    "test": "Testar",
+    "testing": "Testando...",
+    "table": {
+      "url": "URL",
+      "events": "Eventos",
+      "active": "Ativo",
+      "lastStatus": "\u00daltimo Status"
+    },
+    "form": {
+      "url": "URL do Webhook",
+      "events": "Eventos"
+    },
+    "messages": {
+      "fetchError": "Falha ao carregar webhooks.",
+      "created": "Webhook criado com sucesso.",
+      "updated": "Webhook atualizado com sucesso.",
+      "deleted": "Webhook exclu\u00eddo com sucesso.",
+      "saveError": "Falha ao salvar webhook.",
+      "deleteError": "Falha ao excluir webhook.",
+      "deleteConfirm": "Tem certeza que deseja excluir este webhook? Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita.",
+      "toggled": "Status do webhook atualizado.",
+      "toggleError": "Falha ao atualizar status do webhook.",
+      "testSuccess": "Teste de webhook enviado com sucesso.",
+      "testFailed": "Falha no teste do webhook."
+    }
   }
 }

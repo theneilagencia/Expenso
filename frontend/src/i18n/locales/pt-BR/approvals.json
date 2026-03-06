@@ -22,5 +22,45 @@
   "department": "Departamento",
   "requester": "Solicitante",
   "submittedDate": "Data de Envio",
-  "slaRemaining": "SLA Restante"
+  "slaRemaining": "SLA Restante",
+  "suggestApprove": "Sugerir Comentário de Aprovação",
+  "suggestReject": "Sugerir Comentário de Rejeição",
+  "aiSummary": "Resumo IA",
+  "detail": {
+    "requestInfo": "Informações da Solicitação",
+    "requester": "Solicitante",
+    "department": "Departamento",
+    "totalAmount": "Valor Total",
+    "submittedAt": "Enviado em",
+    "category": "Categoria",
+    "slaDeadline": "Prazo SLA",
+    "description": "Descrição",
+    "items": "Itens",
+    "itemDescription": "Descrição",
+    "itemQuantity": "Qtd",
+    "itemUnitPrice": "Preço Unitário",
+    "itemTotal": "Total",
+    "attachments": "Anexos",
+    "aiAnalysis": "Análise IA",
+    "riskScore": "Score de Risco",
+    "qualityScore": "Score de Qualidade",
+    "recommendations": "Recomendações",
+    "auditTrail": "Trilha de Auditoria",
+    "comment": "Comentário",
+    "commentPlaceholder": "Adicione seu comentário ou motivo...",
+    "commentRequired": "Comentário é obrigatório para esta ação"
+  },
+  "actions": {
+    "approve": "Aprovar",
+    "reject": "Reprovar",
+    "requestEdit": "Solicitar Correção"
+  },
+  "messages": {
+    "approved": "Solicitação aprovada com sucesso",
+    "rejected": "Solicitação reprovada",
+    "editRequested": "Correção solicitada",
+    "approveError": "Falha ao aprovar solicitação",
+    "rejectError": "Falha ao reprovar solicitação",
+    "editRequestError": "Falha ao solicitar correção"
+  }
 }

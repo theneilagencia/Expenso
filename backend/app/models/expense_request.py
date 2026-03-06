@@ -6,6 +6,11 @@ from sqlalchemy.dialects.postgresql import JSONB, UUID
 
 from app.db.base import Base
 
+try:
+    from pgvector.sqlalchemy import Vector
+except ImportError:
+    Vector = None
+
 
 class ExpenseRequest(Base):
     __tablename__ = "expense_requests"
@@ -36,6 +41,7 @@ class ExpenseRequest(Base):
     ai_policy_violations = Column(JSONB, nullable=True)
     ai_skipped = Column(Boolean, default=False)
     ai_analyzed_at = Column(DateTime(timezone=True), nullable=True)
+    embedding = Column(Vector(1536), nullable=True) if Vector else Column(Text, nullable=True)
     manager_sla_due_at = Column(DateTime(timezone=True), nullable=True)
     finance_sla_due_at = Column(DateTime(timezone=True), nullable=True)
     correction_sla_due_at = Column(DateTime(timezone=True), nullable=True)

@@ -28,6 +28,42 @@ class Settings(BaseSettings):
 
     ANTHROPIC_API_KEY: str = ""
 
+    # Password reset
+    PASSWORD_RESET_EXPIRE_HOURS: int = 2
+    FRONTEND_URL: str = "http://localhost:5173"
+
+    # SMTP (for password reset emails)
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM_EMAIL: str = "noreply@expenso.app"
+
+    # SSO — Azure AD
+    AZURE_AD_CLIENT_ID: str = ""
+    AZURE_AD_CLIENT_SECRET: str = ""
+    AZURE_AD_TENANT_ID: str = ""
+
+    # SSO — Google Workspace
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+
+    # Rate limiting
+    RATE_LIMIT_ENABLED: bool = True
+
+    # Encryption
+    ENCRYPTION_KEY: str = ""
+
+    # Payment gateway
+    PAYMENT_GATEWAY: str = "mock"
+    REVOLUT_API_KEY: str = ""
+    REVOLUT_API_URL: str = "https://sandbox-b2b.revolut.com/api/1.0"
+    REVOLUT_CLIENT_ID: str = ""
+    REVOLUT_PRIVATE_KEY: str = ""
+    REVOLUT_WEBHOOK_SECRET: str = ""
+    PAYMENT_MAX_RETRIES: int = 3
+    PAYMENT_RETRY_DELAY_MINUTES: int = 15
+
     model_config = {"env_file": ".env", "case_sensitive": True}
 
 

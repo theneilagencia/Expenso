@@ -1,4 +1,5 @@
 import os
+import re
 import uuid
 from datetime import datetime, timezone
 
@@ -21,6 +22,42 @@ ALLOWED_MIME_TYPES = {
     "text/csv",
 }
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
+MAX_FILES_PER_REQUEST = 10
+
+# Executable extensions that are never allowed
+BLOCKED_EXTENSIONS = {
+    ".exe", ".sh", ".py", ".js", ".bat", ".cmd", ".ps1",
+    ".msi", ".dll", ".so", ".com", ".scr", ".pif", ".vbs",
+    ".wsf", ".jar", ".app", ".deb", ".rpm",
+}
+
+
+def secure_filename(filename: str) -> str:
+    """Sanitize a filename — strip path separators, null bytes, special chars."""
+    if not filename:
+        return "unnamed"
+    # Remove path separators and null bytes
+    filename = filename.replace("/", "").replace("\\", "").replace("\x00", "")
+    # Allow only alphanumeric, hyphens, underscores, dots, spaces
+    filename = re.sub(r"[^\w\-. ]", "", filename)
+    # Collapse multiple dots/spaces
+    filename = re.sub(r"\.{2,}", ".", filename)
+    filename = filename.strip(". ")
+    return filename or "unnamed"
+
+
+def validate_magic_bytes(content: bytes, declared_mime: str) -> str | None:
+    """Validate file content via magic bytes. Returns detected MIME or None."""
+    try:
+        import magic
+
+        detected = magic.from_buffer(content[:2048], mime=True)
+        return detected
+    except ImportError:
+        # python-magic not installed — fall back to declared MIME
+        return declared_mime
+    except Exception:
+        return None
 
 
 def get_minio_client():
@@ -55,21 +92,48 @@ def upload_attachment(
     if expense.employee_id != current_user.id and current_user.role not in ("ADMIN", "MANAGER"):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
 
-    if file.content_type not in ALLOWED_MIME_TYPES:
+    # Check max files per request
+    existing_count = (
+        db.query(Attachment)
+        .filter(Attachment.request_id == request_id, Attachment.deleted_at.is_(None))
+        .count()
+    )
+    if existing_count >= MAX_FILES_PER_REQUEST:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"File type {file.content_type} not allowed",
+            detail=f"Maximum {MAX_FILES_PER_REQUEST} files per request",
         )
 
+    # Sanitize filename
+    safe_name = secure_filename(file.filename or "unnamed")
+
+    # Check extension blocklist
+    _, ext = os.path.splitext(safe_name)
+    if ext.lower() in BLOCKED_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"File extension {ext} is not allowed",
+        )
+
+    # Read content and check size
     file_content = file.file.read()
     if len(file_content) > MAX_FILE_SIZE:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="File exceeds maximum size of 10MB",
         )
+
+    # Validate MIME type via magic bytes (content inspection)
+    detected_mime = validate_magic_bytes(file_content, file.content_type)
+    if not detected_mime or detected_mime not in ALLOWED_MIME_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"File type {detected_mime or 'unknown'} not allowed",
+        )
+
     file.file.seek(0)
 
-    file_ext = os.path.splitext(file.filename)[1] if file.filename else ""
+    file_ext = os.path.splitext(safe_name)[1] if safe_name != "unnamed" else ""
     file_key = f"attachments/{request_id}/{uuid.uuid4()}{file_ext}"
 
     bucket = getattr(settings, "MINIO_BUCKET", "expenso")
@@ -82,7 +146,7 @@ def upload_attachment(
             file_key,
             file.file,
             length=len(file_content),
-            content_type=file.content_type,
+            content_type=detected_mime,
         )
     except Exception as e:
         raise HTTPException(
@@ -93,9 +157,9 @@ def upload_attachment(
     attachment = Attachment(
         request_id=request_id,
         uploaded_by=current_user.id,
-        file_name=file.filename or "unnamed",
+        file_name=safe_name,
         file_path=file_key,
-        mime_type=file.content_type,
+        mime_type=detected_mime,
         size_bytes=len(file_content),
     )
     db.add(attachment)

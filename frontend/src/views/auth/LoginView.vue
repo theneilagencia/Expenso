@@ -1,6 +1,6 @@
 <template>
   <AuthLayout>
-    <form class="login-form" @submit.prevent="handleLogin">
+    <form v-if="!mfaRequired" class="login-form" @submit.prevent="handleLogin">
       <div class="login-form__field">
         <label for="email">{{ t('auth.email') }}</label>
         <input
@@ -25,38 +25,151 @@
       <button type="submit" class="login-form__submit" :disabled="loading">
         {{ loading ? t('common.loading') : t('auth.login') }}
       </button>
-      <a href="#" class="login-form__forgot">{{ t('auth.forgotPassword') }}</a>
+      <router-link :to="{ name: 'forgot-password' }" class="login-form__forgot">
+        {{ t('auth.forgotPassword') }}
+      </router-link>
+      <div v-if="ssoProviders.length" class="login-form__sso">
+        <div class="login-form__divider">
+          <span>{{ t('auth.orContinueWith') }}</span>
+        </div>
+        <button
+          v-for="provider in ssoProviders"
+          :key="provider.provider"
+          type="button"
+          class="login-form__sso-btn"
+          @click="handleSSO(provider)"
+        >
+          {{ provider.provider === 'azure_ad' ? 'Microsoft' : 'Google' }}
+        </button>
+      </div>
+    </form>
+
+    <!-- MFA Verification -->
+    <form v-else class="login-form" @submit.prevent="handleMFAVerify">
+      <h3 class="login-form__mfa-title">{{ t('auth.mfa.verifyTitle') }}</h3>
+      <p class="login-form__mfa-text">{{ t('auth.mfa.verifyDescription') }}</p>
+      <div class="login-form__field">
+        <label for="mfa-code">{{ t('auth.mfa.totpCode') }}</label>
+        <input
+          id="mfa-code"
+          v-model="mfaCode"
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]{6}"
+          maxlength="6"
+          :placeholder="t('auth.mfa.codePlaceholder')"
+          class="login-form__mfa-input"
+          required
+        />
+      </div>
+      <p v-if="error" class="login-form__error">{{ error }}</p>
+      <button type="submit" class="login-form__submit" :disabled="loading || mfaCode.length !== 6">
+        {{ loading ? t('common.loading') : t('auth.mfa.verify') }}
+      </button>
+      <button
+        type="button"
+        class="login-form__back-btn"
+        @click="cancelMFA"
+      >
+        {{ t('auth.backToLogin') }}
+      </button>
     </form>
   </AuthLayout>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
+import { authService } from '@/services/auth'
+import { mfaService } from '@/services/mfa'
+import { useAuthStore } from '@/stores/auth.store'
 import AuthLayout from '@/layouts/AuthLayout.vue'
 
 const { t } = useI18n()
 const router = useRouter()
 const { login } = useAuth()
+const authStore = useAuthStore()
 
 const email = ref('')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
+const ssoProviders = ref([])
+
+const mfaRequired = ref(false)
+const mfaToken = ref('')
+const mfaCode = ref('')
+
+onMounted(async () => {
+  try {
+    const data = await authService.getSSOConfig()
+    ssoProviders.value = data.providers || []
+  } catch {
+    // SSO not available — continue with email/password only
+  }
+})
 
 async function handleLogin() {
   error.value = ''
   loading.value = true
   try {
-    await login(email.value, password.value)
-    router.push({ name: 'dashboard' })
+    const data = await login(email.value, password.value)
+    if (data?.mfa_required) {
+      mfaRequired.value = true
+      mfaToken.value = data.mfa_token
+      mfaCode.value = ''
+    } else {
+      router.push({ name: 'dashboard' })
+    }
   } catch (e) {
-    error.value = t('auth.invalidCredentials')
+    if (e?.response?.data?.mfa_required) {
+      mfaRequired.value = true
+      mfaToken.value = e.response.data.mfa_token
+      mfaCode.value = ''
+    } else {
+      error.value = t('auth.invalidCredentials')
+    }
   } finally {
     loading.value = false
   }
+}
+
+async function handleMFAVerify() {
+  error.value = ''
+  loading.value = true
+  try {
+    const data = await mfaService.verify(mfaToken.value, mfaCode.value)
+    authStore.setAuth(data)
+    router.push({ name: 'dashboard' })
+  } catch {
+    error.value = t('auth.mfa.invalidCode')
+  } finally {
+    loading.value = false
+  }
+}
+
+function cancelMFA() {
+  mfaRequired.value = false
+  mfaToken.value = ''
+  mfaCode.value = ''
+  error.value = ''
+}
+
+function handleSSO(provider) {
+  const redirectUri = `${window.location.origin}/auth/callback`
+  const scopes = provider.provider === 'azure_ad'
+    ? 'openid email profile'
+    : 'openid email profile'
+  const params = new URLSearchParams({
+    client_id: provider.client_id,
+    redirect_uri: redirectUri,
+    response_type: 'code',
+    scope: scopes,
+    state: provider.provider,
+  })
+  window.location.href = `${provider.authorize_url}?${params.toString()}`
 }
 </script>
 
@@ -105,6 +218,7 @@ async function handleLogin() {
     font-size: $font-size-base;
     font-weight: 500;
     transition: background 0.2s;
+    cursor: pointer;
 
     &:hover:not(:disabled) {
       background: $primary-dark;
@@ -122,6 +236,89 @@ async function handleLogin() {
     margin-top: $spacing-md;
     font-size: $font-size-sm;
     color: $primary;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__sso {
+    margin-top: $spacing-lg;
+  }
+
+  &__divider {
+    display: flex;
+    align-items: center;
+    margin-bottom: $spacing-md;
+
+    &::before,
+    &::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid $gray-300;
+    }
+
+    span {
+      padding: 0 $spacing-sm;
+      font-size: $font-size-sm;
+      color: $gray-500;
+    }
+  }
+
+  &__sso-btn {
+    width: 100%;
+    padding: $spacing-sm $spacing-md;
+    background: $white;
+    color: $gray-700;
+    border: 1px solid $gray-300;
+    border-radius: $radius-md;
+    font-size: $font-size-base;
+    cursor: pointer;
+    margin-bottom: $spacing-sm;
+    transition: background 0.2s;
+
+    &:hover {
+      background: $gray-50;
+    }
+  }
+
+  &__mfa-title {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    color: $gray-800;
+    margin-bottom: $spacing-xs;
+    text-align: center;
+  }
+
+  &__mfa-text {
+    font-size: $font-size-sm;
+    color: $gray-500;
+    text-align: center;
+    margin-bottom: $spacing-lg;
+  }
+
+  &__mfa-input {
+    text-align: center;
+    font-size: $font-size-xl;
+    letter-spacing: 0.5em;
+  }
+
+  &__back-btn {
+    display: block;
+    width: 100%;
+    margin-top: $spacing-md;
+    padding: $spacing-sm $spacing-md;
+    background: none;
+    color: $primary;
+    border: none;
+    font-size: $font-size-sm;
+    cursor: pointer;
+    text-align: center;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 </style>

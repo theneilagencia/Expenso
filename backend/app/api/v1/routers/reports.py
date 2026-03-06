@@ -13,8 +13,14 @@ from app.models.department import Department
 from app.models.expense_category import ExpenseCategory
 from app.models.expense_request import ExpenseRequest
 from app.models.user import User
+from app.services.ai_service import AIService
+from app.services.cache_service import cache_get, cache_set
 
 router = APIRouter()
+
+
+def _cache_key(endpoint: str, date_from=None, date_to=None, department_id=None):
+    return f"reports:{endpoint}:{date_from or ''}:{date_to or ''}:{department_id or ''}"
 
 
 def _base_query(db: Session, date_from=None, date_to=None, department_id=None):
@@ -38,6 +44,11 @@ def get_dashboard(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
+    key = _cache_key("dashboard", date_from, date_to, department_id)
+    cached = cache_get(key)
+    if cached is not None:
+        return cached
+
     q = _base_query(db, date_from, date_to, department_id)
 
     total_requests = q.count()
@@ -62,7 +73,7 @@ def get_dashboard(
         func.coalesce(func.avg(ExpenseRequest.ai_risk_score), 0)
     ).scalar()
 
-    return {
+    result = {
         "total_requests": total_requests,
         "total_amount": float(total_amount),
         "average_amount": round(float(avg_amount), 2),
@@ -71,6 +82,8 @@ def get_dashboard(
         "average_risk_score": round(float(avg_risk), 1),
         "status_breakdown": {s: c for s, c in status_counts},
     }
+    cache_set(key, result, ttl=300)
+    return result
 
 
 @router.get("/by-category")
@@ -81,6 +94,11 @@ def get_by_category(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
+    key = _cache_key("by-category", date_from, date_to, department_id)
+    cached = cache_get(key)
+    if cached is not None:
+        return cached
+
     q = db.query(
         ExpenseCategory.name,
         func.count(ExpenseRequest.id).label("count"),
@@ -101,7 +119,7 @@ def get_by_category(
 
     rows = q.group_by(ExpenseCategory.id, ExpenseCategory.name).order_by(func.sum(ExpenseRequest.amount).desc().nullslast()).all()
 
-    return [
+    result = [
         {
             "category": row.name,
             "count": row.count,
@@ -110,6 +128,8 @@ def get_by_category(
         }
         for row in rows
     ]
+    cache_set(key, result, ttl=600)
+    return result
 
 
 @router.get("/by-department")
@@ -119,6 +139,11 @@ def get_by_department(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
+    key = _cache_key("by-department", date_from, date_to)
+    cached = cache_get(key)
+    if cached is not None:
+        return cached
+
     q = db.query(
         Department.name,
         func.count(ExpenseRequest.id).label("count"),
@@ -137,7 +162,7 @@ def get_by_department(
 
     rows = q.group_by(Department.id, Department.name).order_by(func.sum(ExpenseRequest.amount).desc().nullslast()).all()
 
-    return [
+    result = [
         {
             "department": row.name,
             "count": row.count,
@@ -146,6 +171,8 @@ def get_by_department(
         }
         for row in rows
     ]
+    cache_set(key, result, ttl=600)
+    return result
 
 
 @router.get("/by-month")
@@ -156,6 +183,11 @@ def get_by_month(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
+    key = _cache_key("by-month", date_from, date_to, department_id)
+    cached = cache_get(key)
+    if cached is not None:
+        return cached
+
     year_col = extract("year", ExpenseRequest.created_at).label("year")
     month_col = extract("month", ExpenseRequest.created_at).label("month")
 
@@ -177,7 +209,7 @@ def get_by_month(
 
     rows = q.group_by(year_col, month_col).order_by(year_col, month_col).all()
 
-    return [
+    result = [
         {
             "year": int(row.year),
             "month": int(row.month),
@@ -186,6 +218,8 @@ def get_by_month(
         }
         for row in rows
     ]
+    cache_set(key, result, ttl=600)
+    return result
 
 
 @router.get("/export/csv")
@@ -292,4 +326,97 @@ def export_pdf(
         iter([html.encode("utf-8")]),
         media_type="text/html",
         headers={"Content-Disposition": "attachment; filename=expenses_report.html"},
+    )
+
+
+@router.get("/narrative")
+async def stream_narrative_report(
+    date_from: str = Query(None),
+    date_to: str = Query(None),
+    department_id: str = Query(None),
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Stream an AI-generated narrative expense report via SSE."""
+    q = _base_query(db, date_from, date_to, department_id)
+
+    # Dashboard aggregation
+    total_requests = q.count()
+    total_amount = q.with_entities(func.coalesce(func.sum(ExpenseRequest.amount), 0)).scalar()
+    avg_amount = q.with_entities(func.coalesce(func.avg(ExpenseRequest.amount), 0)).scalar()
+    paid_q = q.filter(ExpenseRequest.status == "PAID")
+    total_paid = paid_q.with_entities(func.coalesce(func.sum(ExpenseRequest.amount), 0)).scalar()
+    pending_q = _base_query(db, date_from, date_to, department_id).filter(
+        ExpenseRequest.status.in_(["PENDING_MANAGER", "PENDING_FINANCE", "PENDING_AI"])
+    )
+    total_pending = pending_q.with_entities(func.coalesce(func.sum(ExpenseRequest.amount), 0)).scalar()
+
+    dashboard = {
+        "total_requests": total_requests,
+        "total_amount": float(total_amount),
+        "average_amount": round(float(avg_amount), 2),
+        "total_paid": float(total_paid),
+        "total_pending": float(total_pending),
+    }
+
+    # Category breakdown
+    cat_q = db.query(
+        ExpenseCategory.name.label("category"),
+        func.count(ExpenseRequest.id).label("count"),
+        func.coalesce(func.sum(ExpenseRequest.amount), 0).label("total"),
+    ).outerjoin(ExpenseRequest, ExpenseRequest.category_id == ExpenseCategory.id).filter(
+        ExpenseCategory.deleted_at.is_(None)
+    )
+    if date_from:
+        cat_q = cat_q.filter(ExpenseRequest.created_at >= datetime.fromisoformat(date_from))
+    if date_to:
+        cat_q = cat_q.filter(ExpenseRequest.created_at <= datetime.fromisoformat(date_to))
+    cat_rows = cat_q.group_by(ExpenseCategory.id, ExpenseCategory.name).all()
+    by_category = [
+        {"category": r.category, "count": r.count, "total": float(r.total)}
+        for r in cat_rows
+    ]
+
+    # Department breakdown
+    dept_q = db.query(
+        Department.name.label("department"),
+        func.count(ExpenseRequest.id).label("count"),
+        func.coalesce(func.sum(ExpenseRequest.amount), 0).label("total"),
+    ).outerjoin(User, User.department_id == Department.id).outerjoin(
+        ExpenseRequest, ExpenseRequest.employee_id == User.id
+    ).filter(Department.deleted_at.is_(None))
+    if date_from:
+        dept_q = dept_q.filter(ExpenseRequest.created_at >= datetime.fromisoformat(date_from))
+    if date_to:
+        dept_q = dept_q.filter(ExpenseRequest.created_at <= datetime.fromisoformat(date_to))
+    dept_rows = dept_q.group_by(Department.id, Department.name).all()
+    by_department = [
+        {"department": r.department, "count": r.count, "total": float(r.total)}
+        for r in dept_rows
+    ]
+
+    period = "all time"
+    if date_from and date_to:
+        period = f"{date_from} to {date_to}"
+    elif date_from:
+        period = f"from {date_from}"
+    elif date_to:
+        period = f"until {date_to}"
+
+    locale = current_user.locale or "en-US"
+    report_data = {
+        "dashboard": dashboard,
+        "by_category": by_category,
+        "by_department": by_department,
+        "period": period,
+    }
+
+    return StreamingResponse(
+        AIService.stream_narrative(report_data, locale),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
     )

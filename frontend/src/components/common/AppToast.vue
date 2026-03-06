@@ -10,61 +10,7 @@
           role="alert"
         >
           <div class="app-toast__icon">
-            <!-- Success -->
-            <svg
-              v-if="toast.type === 'success'"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-              <polyline points="22 4 12 14.01 9 11.01" />
-            </svg>
-            <!-- Error -->
-            <svg
-              v-else-if="toast.type === 'error'"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="15" y1="9" x2="9" y2="15" />
-              <line x1="9" y1="9" x2="15" y2="15" />
-            </svg>
-            <!-- Warning -->
-            <svg
-              v-else-if="toast.type === 'warning'"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-              <line x1="12" y1="9" x2="12" y2="13" />
-              <line x1="12" y1="17" x2="12.01" y2="17" />
-            </svg>
-            <!-- Info -->
-            <svg
-              v-else
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="16" x2="12" y2="12" />
-              <line x1="12" y1="8" x2="12.01" y2="8" />
-            </svg>
+            <BtsStatusIcon :variant="mapTypeToVariant(toast.type)" />
           </div>
 
           <span class="app-toast__message">{{ toast.message }}</span>
@@ -75,14 +21,18 @@
             @click="dismiss(toast.id)"
           >
             <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
+              width="10"
+              height="10"
+              viewBox="0 0 10 10"
               fill="none"
-              stroke="currentColor"
-              stroke-width="2"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <path d="M18 6L6 18M6 6l12 12" />
+              <path
+                d="M1 1L9 9M9 1L1 9"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
             </svg>
           </button>
 
@@ -101,9 +51,20 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
 import { useToast } from '@/composables/useToast'
+import { BtsStatusIcon } from '@/design-system'
 
 const { t } = useI18n()
 const { toasts, dismiss } = useToast()
+
+function mapTypeToVariant(type) {
+  const map = {
+    success: 'success',
+    error: 'danger',
+    warning: 'warning',
+    info: 'info'
+  }
+  return map[type] || 'info'
+}
 </script>
 
 <style lang="scss" scoped>
@@ -124,60 +85,45 @@ const { toasts, dismiss } = useToast()
   position: relative;
   display: flex;
   align-items: flex-start;
-  gap: $spacing-sm;
-  padding: $spacing-md;
-  background-color: $white;
-  border-radius: $radius-lg;
+  gap: 16px;
+  padding: 20px;
+  background: var(--color-primary-white, $white);
+  border: 1px solid;
+  border-radius: 12px;
   box-shadow: $shadow-lg;
-  border-left: 4px solid;
   overflow: hidden;
   pointer-events: auto;
+  font-family: var(--font-family-primary, inherit);
 
   &--success {
-    border-left-color: $success;
-
-    .app-toast__icon {
-      color: $success;
-    }
+    border-color: var(--color-success-dark, $success);
 
     .app-toast__progress-bar {
-      background-color: $success;
+      background-color: var(--color-success-dark, $success);
     }
   }
 
   &--error {
-    border-left-color: $danger;
-
-    .app-toast__icon {
-      color: $danger;
-    }
+    border-color: var(--color-error-semi-dark, $danger);
 
     .app-toast__progress-bar {
-      background-color: $danger;
+      background-color: var(--color-error-semi-dark, $danger);
     }
   }
 
   &--warning {
-    border-left-color: $warning;
-
-    .app-toast__icon {
-      color: $warning;
-    }
+    border-color: var(--color-warning-semi-dark, $warning);
 
     .app-toast__progress-bar {
-      background-color: $warning;
+      background-color: var(--color-warning-semi-dark, $warning);
     }
   }
 
   &--info {
-    border-left-color: $info;
-
-    .app-toast__icon {
-      color: $info;
-    }
+    border-color: var(--color-primary-blue-highlight, $info);
 
     .app-toast__progress-bar {
-      background-color: $info;
+      background-color: var(--color-primary-blue-highlight, $info);
     }
   }
 
@@ -185,14 +131,16 @@ const { toasts, dismiss } = useToast()
     flex-shrink: 0;
     display: inline-flex;
     align-items: center;
-    margin-top: 1px;
+    width: 32px;
+    height: 32px;
   }
 
   &__message {
     flex: 1;
-    font-size: $font-size-sm;
-    color: $gray-700;
-    line-height: 1.4;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    color: var(--color-text-primary, $gray-700);
   }
 
   &__dismiss {
@@ -200,18 +148,19 @@ const { toasts, dismiss } = useToast()
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 18px;
+    height: 18px;
+    padding: 4px;
     border: none;
     background: none;
     color: $gray-400;
-    border-radius: $radius-sm;
+    border-radius: 4px;
     cursor: pointer;
     transition: color 0.15s ease, background-color 0.15s ease;
 
     &:hover {
       color: $gray-600;
-      background-color: $gray-100;
+      background: rgba(0, 0, 0, 0.05);
     }
   }
 

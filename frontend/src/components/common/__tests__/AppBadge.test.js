@@ -7,7 +7,14 @@ describe('AppBadge', () => {
     return mount(AppBadge, {
       props,
       slots,
-      global: { stubs: {} }
+      global: {
+        stubs: {
+          BtsBadge: {
+            template: '<span class="bts-badge" :class="`bts-badge--${variant}`"><slot /></span>',
+            props: ['variant', 'label']
+          }
+        }
+      }
     })
   }
 
@@ -16,46 +23,46 @@ describe('AppBadge', () => {
     expect(wrapper.text()).toContain('Active')
   })
 
-  it('renders with default variant (neutral) and size (md)', () => {
+  it('renders with default variant (neutral → default) and size (md)', () => {
     const wrapper = mountBadge({}, { default: 'Default' })
-    expect(wrapper.classes()).toContain('app-badge')
-    expect(wrapper.classes()).toContain('app-badge--neutral')
-    expect(wrapper.classes()).toContain('app-badge--md')
+    expect(wrapper.find('.bts-badge').exists()).toBe(true)
+    expect(wrapper.find('.bts-badge--default').exists()).toBe(true)
+    expect(wrapper.find('.app-badge--md').exists()).toBe(true)
   })
 
   it('applies success variant class', () => {
     const wrapper = mountBadge({ variant: 'success' }, { default: 'OK' })
-    expect(wrapper.classes()).toContain('app-badge--success')
+    expect(wrapper.find('.bts-badge--success').exists()).toBe(true)
   })
 
   it('applies warning variant class', () => {
     const wrapper = mountBadge({ variant: 'warning' }, { default: 'Pending' })
-    expect(wrapper.classes()).toContain('app-badge--warning')
+    expect(wrapper.find('.bts-badge--warning').exists()).toBe(true)
   })
 
   it('applies danger variant class', () => {
     const wrapper = mountBadge({ variant: 'danger' }, { default: 'Error' })
-    expect(wrapper.classes()).toContain('app-badge--danger')
+    expect(wrapper.find('.bts-badge--danger').exists()).toBe(true)
   })
 
   it('applies primary variant class', () => {
     const wrapper = mountBadge({ variant: 'primary' }, { default: 'Main' })
-    expect(wrapper.classes()).toContain('app-badge--primary')
+    expect(wrapper.find('.bts-badge--primary').exists()).toBe(true)
   })
 
   it('applies info variant class', () => {
     const wrapper = mountBadge({ variant: 'info' }, { default: 'Info' })
-    expect(wrapper.classes()).toContain('app-badge--info')
+    expect(wrapper.find('.bts-badge--info').exists()).toBe(true)
   })
 
   it('applies sm size class', () => {
     const wrapper = mountBadge({ size: 'sm' }, { default: 'Small' })
-    expect(wrapper.classes()).toContain('app-badge--sm')
+    expect(wrapper.find('.app-badge--sm').exists()).toBe(true)
   })
 
   it('applies md size class', () => {
     const wrapper = mountBadge({ size: 'md' }, { default: 'Medium' })
-    expect(wrapper.classes()).toContain('app-badge--md')
+    expect(wrapper.find('.app-badge--md').exists()).toBe(true)
   })
 
   it('renders as a span element', () => {
@@ -71,8 +78,8 @@ describe('AppBadge', () => {
 
   it('combines variant and size classes correctly', () => {
     const wrapper = mountBadge({ variant: 'danger', size: 'sm' }, { default: 'X' })
-    expect(wrapper.classes()).toContain('app-badge')
-    expect(wrapper.classes()).toContain('app-badge--danger')
-    expect(wrapper.classes()).toContain('app-badge--sm')
+    expect(wrapper.find('.bts-badge').exists()).toBe(true)
+    expect(wrapper.find('.bts-badge--danger').exists()).toBe(true)
+    expect(wrapper.find('.app-badge--sm').exists()).toBe(true)
   })
 })

@@ -21,6 +21,13 @@
           >
             {{ t('reports.exportPdf') }}
           </button>
+          <button
+            class="reports__export-btn reports__export-btn--ai"
+            :disabled="narrativeLoading"
+            @click="handleGenerateNarrative"
+          >
+            {{ narrativeLoading ? t('reports.narrativeGenerating') : t('reports.generateNarrative') }}
+          </button>
         </div>
       </div>
 
@@ -86,96 +93,37 @@
         <div class="reports__charts">
           <div class="reports__chart-card">
             <h3 class="reports__chart-title">{{ t('reports.charts.byCategory') }}</h3>
-            <div class="reports__chart-placeholder" data-chart="category">
-              <div
-                v-if="categoryData.length"
-                class="reports__chart-bars"
-              >
-                <div
-                  v-for="item in categoryData"
-                  :key="item.category"
-                  class="reports__chart-bar-row"
-                >
-                  <span class="reports__chart-bar-label">{{ item.category }}</span>
-                  <div class="reports__chart-bar-track">
-                    <div
-                      class="reports__chart-bar-fill"
-                      :style="{ width: getBarWidth(item.total, categoryMax) }"
-                    />
-                  </div>
-                  <span class="reports__chart-bar-value">{{ formatCurrency(item.total) }}</span>
-                </div>
-              </div>
-              <p
-                v-else
-                class="reports__chart-empty"
-              >
-                {{ t('reports.charts.noData') }}
-              </p>
-            </div>
+            <SpendingByCategoryChart :data="categoryData" :loading="false" />
           </div>
 
           <div class="reports__chart-card">
             <h3 class="reports__chart-title">{{ t('reports.charts.byDepartment') }}</h3>
-            <div class="reports__chart-placeholder" data-chart="department">
-              <div
-                v-if="departmentData.length"
-                class="reports__chart-bars"
-              >
-                <div
-                  v-for="item in departmentData"
-                  :key="item.department"
-                  class="reports__chart-bar-row"
-                >
-                  <span class="reports__chart-bar-label">{{ item.department }}</span>
-                  <div class="reports__chart-bar-track">
-                    <div
-                      class="reports__chart-bar-fill reports__chart-bar-fill--secondary"
-                      :style="{ width: getBarWidth(item.total, departmentMax) }"
-                    />
-                  </div>
-                  <span class="reports__chart-bar-value">{{ formatCurrency(item.total) }}</span>
-                </div>
-              </div>
-              <p
-                v-else
-                class="reports__chart-empty"
-              >
-                {{ t('reports.charts.noData') }}
-              </p>
-            </div>
+            <DepartmentComparisonChart :data="departmentData" :loading="false" />
           </div>
 
           <div class="reports__chart-card reports__chart-card--full">
             <h3 class="reports__chart-title">{{ t('reports.charts.byMonth') }}</h3>
-            <div class="reports__chart-placeholder" data-chart="monthly">
-              <div
-                v-if="monthlyData.length"
-                class="reports__chart-monthly"
-              >
-                <div
-                  v-for="item in monthlyData"
-                  :key="item.month"
-                  class="reports__chart-month-col"
-                >
-                  <div class="reports__chart-month-bar-wrapper">
-                    <div
-                      class="reports__chart-month-bar"
-                      :style="{ height: getBarWidth(item.total, monthlyMax) }"
-                    />
-                  </div>
-                  <span class="reports__chart-month-label">{{ item.month }}</span>
-                  <span class="reports__chart-month-value">{{ formatCurrencyShort(item.total) }}</span>
-                </div>
-              </div>
-              <p
-                v-else
-                class="reports__chart-empty"
-              >
-                {{ t('reports.charts.noData') }}
-              </p>
-            </div>
+            <MonthlyTrendChart :data="monthlyData" :loading="false" />
           </div>
+        </div>
+
+        <!-- AI Narrative Report -->
+        <div
+          v-if="narrativeText || narrativeLoading"
+          class="reports__chart-card reports__chart-card--full reports__narrative-card"
+        >
+          <h3 class="reports__chart-title">{{ t('reports.narrativeTitle') }}</h3>
+          <div
+            v-if="narrativeLoading && !narrativeText"
+            class="reports__loading"
+          >
+            {{ t('reports.narrativeGenerating') }}
+          </div>
+          <div
+            v-else
+            class="reports__narrative-text"
+            v-text="narrativeText"
+          />
         </div>
       </template>
     </div>
@@ -186,7 +134,11 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import SpendingByCategoryChart from '@/components/charts/SpendingByCategoryChart.vue'
+import MonthlyTrendChart from '@/components/charts/MonthlyTrendChart.vue'
+import DepartmentComparisonChart from '@/components/charts/DepartmentComparisonChart.vue'
 import { reportsService } from '@/services/reports'
+import { aiService } from '@/services/ai'
 import { useToast } from '@/composables/useToast'
 
 const { t } = useI18n()
@@ -207,18 +159,8 @@ const dashboard = ref({
 const categoryData = ref([])
 const departmentData = ref([])
 const monthlyData = ref([])
-
-const categoryMax = computed(() => {
-  return Math.max(...categoryData.value.map(i => i.total), 1)
-})
-
-const departmentMax = computed(() => {
-  return Math.max(...departmentData.value.map(i => i.total), 1)
-})
-
-const monthlyMax = computed(() => {
-  return Math.max(...monthlyData.value.map(i => i.total), 1)
-})
+const narrativeText = ref('')
+const narrativeLoading = ref(false)
 
 const trendClass = computed(() => {
   const trend = dashboard.value.monthly_trend
@@ -234,25 +176,12 @@ function getDateParams() {
   return params
 }
 
-function getBarWidth(value, max) {
-  if (!max) return '0%'
-  return `${Math.round((value / max) * 100)}%`
-}
-
 function formatCurrency(value) {
   if (value == null) return '-'
   return new Intl.NumberFormat(undefined, {
     style: 'currency',
     currency: 'EUR'
   }).format(value)
-}
-
-function formatCurrencyShort(value) {
-  if (value == null) return '-'
-  if (value >= 1000) {
-    return `${(value / 1000).toFixed(1)}k`
-  }
-  return formatCurrency(value)
 }
 
 function formatTrend(value) {
@@ -316,6 +245,16 @@ function downloadBlob(data, filename, mimeType) {
   link.download = filename
   link.click()
   window.URL.revokeObjectURL(url)
+}
+
+function handleGenerateNarrative() {
+  narrativeText.value = ''
+  narrativeLoading.value = true
+  aiService.streamNarrativeReport(
+    getDateParams(),
+    (chunk) => { narrativeText.value += chunk.content || '' },
+    () => { narrativeLoading.value = false }
+  )
 }
 
 onMounted(() => {
@@ -504,103 +443,25 @@ onMounted(() => {
     margin-bottom: $spacing-md;
   }
 
-  &__chart-placeholder {
-    min-height: 12rem;
+  &__narrative-card {
+    margin-top: $spacing-lg;
   }
 
-  &__chart-empty {
-    text-align: center;
-    padding: $spacing-xl;
-    color: $gray-400;
+  &__narrative-text {
+    white-space: pre-wrap;
+    line-height: 1.7;
+    color: $gray-700;
     font-size: $font-size-sm;
   }
 
-  &__chart-bars {
-    display: flex;
-    flex-direction: column;
-    gap: $spacing-sm;
-  }
+  &__export-btn--ai {
+    background: $info;
+    color: $white;
 
-  &__chart-bar-row {
-    display: flex;
-    align-items: center;
-    gap: $spacing-md;
-  }
-
-  &__chart-bar-label {
-    font-size: $font-size-sm;
-    color: $gray-600;
-    min-width: 7rem;
-    text-align: right;
-  }
-
-  &__chart-bar-track {
-    flex: 1;
-    height: 1.5rem;
-    background: $gray-100;
-    border-radius: $radius-sm;
-    overflow: hidden;
-  }
-
-  &__chart-bar-fill {
-    height: 100%;
-    background: $primary;
-    border-radius: $radius-sm;
-    transition: width 0.4s ease;
-
-    &--secondary {
-      background: $info;
+    &:hover:not(:disabled) {
+      background: darken($info, 8%);
     }
   }
 
-  &__chart-bar-value {
-    font-size: $font-size-xs;
-    color: $gray-500;
-    min-width: 5rem;
-  }
-
-  &__chart-monthly {
-    display: flex;
-    align-items: flex-end;
-    gap: $spacing-sm;
-    height: 12rem;
-    padding-top: $spacing-md;
-  }
-
-  &__chart-month-col {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: $spacing-xs;
-  }
-
-  &__chart-month-bar-wrapper {
-    flex: 1;
-    width: 100%;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-  }
-
-  &__chart-month-bar {
-    width: 60%;
-    background: $primary;
-    border-radius: $radius-sm $radius-sm 0 0;
-    transition: height 0.4s ease;
-    min-height: 0.25rem;
-  }
-
-  &__chart-month-label {
-    font-size: $font-size-xs;
-    color: $gray-500;
-    text-align: center;
-  }
-
-  &__chart-month-value {
-    font-size: $font-size-xs;
-    color: $gray-600;
-    font-weight: 500;
-  }
 }
 </style>

@@ -22,5 +22,45 @@
   "department": "Department",
   "requester": "Requester",
   "submittedDate": "Submitted Date",
-  "slaRemaining": "SLA Remaining"
+  "slaRemaining": "SLA Remaining",
+  "suggestApprove": "Suggest Approval Comment",
+  "suggestReject": "Suggest Rejection Comment",
+  "aiSummary": "AI Summary",
+  "detail": {
+    "requestInfo": "Request Information",
+    "requester": "Requester",
+    "department": "Department",
+    "totalAmount": "Total Amount",
+    "submittedAt": "Submitted At",
+    "category": "Category",
+    "slaDeadline": "SLA Deadline",
+    "description": "Description",
+    "items": "Items",
+    "itemDescription": "Description",
+    "itemQuantity": "Qty",
+    "itemUnitPrice": "Unit Price",
+    "itemTotal": "Total",
+    "attachments": "Attachments",
+    "aiAnalysis": "AI Analysis",
+    "riskScore": "Risk Score",
+    "qualityScore": "Quality Score",
+    "recommendations": "Recommendations",
+    "auditTrail": "Audit Trail",
+    "comment": "Comment",
+    "commentPlaceholder": "Add your comment or reason...",
+    "commentRequired": "Comment is required for this action"
+  },
+  "actions": {
+    "approve": "Approve",
+    "reject": "Reject",
+    "requestEdit": "Request Correction"
+  },
+  "messages": {
+    "approved": "Request approved successfully",
+    "rejected": "Request rejected",
+    "editRequested": "Correction requested",
+    "approveError": "Failed to approve request",
+    "rejectError": "Failed to reject request",
+    "editRequestError": "Failed to request correction"
+  }
 }

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f7; }
+    .container { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 8px; overflow: hidden; }
+    .header { background: #2563eb; color: #fff; padding: 24px; text-align: center; }
+    .header h1 { margin: 0; font-size: 20px; }
+    .body { padding: 24px; color: #333; line-height: 1.6; }
+    .details { background: #f8fafc; border-radius: 6px; padding: 16px; margin: 16px 0; }
+    .details td { padding: 4px 12px 4px 0; }
+    .details .label { font-weight: 600; color: #64748b; }
+    .btn { display: inline-block; background: #2563eb; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; margin: 16px 0; }
+    .footer { padding: 16px 24px; text-align: center; color: #94a3b8; font-size: 12px; border-top: 1px solid #e2e8f0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header"><h1>Expenso</h1></div>
+    <div class="body">
+      {% block content %}{% endblock %}
+      <table class="details">
+        <tr><td class="label">{{ label_title }}</td><td>{{ request_title }}</td></tr>
+        <tr><td class="label">{{ label_amount }}</td><td>{{ currency }} {{ amount }}</td></tr>
+        {% if status %}<tr><td class="label">Status</td><td>{{ status }}</td></tr>{% endif %}
+      </table>
+      {% if action_url %}
+      <a href="{{ action_url }}" class="btn">{% block btn_text %}{{ label_view }}{% endblock %}</a>
+      {% endif %}
+    </div>
+    <div class="footer">{{ footer_text }}</div>
+  </div>
+</body>
+</html>

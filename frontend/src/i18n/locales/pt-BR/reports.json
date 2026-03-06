@@ -22,5 +22,33 @@
   "exportCSV": "Exportar CSV",
   "exportXLSX": "Exportar XLSX",
   "exportPDF": "Exportar PDF",
-  "generating": "Gerando relatório..."
+  "generating": "Gerando relatório...",
+  "subtitle": "Analise seus dados de despesas",
+  "exportCsv": "Exportar CSV",
+  "exportPdf": "Exportar PDF",
+  "dateFrom": "De",
+  "dateTo": "Até",
+  "apply": "Aplicar",
+  "stats": {
+    "totalExpenses": "Total de Despesas",
+    "avgPerRequest": "Média por Solicitação",
+    "topCategory": "Principal Categoria",
+    "monthlyTrend": "Tendência Mensal"
+  },
+  "charts": {
+    "byCategory": "Por Categoria",
+    "byDepartment": "Por Departamento",
+    "byMonth": "Por Mês",
+    "noData": "Sem dados disponíveis",
+    "totalSpending": "Gasto Total",
+    "requests": "Solicitações"
+  },
+  "generateNarrative": "Gerar Relatório IA",
+  "narrativeTitle": "Relatório Narrativo IA",
+  "narrativeGenerating": "Gerando relatório narrativo...",
+  "messages": {
+    "fetchError": "Falha ao carregar dados do relatório",
+    "exported": "Relatório exportado com sucesso",
+    "exportError": "Falha ao exportar relatório"
+  }
 }

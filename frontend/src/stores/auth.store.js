@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { ROLE_HIERARCHY } from '@/constants/roles'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
@@ -9,6 +10,17 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!token.value)
   const userRole = computed(() => user.value?.role || null)
   const userLocale = computed(() => user.value?.locale || 'en-US')
+  const forcePasswordReset = computed(() => user.value?.force_password_reset || false)
+
+  function hasMinRole(minRole) {
+    const userLevel = ROLE_HIERARCHY[userRole.value] || 0
+    const requiredLevel = ROLE_HIERARCHY[minRole] || 0
+    return userLevel >= requiredLevel
+  }
+
+  function hasRole(...roles) {
+    return roles.includes(userRole.value)
+  }
 
   function setAuth(data) {
     user.value = data.user
@@ -30,5 +42,10 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = { ...user.value, ...data }
   }
 
-  return { user, token, refreshToken, isAuthenticated, userRole, userLocale, setAuth, clearAuth, updateUser }
+  return {
+    user, token, refreshToken,
+    isAuthenticated, userRole, userLocale, forcePasswordReset,
+    hasMinRole, hasRole,
+    setAuth, clearAuth, updateUser,
+  }
 })

@@ -22,6 +22,8 @@
           </span>
         </div>
 
+        <div class="request-edit__content">
+        <div class="request-edit__main">
         <form class="request-edit__form" @submit.prevent="handleSubmit">
           <!-- Basic Info -->
           <div class="request-edit__section">
@@ -288,20 +290,36 @@
             </div>
           </div>
         </form>
+        </div>
+
+        <div class="request-edit__sidebar">
+          <AIAssistantBox
+            :messages="aiAssistantMessages"
+            :is-assisting="isAssisting"
+            @start="handleStartAssistance"
+            @stop="handleStopAssistance"
+          />
+          <AIQualityMeter v-if="qualityScore > 0" :score="qualityScore" />
+        </div>
+        </div>
       </template>
     </div>
   </DefaultLayout>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import AIAssistantBox from '@/components/ai/AIAssistantBox.vue'
+import AIQualityMeter from '@/components/ai/AIQualityMeter.vue'
 import { useRequest } from '@/composables/useRequest'
 import { useFileUpload } from '@/composables/useFileUpload'
+import { useAIAssistant } from '@/composables/useAIAssistant'
 import { useToast } from '@/composables/useToast'
 import { REQUEST_STATUS } from '@/constants/status'
+import { requestsService } from '@/services/requests'
 
 const props = defineProps({
   id: {
@@ -320,28 +338,21 @@ const {
   performAction
 } = useRequest()
 const { uploading, progress, upload, remove: removeAttachment } = useFileUpload()
+const {
+  qualityScore,
+  assistantMessages: aiAssistantMessages,
+  isAssisting,
+  startAssistanceDraft,
+  stopAssistance,
+} = useAIAssistant()
 const toast = useToast()
 
 const initialLoading = ref(true)
 const fileInput = ref(null)
 const newFiles = ref([])
 
-// Placeholder data - in production these would come from an API
-const categories = ref([
-  { id: 1, name: 'Travel' },
-  { id: 2, name: 'Office Supplies' },
-  { id: 3, name: 'Software' },
-  { id: 4, name: 'Equipment' },
-  { id: 5, name: 'Training' }
-])
-
-const costCenters = ref([
-  { id: 1, name: 'Engineering' },
-  { id: 2, name: 'Marketing' },
-  { id: 3, name: 'Sales' },
-  { id: 4, name: 'Operations' },
-  { id: 5, name: 'HR' }
-])
+const categories = ref([])
+const costCenters = ref([])
 
 const form = reactive({
   title: '',
@@ -460,9 +471,34 @@ function handleSubmit() {
   saveRequest(true)
 }
 
+watch(
+  () => ({ description: form.description, title: form.title, category_id: form.category_id }),
+  (newVal) => {
+    if ((newVal.description?.length > 10) || (newVal.title?.length > 10)) {
+      startAssistanceDraft({ ...form, totalAmount: totalAmount.value })
+    }
+  },
+  { deep: true }
+)
+
+function handleStartAssistance() {
+  startAssistanceDraft({ ...form, totalAmount: totalAmount.value })
+}
+
+function handleStopAssistance() {
+  stopAssistance()
+}
+
 onMounted(async () => {
   try {
-    const data = await fetchRequest(props.id)
+    const [data, cats, ccs] = await Promise.all([
+      fetchRequest(props.id),
+      requestsService.listCategories(),
+      requestsService.listCostCenters()
+    ])
+
+    categories.value = cats
+    costCenters.value = ccs
 
     // Redirect if request is not editable
     const editableStatuses = [REQUEST_STATUS.DRAFT, REQUEST_STATUS.IN_CORRECTION]
@@ -484,8 +520,30 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 .request-edit {
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0 auto;
+
+  &__content {
+    display: flex;
+    gap: $spacing-lg;
+  }
+
+  &__main {
+    flex: 1;
+    min-width: 0;
+    max-width: 900px;
+  }
+
+  &__sidebar {
+    width: 320px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+    position: sticky;
+    top: $spacing-lg;
+    align-self: flex-start;
+  }
 
   &__loading {
     text-align: center;

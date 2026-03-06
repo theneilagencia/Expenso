@@ -1,11 +1,13 @@
 <template>
   <div class="app-loader" :class="{ 'app-loader--fullscreen': fullscreen }">
-    <div class="app-loader__spinner" />
+    <BtsSpinner size="lg" variant="primary" :label="text || 'Loading'" />
     <p v-if="text" class="app-loader__text">{{ text }}</p>
   </div>
 </template>
 
 <script setup>
+import { BtsSpinner } from '@/design-system'
+
 defineProps({
   fullscreen: { type: Boolean, default: false },
   text: { type: String, default: '' }
@@ -25,15 +27,6 @@ defineProps({
     inset: 0;
     background: rgba($white, 0.8);
     z-index: $z-modal;
-  }
-
-  &__spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid $gray-200;
-    border-top-color: $primary;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
   }
 
   &__text {

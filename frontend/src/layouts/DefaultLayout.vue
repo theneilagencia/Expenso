@@ -7,9 +7,10 @@
           <h1 class="default-layout__logo">Expenso</h1>
         </div>
         <div class="default-layout__header-right">
-          <div class="default-layout__notifications" @click="showNotifications = !showNotifications">
+          <div class="default-layout__notifications" ref="notificationsRef" @click="showNotifications = !showNotifications">
             <span class="default-layout__bell">&#128276;</span>
             <span v-if="unreadCount > 0" class="default-layout__badge">{{ unreadCount }}</span>
+            <NotificationDropdown :visible="showNotifications" @close="showNotifications = false" />
           </div>
           <LocaleSwitcher />
           <div class="default-layout__user" @click="$router.push({ name: 'settings' })">
@@ -25,23 +26,30 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import LocaleSwitcher from '@/components/common/LocaleSwitcher.vue'
 import AppSidebar from '@/components/common/AppSidebar.vue'
+import NotificationDropdown from '@/components/common/NotificationDropdown.vue'
 import { useAuthStore } from '@/stores/auth.store'
-import { notificationsService } from '@/services/notifications'
+import { useNotifications } from '@/composables/useNotifications'
 
 const authStore = useAuthStore()
 const showNotifications = ref(false)
-const unreadCount = ref(0)
+const notificationsRef = ref(null)
+const { unreadCount } = useNotifications()
 
-onMounted(async () => {
-  try {
-    const data = await notificationsService.getUnreadCount()
-    unreadCount.value = data.count || 0
-  } catch {
-    // ignore on mount
+function handleClickOutside(e) {
+  if (notificationsRef.value && !notificationsRef.value.contains(e.target)) {
+    showNotifications.value = false
   }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
 })
 </script>
 

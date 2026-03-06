@@ -209,6 +209,21 @@
               </span>
             </router-link>
           </li>
+
+          <li class="app-sidebar__item">
+            <router-link
+              :to="{ name: 'admin-ai-usage' }"
+              class="app-sidebar__link"
+              :class="{ 'app-sidebar__link--active': isActive('admin-ai-usage') }"
+            >
+              <svg class="app-sidebar__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1.27A7 7 0 0 1 14 23h-4a7 7 0 0 1-6.73-4H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z" />
+              </svg>
+              <span v-if="!collapsed" class="app-sidebar__label">
+                {{ t('common.sidebar.aiUsage') }}
+              </span>
+            </router-link>
+          </li>
         </ul>
       </template>
     </nav>

@@ -10,6 +10,24 @@ const routes = [
     component: () => import('@/views/auth/LoginView.vue'),
     meta: { requiresAuth: false, layout: 'auth' }
   },
+  {
+    path: '/forgot-password',
+    name: 'forgot-password',
+    component: () => import('@/views/auth/ForgotPasswordView.vue'),
+    meta: { requiresAuth: false, layout: 'auth' }
+  },
+  {
+    path: '/reset-password',
+    name: 'reset-password',
+    component: () => import('@/views/auth/ResetPasswordView.vue'),
+    meta: { requiresAuth: false, layout: 'auth' }
+  },
+  {
+    path: '/auth/callback',
+    name: 'sso-callback',
+    component: () => import('@/views/auth/SSOCallbackView.vue'),
+    meta: { requiresAuth: false, layout: 'auth' }
+  },
 
   // Employee
   {
@@ -105,6 +123,50 @@ const routes = [
     component: () => import('@/views/admin/AuditView.vue'),
     meta: { requiresAuth: true, roles: [ROLES.ADMIN] }
   },
+  {
+    path: '/admin/ai-usage',
+    name: 'admin-ai-usage',
+    component: () => import('@/views/admin/AIUsageView.vue'),
+    meta: { requiresAuth: true, roles: [ROLES.ADMIN] }
+  },
+  {
+    path: '/admin/approval-policies',
+    name: 'admin-approval-policies',
+    component: () => import('@/views/admin/ApprovalPoliciesView.vue'),
+    meta: { requiresAuth: true, roles: [ROLES.ADMIN] }
+  },
+  {
+    path: '/admin/calendar',
+    name: 'admin-calendar',
+    component: () => import('@/views/admin/CalendarView.vue'),
+    meta: { requiresAuth: true, roles: [ROLES.ADMIN] }
+  },
+  {
+    path: '/admin/vendors',
+    name: 'admin-vendors',
+    component: () => import('@/views/admin/VendorsView.vue'),
+    meta: { requiresAuth: true, roles: [ROLES.ADMIN] }
+  },
+  {
+    path: '/admin/hierarchy',
+    name: 'admin-hierarchy',
+    component: () => import('@/views/admin/HierarchyView.vue'),
+    meta: { requiresAuth: true, roles: [ROLES.ADMIN] }
+  },
+  {
+    path: '/admin/webhooks',
+    name: 'admin-webhooks',
+    component: () => import('@/views/admin/WebhooksView.vue'),
+    meta: { requiresAuth: true, roles: [ROLES.ADMIN] }
+  },
+
+  // Profile
+  {
+    path: '/profile/mfa',
+    name: 'profile-mfa',
+    component: () => import('@/views/profile/MFASetupView.vue'),
+    meta: { requiresAuth: true }
+  },
 
   // Settings
   {
@@ -130,14 +192,17 @@ export const router = createRouter({
 router.beforeEach((to) => {
   const authStore = useAuthStore()
 
+  // Redirect unauthenticated users to login (except public pages)
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
 
-  if (to.name === 'login' && authStore.isAuthenticated) {
+  // Redirect authenticated users away from auth pages
+  if (to.meta.layout === 'auth' && authStore.isAuthenticated && to.name !== 'sso-callback') {
     return { name: 'dashboard' }
   }
 
+  // Role-based access control
   if (to.meta.roles && !to.meta.roles.includes(authStore.userRole)) {
     return { name: 'dashboard' }
   }

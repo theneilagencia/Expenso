@@ -9,5 +9,6 @@
   "correctionRequested": "Correction requested for #{id}",
   "paymentProcessed": "Payment for #{id} has been processed",
   "slaReminder": "SLA reminder: Request #{id} needs attention",
-  "slaEscalation": "SLA escalation: Request #{id} deadline exceeded"
+  "slaEscalation": "SLA escalation: Request #{id} deadline exceeded",
+  "justNow": "just now"
 }

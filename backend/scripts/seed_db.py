@@ -67,9 +67,17 @@ def seed(db: Session) -> None:
 
 
 if __name__ == "__main__":
-    print("Seeding Expenso database...")
+    skip_if_exists = "--skip-if-exists" in sys.argv
+
     db = SessionLocal()
     try:
+        if skip_if_exists:
+            admin = db.query(User).filter_by(email="admin@expenso.io").first()
+            if admin:
+                print("Database already seeded (admin@expenso.io exists). Skipping.")
+                sys.exit(0)
+
+        print("Seeding Expenso database...")
         seed(db)
     finally:
         db.close()

@@ -1,0 +1,236 @@
+/**
+ * Design Tokens - SCSS Variables
+ * BTS Global Corp Design System
+ *
+ * Princípios visuais: Sofisticado, moderno, confiável
+ * Paleta sóbria (azul escuro, branco, preto, toques de azul-claro)
+ * Tipografia: Inter (Clean, legível, modular)
+ *
+ * Este arquivo converte os tokens JavaScript em CSS Custom Properties.
+ */
+
+:root {
+  // ============================================
+  // PRIMARY BRAND COLORS
+  // ============================================
+
+  --color-primary-white: #FFFFFF;
+  --color-primary-black: #000000;
+  --color-primary-blue: #122539;
+  --color-primary-blue-highlight: #185AB4;
+
+  // ============================================
+  // SECONDARY BRAND COLORS
+  // ============================================
+
+  --color-secondary-blue-s01: #18365B;
+  --color-secondary-blue-s02: #006394;
+  --color-secondary-blue-s03: #006DA5;
+  --color-secondary-blue-s04: #247BA1;
+  --color-secondary-blue-s05: #2EB5F3;
+  --color-secondary-gray-s06: #E8E8E8;
+
+  // ============================================
+  // NEUTRAL COLORS
+  // ============================================
+
+  --color-neutral-white: #FFFFFF;
+  --color-neutral-gray-light: #F4F4F4;
+  --color-neutral-gray-semi-light: #E5E5E5;
+  --color-neutral-gray-base: #C6C6C6;
+  --color-neutral-gray-semi-dark: #9B9B9B;
+  --color-neutral-gray-dark: #575757;
+  --color-neutral-black: #333333;
+
+  // ============================================
+  // FEEDBACK COLORS
+  // ============================================
+
+  // Success (Verde)
+  --color-success-light: #7AE87E;
+  --color-success-semi-light: #55D266;
+  --color-success-base: #26B547;
+  --color-success-semi-dark: #1B9B45;
+  --color-success-dark: #138242;
+  --color-success-darker: #075638;
+
+  // Warning (Amarelo)
+  --color-warning-light: #FFDE76;
+  --color-warning-semi-light: #FFD054;
+  --color-warning-base: #FFBA1C;
+  --color-warning-semi-dark: #DB9814;
+  --color-warning-dark: #B7790E;
+  --color-warning-darker: #7A4805;
+
+  // Error (Vermelho)
+  --color-error-light: #FF9F83;
+  --color-error-semi-light: #FF7A65;
+  --color-error-base: #FF3D32;
+  --color-error-semi-dark: #DB242A;
+  --color-error-dark: #B7192B;
+  --color-error-darker: #7A0929;
+
+  // Info (Azul BTS)
+  --color-info-light: #2EB5F3;
+  --color-info-semi-light: #247BA1;
+  --color-info-base: #006DA5;
+  --color-info-semi-dark: #006394;
+  --color-info-dark: #18365B;
+  --color-info-darker: #122539;
+
+  // ============================================
+  // TEXT COLORS
+  // ============================================
+
+  --color-text-primary: #000000;
+  --color-text-secondary: #333333;
+  --color-text-tertiary: #575757;
+  --color-text-disabled: #9B9B9B;
+  --color-text-inverse: #FFFFFF;
+  --color-text-link: #185AB4;
+  --color-text-link-hover: #122539;
+
+  // ============================================
+  // BACKGROUND COLORS
+  // ============================================
+
+  --color-bg-default: #FFFFFF;
+  --color-bg-paper: #F4F4F4;
+  --color-bg-elevated: #FFFFFF;
+  --color-bg-dark: #122539;
+  --color-bg-light: #E5E5E5;
+  --color-bg-accent: #2EB5F3;
+
+  // ============================================
+  // BORDER COLORS
+  // ============================================
+
+  --color-border-default: #C6C6C6;
+  --color-border-light: #F4F4F4;
+  --color-border-dark: #9B9B9B;
+  --color-border-focus: #185AB4;
+  --color-border-divider: #E8E8E8;
+
+  // ============================================
+  // TYPOGRAPHY - Font Families
+  // ============================================
+
+  --font-family-primary: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-family-secondary: "Inter", sans-serif;
+  --font-family-mono: "Fira Code", "Courier New", Courier, monospace;
+
+  // ============================================
+  // TYPOGRAPHY - Font Sizes
+  // ============================================
+
+  // Base sizes
+  --font-size-xs: 0.75rem;        // 12px - Caption
+  --font-size-sm: 0.875rem;       // 14px - Body Small
+  --font-size-base: 1rem;         // 16px - Body Default
+  --font-size-lg: 1.25rem;        // 20px - Subtitle
+  --font-size-xl: 1.5rem;         // 24px - Heading 4
+  --font-size-2xl: 1.75rem;       // 28px - Heading 3
+  --font-size-3xl: 2rem;          // 32px - Heading 2
+  --font-size-4xl: 2.5rem;        // 40px - Heading 1
+  --font-size-5xl: 3rem;          // 48px - Display LG
+  --font-size-6xl: 3.5rem;        // 56px - Display XL
+
+  // Specific sizes
+  --font-size-caption: 0.75rem;   // 12px
+  --font-size-body-sm: 0.875rem;  // 14px
+
+  // Typography styles
+  --font-size-display-xl: 3.5rem;       // 56px
+  --font-size-display-lg: 3rem;         // 48px
+  --font-size-heading-1: 2.5rem;        // 40px
+  --font-size-heading-2: 2rem;          // 32px
+  --font-size-heading-3: 1.75rem;       // 28px
+  --font-size-heading-4: 1.5rem;        // 24px
+  --font-size-subtitle: 1.25rem;        // 20px
+  --font-size-body: 1rem;               // 16px
+  
+  // ============================================
+  // TYPOGRAPHY - Font Weights
+  // ============================================
+  
+  --font-weight-thin: 100;
+  --font-weight-extralight: 200;
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 900;
+  
+  // ============================================
+  // TYPOGRAPHY - Line Heights
+  // ============================================
+  
+  --line-height-none: 1;
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+  
+  // ============================================
+  // TYPOGRAPHY - Letter Spacing
+  // ============================================
+  
+  --letter-spacing-tighter: -0.05em;
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+  --letter-spacing-widest: 0.1em;
+  
+  // ============================================
+  // SPACING
+  // ============================================
+  
+  --spacing-0: 0;
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-7: 1.75rem;
+  --spacing-8: 2rem;
+  --spacing-9: 2.25rem;
+  --spacing-10: 2.5rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+  --spacing-20: 5rem;
+  --spacing-24: 6rem;
+  --spacing-32: 8rem;
+  
+  // ============================================
+  // SHADOWS
+  // ============================================
+  
+  --shadow-none: none;
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  
+  // ============================================
+  // BORDER RADIUS
+  // ============================================
+  
+  --radius-none: 0;
+  --radius-sm: 0.125rem;
+  --radius-base: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+  --radius-full: 9999px;
+}
+

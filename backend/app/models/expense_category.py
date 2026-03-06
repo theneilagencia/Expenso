@@ -21,6 +21,7 @@ class ExpenseCategory(Base):
     min_justification_chars = Column(Integer, default=20)
     ai_attention_score = Column(Integer, default=50)
     tax_deductibility_pct = Column(Float, nullable=True)
+    accounting_code = Column(String(50), nullable=True)
     is_active = Column(Boolean, default=True)
     sort_order = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

@@ -1,4 +1,56 @@
 import http from '@/services/http'
+import { useAuthStore } from '@/stores/auth.store'
+
+function _createSSEStream(url, options, onChunk, onDone) {
+  const authStore = useAuthStore()
+  const controller = new AbortController()
+
+  fetch(url, {
+    method: options.method || 'GET',
+    headers: {
+      'Authorization': `Bearer ${authStore.token}`,
+      ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+    },
+    body: options.body ? JSON.stringify(options.body) : undefined,
+    signal: controller.signal,
+  })
+    .then(response => {
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+
+      function read() {
+        reader.read().then(({ done, value }) => {
+          if (done) {
+            onDone?.()
+            return
+          }
+          const text = decoder.decode(value)
+          const lines = text.split('\n')
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6))
+                if (data.done) {
+                  onDone?.(data)
+                } else {
+                  onChunk?.(data)
+                }
+              } catch {
+                // skip malformed lines
+              }
+            }
+          }
+          read()
+        })
+      }
+      read()
+    })
+    .catch(() => {
+      onDone?.()
+    })
+
+  return { close: () => controller.abort() }
+}
 
 export const aiService = {
   async getAssistance(requestId) {
@@ -9,26 +61,27 @@ export const aiService = {
   },
 
   streamAssistance(requestId, onChunk, onDone) {
-    const eventSource = new EventSource(
+    return _createSSEStream(
       `${http.defaults.baseURL}/api/v1/ai/assist/${requestId}/stream`,
-      { withCredentials: true }
+      {},
+      onChunk,
+      onDone
     )
+  },
 
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data)
-      if (data.done) {
-        eventSource.close()
-        onDone?.(data)
-      } else {
-        onChunk?.(data)
-      }
-    }
+  streamAssistanceDraft(params, onChunk, onDone) {
+    const queryString = new URLSearchParams(
+      Object.fromEntries(
+        Object.entries(params).filter(([, v]) => v != null && v !== '')
+      )
+    ).toString()
 
-    eventSource.onerror = () => {
-      eventSource.close()
-    }
-
-    return eventSource
+    return _createSSEStream(
+      `${http.defaults.baseURL}/api/v1/ai/assist/stream?${queryString}`,
+      {},
+      onChunk,
+      onDone
+    )
   },
 
   async getAnalysis(requestId) {
@@ -41,27 +94,13 @@ export const aiService = {
     return data
   },
 
-  streamChat(messages, onChunk, onDone) {
-    const eventSource = new EventSource(
+  streamChatWithAuth(messages, onChunk, onDone) {
+    return _createSSEStream(
       `${http.defaults.baseURL}/api/v1/ai/chat/stream`,
-      { withCredentials: true }
+      { method: 'POST', body: { messages } },
+      onChunk,
+      onDone
     )
-
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data)
-      if (data.done) {
-        eventSource.close()
-        onDone?.(data)
-      } else {
-        onChunk?.(data)
-      }
-    }
-
-    eventSource.onerror = () => {
-      eventSource.close()
-    }
-
-    return eventSource
   },
 
   async sendChatMessage(payload) {
@@ -71,6 +110,39 @@ export const aiService = {
 
   async getStrategistReport(params = {}) {
     const { data } = await http.get('/api/v1/ai/strategist/report', { params })
+    return data
+  },
+
+  async getAIUsage(params = {}) {
+    const { data } = await http.get('/api/v1/ai/admin/ai-usage', { params })
+    return data
+  },
+
+  streamNarrativeReport(params, onChunk, onDone) {
+    const queryString = new URLSearchParams(
+      Object.fromEntries(
+        Object.entries(params).filter(([, v]) => v != null && v !== '')
+      )
+    ).toString()
+
+    return _createSSEStream(
+      `${http.defaults.baseURL}/api/v1/reports/narrative?${queryString}`,
+      {},
+      onChunk,
+      onDone
+    )
+  },
+
+  async generateSummary(requestId) {
+    const { data } = await http.post(`/api/v1/requests/${requestId}/ai-summary`)
+    return data
+  },
+
+  async suggestComment(requestId, action) {
+    const { data } = await http.post('/api/v1/ai/suggest-comment', {
+      request_id: requestId,
+      action
+    })
     return data
   }
 }

@@ -175,6 +175,26 @@
           </div>
         </div>
 
+        <!-- AI Summary -->
+        <div
+          v-if="aiSummary || summaryLoading"
+          class="approval-detail__card"
+        >
+          <h3 class="approval-detail__card-title">{{ t('approvals.aiSummary') }}</h3>
+          <div
+            v-if="summaryLoading"
+            class="approval-detail__loading"
+          >
+            {{ t('common.loading') }}
+          </div>
+          <p
+            v-else
+            class="approval-detail__summary-text"
+          >
+            {{ aiSummary }}
+          </p>
+        </div>
+
         <!-- Audit Trail -->
         <div
           v-if="auditLog.length"
@@ -208,6 +228,22 @@
         <!-- Comment Form -->
         <div class="approval-detail__card">
           <h3 class="approval-detail__card-title">{{ t('approvals.detail.comment') }}</h3>
+          <div class="approval-detail__suggest-actions">
+            <button
+              class="approval-detail__suggest-btn"
+              :disabled="suggestLoading"
+              @click="handleSuggestComment('approve')"
+            >
+              {{ t('approvals.suggestApprove') }}
+            </button>
+            <button
+              class="approval-detail__suggest-btn approval-detail__suggest-btn--reject"
+              :disabled="suggestLoading"
+              @click="handleSuggestComment('reject')"
+            >
+              {{ t('approvals.suggestReject') }}
+            </button>
+          </div>
           <textarea
             v-model="comment"
             class="approval-detail__comment-input"
@@ -259,6 +295,7 @@ import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import { useApproval } from '@/composables/useApproval'
 import { useRequest } from '@/composables/useRequest'
 import { useToast } from '@/composables/useToast'
+import { aiService } from '@/services/ai'
 import { ROUTE_NAMES } from '@/constants/routes'
 
 const props = defineProps({
@@ -291,6 +328,9 @@ const {
 const auditLog = ref([])
 const comment = ref('')
 const commentRequired = ref(false)
+const aiSummary = ref(null)
+const summaryLoading = ref(false)
+const suggestLoading = ref(false)
 
 const requestId = props.id || route.params.id
 
@@ -386,8 +426,33 @@ async function handleRequestEdit() {
   }
 }
 
+async function handleGenerateSummary() {
+  summaryLoading.value = true
+  try {
+    const result = await aiService.generateSummary(requestId)
+    aiSummary.value = result.summary || null
+  } catch {
+    // Summary is non-critical
+  } finally {
+    summaryLoading.value = false
+  }
+}
+
+async function handleSuggestComment(action) {
+  suggestLoading.value = true
+  try {
+    const result = await aiService.suggestComment(requestId, action)
+    comment.value = result.suggestion || ''
+  } catch {
+    toast.error(t('common.error'))
+  } finally {
+    suggestLoading.value = false
+  }
+}
+
 onMounted(async () => {
   await fetchRequest(requestId)
+  handleGenerateSummary()
   try {
     const log = await fetchAuditLog(requestId)
     auditLog.value = log || []
@@ -721,6 +786,51 @@ onMounted(async () => {
     color: $gray-500;
     font-style: italic;
     margin: 0;
+  }
+
+  &__summary-text {
+    color: $gray-700;
+    line-height: 1.6;
+    font-size: $font-size-sm;
+    margin: 0;
+  }
+
+  &__suggest-actions {
+    display: flex;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-md;
+  }
+
+  &__suggest-btn {
+    padding: $spacing-xs $spacing-md;
+    background: $white;
+    color: $primary;
+    border: 1px solid $primary;
+    border-radius: $radius-md;
+    font-size: $font-size-xs;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+      background: $primary;
+      color: $white;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &--reject {
+      color: $danger;
+      border-color: $danger;
+
+      &:hover:not(:disabled) {
+        background: $danger;
+        color: $white;
+      }
+    }
   }
 
   &__comment-input {

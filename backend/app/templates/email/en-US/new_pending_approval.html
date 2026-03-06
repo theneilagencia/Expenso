@@ -1,0 +1,7 @@
+{% extends "email/base.html" %}
+{% block content %}
+<h2>New Request Pending Your Approval</h2>
+<p>Hello {{ user_name }},</p>
+<p>A new expense request from {{ requester_name }} requires your review and approval.</p>
+{% endblock %}
+{% block btn_text %}Review Request{% endblock %}
