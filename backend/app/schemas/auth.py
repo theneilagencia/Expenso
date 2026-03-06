@@ -37,3 +37,7 @@ class SSOLoginRequest(BaseModel):
     provider: str = Field(..., pattern="^(azure_ad|google)$")
     code: str
     redirect_uri: Optional[str] = None
+
+
+class DeleteAccountRequest(BaseModel):
+    current_password: str

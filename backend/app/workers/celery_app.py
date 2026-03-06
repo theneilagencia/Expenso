@@ -40,6 +40,10 @@ celery_app.conf.beat_schedule = {
         "task": "app.workers.tasks.payment_tasks.poll_payment_status",
         "schedule": 600.0,  # every 10 minutes
     },
+    "data-retention-monthly": {
+        "task": "app.workers.tasks.lgpd_tasks.data_retention_cleanup",
+        "schedule": 2592000.0,  # every 30 days
+    },
 }
 
 celery_app.autodiscover_tasks(["app.workers.tasks"])
