@@ -7,7 +7,19 @@ from app.api.v1.admin import categories as admin_categories
 from app.api.v1.admin import integrations as admin_integrations
 from app.api.v1.admin import sla as admin_sla
 from app.api.v1.admin import users as admin_users
-from app.api.v1.routers import ai, attachments, audit, auth, health, notifications, payments, reports, requests, users
+from app.api.v1.routers import (
+    admin_status,
+    ai,
+    attachments,
+    audit,
+    auth,
+    health,
+    notifications,
+    payments,
+    reports,
+    requests,
+    users,
+)
 from app.config import settings
 from app.core.middleware import SecurityHeadersMiddleware
 from app.core.rate_limit import limiter
@@ -53,6 +65,7 @@ app.include_router(admin_users.router, prefix="/api/v1/admin/users", tags=["Admi
 app.include_router(admin_categories.router, prefix="/api/v1/admin/categories", tags=["Admin - Categories"])
 app.include_router(admin_sla.router, prefix="/api/v1/admin/sla", tags=["Admin - SLA"])
 app.include_router(admin_integrations.router, prefix="/api/v1/admin/integrations", tags=["Admin - Integrations"])
+app.include_router(admin_status.router, prefix="/api/v1/admin", tags=["Admin - System"])
 
 # AI
 app.include_router(ai.router, prefix="/api/v1/ai", tags=["AI"])
