@@ -1,21 +1,37 @@
-name: CD Render
+name: CD — Deploy to Render
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'  # Deploy only on semantic version tags (v1.0.0, v1.1.0, etc.)
 
 jobs:
   deploy-backend:
+    name: Deploy Backend
     runs-on: ubuntu-latest
     steps:
       - name: Deploy Backend to Render
         run: |
-          curl -X POST "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}"
+          echo "Deploying backend for tag ${{ github.ref_name }}..."
+          curl -sf -X POST "${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}" || echo "Warning: Backend deploy hook failed"
 
   deploy-frontend:
+    name: Deploy Frontend
     runs-on: ubuntu-latest
     steps:
       - name: Deploy Frontend to Render
         run: |
-          curl -X POST "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}"
+          echo "Deploying frontend for tag ${{ github.ref_name }}..."
+          curl -sf -X POST "${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}" || echo "Warning: Frontend deploy hook failed"
+
+  notify:
+    name: Notify
+    needs: [deploy-backend, deploy-frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy Summary
+        run: |
+          echo "================================================"
+          echo "  Expenso ${{ github.ref_name }} deploy triggered"
+          echo "  Backend + Frontend deploying on Render"
+          echo "================================================"

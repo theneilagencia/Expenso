@@ -1,15 +1,98 @@
 services:
+  # ─── Backend API ───────────────────────────────────────────
   - type: web
     name: expenso-backend
     runtime: python
-    buildCommand: cd backend && pip install -r requirements.txt && alembic upgrade head
-    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: starter
+    region: oregon
+    buildCommand: |
+      cd backend && pip install -r requirements.txt && psql $DATABASE_URL -c "CREATE EXTENSION IF NOT EXISTS vector;" 2>/dev/null || true
+    startCommand: cd backend && alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 2
+    healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
         fromDatabase:
           name: expenso-db
           property: connectionString
       - key: REDIS_URL
+        fromService:
+          name: expenso-redis
+          type: redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          name: expenso-redis
+          type: redis
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: ENCRYPTION_KEY
+        sync: false
+      - key: APP_ENV
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: ALLOWED_ORIGINS
+        value: "https://app.expenso.io"
+      - key: FRONTEND_URL
+        value: "https://app.expenso.io"
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: PAYMENT_GATEWAY
+        value: mock
+      - key: REVOLUT_API_URL
+        sync: false
+      - key: REVOLUT_API_KEY
+        sync: false
+      - key: REVOLUT_CLIENT_ID
+        sync: false
+      - key: REVOLUT_PRIVATE_KEY
+        sync: false
+      - key: REVOLUT_WEBHOOK_SECRET
+        sync: false
+      - key: MINIO_ENDPOINT
+        sync: false
+      - key: MINIO_ACCESS_KEY
+        sync: false
+      - key: MINIO_SECRET_KEY
+        sync: false
+      - key: MINIO_BUCKET
+        value: expenso-files
+      - key: MINIO_SECURE
+        value: "true"
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM_EMAIL
+        value: noreply@expenso.io
+      - key: RATE_LIMIT_ENABLED
+        value: "true"
+
+  # ─── Celery Worker ────────────────────────────────────────
+  - type: worker
+    name: expenso-worker
+    runtime: python
+    plan: starter
+    buildCommand: cd backend && pip install -r requirements.txt
+    startCommand: cd backend && celery -A app.workers.celery_app worker --loglevel=info --concurrency=2
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: expenso-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: expenso-redis
+          type: redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
         fromService:
           name: expenso-redis
           type: redis
@@ -24,12 +107,44 @@ services:
         value: "false"
       - key: ANTHROPIC_API_KEY
         sync: false
+      - key: ENCRYPTION_KEY
+        sync: false
+      - key: MINIO_ENDPOINT
+        sync: false
+      - key: MINIO_ACCESS_KEY
+        sync: false
+      - key: MINIO_SECRET_KEY
+        sync: false
+      - key: MINIO_BUCKET
+        value: expenso-files
+      - key: MINIO_SECURE
+        value: "true"
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM_EMAIL
+        value: noreply@expenso.io
+      - key: PAYMENT_GATEWAY
+        value: mock
+      - key: REVOLUT_API_KEY
+        sync: false
+      - key: REVOLUT_CLIENT_ID
+        sync: false
+      - key: REVOLUT_PRIVATE_KEY
+        sync: false
+      - key: REVOLUT_WEBHOOK_SECRET
+        sync: false
 
+  # ─── Celery Beat (SINGLE INSTANCE — never scale!) ────────
   - type: worker
-    name: expenso-worker
+    name: expenso-beat
     runtime: python
+    plan: starter
     buildCommand: cd backend && pip install -r requirements.txt
-    startCommand: cd backend && celery -A app.workers.celery_app worker --loglevel=info
+    startCommand: cd backend && celery -A app.workers.celery_app beat --loglevel=info
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -40,30 +155,43 @@ services:
           name: expenso-redis
           type: redis
           property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          name: expenso-redis
+          type: redis
+          property: connectionString
       - key: SECRET_KEY
         generateValue: true
-      - key: ANTHROPIC_API_KEY
-        sync: false
+      - key: APP_ENV
+        value: production
 
+  # ─── Frontend (Static Site / SPA) ─────────────────────────
   - type: web
     name: expenso-frontend
     runtime: static
-    buildCommand: cd frontend && pnpm install && pnpm build
+    buildCommand: cd frontend && npm install && npx vite build
     staticPublishPath: frontend/dist
     headers:
       - path: /*
         name: X-Frame-Options
         value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
     routes:
       - type: rewrite
         source: /*
         destination: /index.html
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://api.expenso.io
 
 databases:
   - name: expenso-db
     plan: starter
     databaseName: expenso_db
     user: expenso
+    postgresMajorVersion: "15"
 
   - name: expenso-redis
     plan: starter

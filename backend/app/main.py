@@ -34,8 +34,8 @@ app = FastAPI(
     title=settings.APP_NAME,
     description="Smart Expense Management Platform",
     version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
+    docs_url="/docs" if settings.DEBUG else None,
+    redoc_url="/redoc" if settings.DEBUG else None,
 )
 
 # Rate limiter
