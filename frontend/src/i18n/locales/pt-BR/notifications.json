@@ -9,5 +9,6 @@
   "correctionRequested": "Corre\u00e7\u00e3o solicitada para #{id}",
   "paymentProcessed": "Pagamento da #{id} foi processado",
   "slaReminder": "Lembrete de SLA: Solicita\u00e7\u00e3o #{id} precisa de aten\u00e7\u00e3o",
-  "slaEscalation": "Escala\u00e7\u00e3o de SLA: Prazo da solicita\u00e7\u00e3o #{id} expirado"
+  "slaEscalation": "Escala\u00e7\u00e3o de SLA: Prazo da solicita\u00e7\u00e3o #{id} expirado",
+  "justNow": "agora mesmo"
 }
