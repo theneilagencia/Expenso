@@ -10,7 +10,7 @@ Create Date: 2026-03-06
 from alembic import op
 
 revision = "sprint8_indexes_004"
-down_revision = "003_add_embedding_column"
+down_revision = "003"
 branch_labels = None
 depends_on = None
 
