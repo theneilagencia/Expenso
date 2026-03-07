@@ -59,11 +59,11 @@ def _build_token_response(user) -> TokenResponse:
 
 @router.post("/login", response_model=None, summary="Authenticate user and return tokens")
 @limiter.limit("5/minute", key_func=_get_ip)
-async def login(request: LoginRequest, http_request: Request, db: Session = Depends(get_db)):
+async def login(body: LoginRequest, request: Request, db: Session = Depends(get_db)):
     from app.models.user import User
 
-    user = db.query(User).filter(User.email == request.email, User.deleted_at.is_(None)).first()
-    if not user or not verify_password(request.password, user.password_hash):
+    user = db.query(User).filter(User.email == body.email, User.deleted_at.is_(None)).first()
+    if not user or not verify_password(body.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"error": "INVALID_CREDENTIALS", "message": "Invalid email or password"},
@@ -87,10 +87,10 @@ async def login(request: LoginRequest, http_request: Request, db: Session = Depe
 
 @router.post("/refresh", response_model=TokenResponse, summary="Refresh access token")
 @limiter.limit("10/minute", key_func=_get_ip)
-async def refresh(request: RefreshRequest, http_request: Request, db: Session = Depends(get_db)):
+async def refresh(body: RefreshRequest, request: Request, db: Session = Depends(get_db)):
     from app.models.user import User
 
-    payload = decode_refresh_token(request.refresh_token)
+    payload = decode_refresh_token(body.refresh_token)
     user_id = payload["sub"]
 
     user = db.query(User).filter(User.id == user_id, User.deleted_at.is_(None)).first()
@@ -109,10 +109,10 @@ async def logout():
 
 @router.post("/password-reset/request", summary="Request password reset email")
 @limiter.limit("3/minute", key_func=_get_ip)
-async def request_password_reset(request: PasswordResetRequest, http_request: Request, db: Session = Depends(get_db)):
+async def request_password_reset(body: PasswordResetRequest, request: Request, db: Session = Depends(get_db)):
     from app.models.user import User
 
-    user = db.query(User).filter(User.email == request.email, User.deleted_at.is_(None)).first()
+    user = db.query(User).filter(User.email == body.email, User.deleted_at.is_(None)).first()
     if not user:
         # Return success even if user not found to prevent email enumeration
         return {"message": "If the email exists, a reset link has been sent"}
@@ -128,16 +128,16 @@ async def request_password_reset(request: PasswordResetRequest, http_request: Re
 
 @router.post("/password-reset/confirm", summary="Confirm password reset with token")
 @limiter.limit("5/minute", key_func=_get_ip)
-async def confirm_password_reset(request: PasswordResetConfirm, http_request: Request, db: Session = Depends(get_db)):
+async def confirm_password_reset(body: PasswordResetConfirm, request: Request, db: Session = Depends(get_db)):
     from app.models.user import User
 
-    user_id = decode_password_reset_token(request.token)
+    user_id = decode_password_reset_token(body.token)
 
     user = db.query(User).filter(User.id == user_id, User.deleted_at.is_(None)).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    user.password_hash = hash_password(request.new_password)
+    user.password_hash = hash_password(body.new_password)
     user.password_changed_at = datetime.now(timezone.utc)
     user.force_password_reset = False
     db.commit()
@@ -168,10 +168,10 @@ async def change_password(
 
 @router.post("/mfa/verify", response_model=TokenResponse, summary="Verify MFA code and return tokens")
 @limiter.limit("5/minute", key_func=_get_ip)
-async def mfa_verify(request: MFAVerifyRequest, http_request: Request, db: Session = Depends(get_db)):
+async def mfa_verify(body: MFAVerifyRequest, request: Request, db: Session = Depends(get_db)):
     from app.models.user import User
 
-    user_id = decode_mfa_token(request.mfa_token)
+    user_id = decode_mfa_token(body.mfa_token)
     user = db.query(User).filter(User.id == user_id, User.deleted_at.is_(None)).first()
     if not user:
         raise HTTPException(
@@ -184,7 +184,7 @@ async def mfa_verify(request: MFAVerifyRequest, http_request: Request, db: Sessi
             detail={"error": "MFA_NOT_ENABLED", "message": "MFA is not enabled for this user"},
         )
 
-    if not MFAService.verify_totp(user.mfa_secret, request.code):
+    if not MFAService.verify_totp(user.mfa_secret, body.code):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"error": "INVALID_MFA_CODE", "message": "Invalid MFA code"},
