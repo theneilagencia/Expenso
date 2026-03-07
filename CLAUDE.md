@@ -9,7 +9,7 @@
 
 - **Name:** Expenso
 - **Tagline:** Smart Expense Management Platform
-- **Repository:** github.com/theneilagencia/Expenso (private)
+- **Repository:** github.com/BTS-Global/Expenso (private)
 - **Deploy:** Render (future: AWS)
 - **Languages:** English (en-US, default) + Português (pt-BR)
 
@@ -48,7 +48,7 @@
 
 ## Sprint 1 — COMPLETED (2026-03-04)
 
-PR: https://github.com/theneilagencia/Expenso/pull/2
+PR: https://github.com/BTS-Global/Expenso/pull/2
 Merge commit: `7e361f5`
 
 - [x] Monorepo folder structure
@@ -73,7 +73,7 @@ Merge commit: `7e361f5`
 
 ## Sprint 2 — COMPLETED (2026-03-05)
 
-PR: https://github.com/theneilagencia/Expenso/pull/3
+PR: https://github.com/BTS-Global/Expenso/pull/3
 Branch: `feat/sprint-2-auth-rbac`
 
 - [x] JWT refresh tokens + token rotation
