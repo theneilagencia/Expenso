@@ -17,18 +17,31 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.execute("CREATE EXTENSION IF NOT EXISTS vector")
+    # Add embedding column as Text first (always works)
     op.add_column(
         "expense_requests",
         sa.Column("embedding", sa.Text(), nullable=True),
     )
-    op.execute(
-        "ALTER TABLE expense_requests ALTER COLUMN embedding TYPE vector(1536) USING embedding::vector(1536)"
-    )
-    op.execute(
-        "CREATE INDEX ix_expense_requests_embedding ON expense_requests "
-        "USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100)"
-    )
+
+    # Try to enable pgvector and convert to vector type
+    # Falls back gracefully if pgvector extension is not available
+    try:
+        conn = op.get_bind()
+        conn.execute(sa.text("CREATE EXTENSION IF NOT EXISTS vector"))
+        conn.execute(
+            sa.text(
+                "ALTER TABLE expense_requests ALTER COLUMN embedding "
+                "TYPE vector(1536) USING embedding::vector(1536)"
+            )
+        )
+        conn.execute(
+            sa.text(
+                "CREATE INDEX ix_expense_requests_embedding ON expense_requests "
+                "USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100)"
+            )
+        )
+    except Exception as e:
+        print(f"WARNING: pgvector not available, embedding column remains Text: {e}")
 
 
 def downgrade() -> None:
