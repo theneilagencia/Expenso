@@ -83,6 +83,58 @@ def _check_celery() -> dict:
         return {"status": "error", "detail": str(e)}
 
 
+@router.get("/debug/db", summary="Temporary DB diagnostic", include_in_schema=False)
+async def debug_db():
+    """Temporary endpoint to debug database state. Remove after fixing."""
+    import traceback
+    result = {}
+    try:
+        from sqlalchemy import text
+        from app.db.session import SessionLocal
+        db = SessionLocal()
+        try:
+            # Check tables
+            rows = db.execute(text(
+                "SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY tablename"
+            )).fetchall()
+            result["tables"] = [r[0] for r in rows]
+
+            # Check alembic version
+            try:
+                rows = db.execute(text("SELECT version_num FROM alembic_version")).fetchall()
+                result["alembic_version"] = [r[0] for r in rows]
+            except Exception as e:
+                result["alembic_version"] = f"error: {e}"
+
+            # Check users
+            if "users" in result["tables"]:
+                rows = db.execute(text("SELECT email, role, status FROM users LIMIT 5")).fetchall()
+                result["users"] = [{"email": r[0], "role": r[1], "status": r[2]} for r in rows]
+            else:
+                result["users"] = "NO USERS TABLE"
+
+            # Try login flow
+            try:
+                from app.models.user import User
+                from app.core.security import verify_password
+                user = db.query(User).filter(User.email == "admin@expenso.io").first()
+                if user:
+                    result["admin_found"] = True
+                    result["admin_role"] = user.role
+                    result["password_ok"] = verify_password("Admin@2026!", user.password_hash)
+                else:
+                    result["admin_found"] = False
+            except Exception as e:
+                result["login_test"] = f"error: {e}"
+                result["login_traceback"] = traceback.format_exc()
+        finally:
+            db.close()
+    except Exception as e:
+        result["db_error"] = str(e)
+        result["traceback"] = traceback.format_exc()
+    return result
+
+
 @router.get("/health", summary="Health check with dependency status")
 async def health_check():
     checks = {
