@@ -1,0 +1,94 @@
+{
+  "nav": {
+    "login": "Entrar",
+    "getStarted": "Comece Agora"
+  },
+  "hero": {
+    "badge": "Potencializado por IA",
+    "title": "Gestao Inteligente de Despesas",
+    "subtitle": "Rastreamento de despesas com IA, aprovacoes multinivel e analytics em tempo real — tudo em uma plataforma.",
+    "cta": "Comece Agora",
+    "ctaSecondary": "Saiba Mais"
+  },
+  "features": {
+    "title": "Tudo o que Voce Precisa",
+    "subtitle": "Da submissao ao pagamento, o Expenso automatiza cada etapa do ciclo de despesas.",
+    "ai": {
+      "title": "Analise com IA",
+      "description": "Cinco papeis de IA especializados analisam riscos, geram resumos, detectam duplicatas e fornecem assistencia em tempo real."
+    },
+    "workflow": {
+      "title": "Fluxo de Aprovacao Inteligente",
+      "description": "Aprovacoes multinivel com politicas configuraveis, rastreamento de SLA, calculo de horario comercial e escalonamento automatico."
+    },
+    "payments": {
+      "title": "Integracao de Pagamentos",
+      "description": "Processe pagamentos via Revolut, PIX ou Folha com operacoes em lote, logica de retentativa e notificacoes via webhook."
+    },
+    "dashboards": {
+      "title": "Dashboards em Tempo Real",
+      "description": "Graficos interativos, cards de KPI e insights estrategicos gerados por IA para monitorar tendencias de gastos."
+    },
+    "compliance": {
+      "title": "Conformidade LGPD/GDPR",
+      "description": "Exportacao de dados, anonimizacao de contas, politicas de retencao automatizadas e trilha de auditoria completa."
+    },
+    "security": {
+      "title": "Seguranca Corporativa",
+      "description": "Autenticacao MFA/2FA, controle de acesso baseado em papeis, limitacao de taxa, credenciais criptografadas e cabecalhos de seguranca."
+    }
+  },
+  "aiHighlight": {
+    "title": "Cinco Papeis de IA Trabalhando por Voce",
+    "subtitle": "Alimentado pelo Claude, o motor de IA do Expenso cuida de analise, assistencia, escrita, estrategia e conversacao.",
+    "assistant": {
+      "title": "Assistente",
+      "description": "Orientacao em tempo real via streaming"
+    },
+    "analyst": {
+      "title": "Analista",
+      "description": "Score de risco automatizado e deteccao de duplicatas"
+    },
+    "writer": {
+      "title": "Escritor",
+      "description": "Resumos, comentarios e relatorios narrativos"
+    },
+    "strategist": {
+      "title": "Estrategista",
+      "description": "Previsoes e otimizacao de gastos programadas"
+    },
+    "chatbot": {
+      "title": "Chatbot",
+      "description": "Q&A no app com contexto baseado no papel"
+    }
+  },
+  "howItWorks": {
+    "title": "Como Funciona",
+    "subtitle": "Quatro passos simples da submissao ao pagamento.",
+    "step1": {
+      "title": "Envie",
+      "description": "Crie uma solicitacao de despesa com preenchimento assistido por IA."
+    },
+    "step2": {
+      "title": "Analise",
+      "description": "A IA analisa riscos, detecta duplicatas e verifica conformidade com politicas."
+    },
+    "step3": {
+      "title": "Aprove",
+      "description": "Aprovacao multinivel com rastreamento de SLA e escalonamento automatico."
+    },
+    "step4": {
+      "title": "Pague",
+      "description": "Processamento em lote via Revolut, PIX ou Folha de Pagamento."
+    }
+  },
+  "cta": {
+    "title": "Pronto para Transformar sua Gestao de Despesas?",
+    "subtitle": "Junte-se as equipes que estao economizando tempo e reduzindo erros com automacao por IA.",
+    "button": "Entre para Comecar"
+  },
+  "footer": {
+    "copyright": "Expenso — Plataforma Inteligente de Gestao de Despesas",
+    "builtWith": "Construido com automacao por IA"
+  }
+}
