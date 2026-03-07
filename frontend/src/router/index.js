@@ -3,6 +3,14 @@ import { useAuthStore } from '@/stores/auth.store'
 import { ROLES } from '@/constants/roles'
 
 const routes = [
+  // Public / Landing
+  {
+    path: '/',
+    name: 'landing',
+    component: () => import('@/views/public/LandingView.vue'),
+    meta: { requiresAuth: false, layout: 'landing' }
+  },
+
   // Auth
   {
     path: '/login',
@@ -31,7 +39,7 @@ const routes = [
 
   // Employee
   {
-    path: '/',
+    path: '/dashboard',
     name: 'dashboard',
     component: () => import('@/views/employee/DashboardView.vue'),
     meta: { requiresAuth: true }
@@ -191,6 +199,11 @@ export const router = createRouter({
 
 router.beforeEach((to) => {
   const authStore = useAuthStore()
+
+  // Redirect authenticated users from landing page to dashboard
+  if (to.name === 'landing' && authStore.isAuthenticated) {
+    return { name: 'dashboard' }
+  }
 
   // Redirect unauthenticated users to login (except public pages)
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {

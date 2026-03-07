@@ -1,0 +1,94 @@
+{
+  "nav": {
+    "login": "Sign In",
+    "getStarted": "Get Started"
+  },
+  "hero": {
+    "badge": "AI-Powered",
+    "title": "Smart Expense Management",
+    "subtitle": "AI-powered expense tracking, multi-level approvals, and real-time analytics — all in one platform.",
+    "cta": "Get Started",
+    "ctaSecondary": "Learn More"
+  },
+  "features": {
+    "title": "Everything You Need",
+    "subtitle": "From submission to payment, Expenso automates every step of the expense lifecycle.",
+    "ai": {
+      "title": "AI-Powered Analysis",
+      "description": "Five specialized AI roles analyze risk, generate summaries, detect duplicates, and provide real-time assistance."
+    },
+    "workflow": {
+      "title": "Smart Approval Workflow",
+      "description": "Multi-level approvals with configurable policies, SLA tracking, business hours calculation, and auto-escalation."
+    },
+    "payments": {
+      "title": "Payment Integration",
+      "description": "Process payments via Revolut, PIX, or Payroll with batch operations, retry logic, and webhook notifications."
+    },
+    "dashboards": {
+      "title": "Real-time Dashboards",
+      "description": "Interactive charts, KPI cards, and AI-generated strategic insights to monitor spending trends across departments."
+    },
+    "compliance": {
+      "title": "LGPD/GDPR Compliance",
+      "description": "Built-in data export, account anonymization, automated retention policies, and complete audit trails."
+    },
+    "security": {
+      "title": "Enterprise Security",
+      "description": "MFA/2FA authentication, role-based access control, rate limiting, encrypted credentials, and security headers."
+    }
+  },
+  "aiHighlight": {
+    "title": "Five AI Roles Working for You",
+    "subtitle": "Powered by Claude, Expenso's AI engine handles analysis, assistance, writing, strategy, and conversation.",
+    "assistant": {
+      "title": "Assistant",
+      "description": "Real-time form guidance via streaming"
+    },
+    "analyst": {
+      "title": "Analyst",
+      "description": "Automated risk scoring and duplicate detection"
+    },
+    "writer": {
+      "title": "Writer",
+      "description": "Summaries, comments, and narrative reports"
+    },
+    "strategist": {
+      "title": "Strategist",
+      "description": "Scheduled forecasts and spending optimization"
+    },
+    "chatbot": {
+      "title": "Chatbot",
+      "description": "In-app Q&A with role-based context"
+    }
+  },
+  "howItWorks": {
+    "title": "How It Works",
+    "subtitle": "Four simple steps from submission to payment.",
+    "step1": {
+      "title": "Submit",
+      "description": "Create an expense request with AI-assisted form completion."
+    },
+    "step2": {
+      "title": "Analyze",
+      "description": "AI analyzes risk, detects duplicates, and checks policy compliance."
+    },
+    "step3": {
+      "title": "Approve",
+      "description": "Multi-level approval with SLA tracking and automatic escalation."
+    },
+    "step4": {
+      "title": "Pay",
+      "description": "Batch payment processing via Revolut, PIX, or Payroll."
+    }
+  },
+  "cta": {
+    "title": "Ready to Transform Your Expense Management?",
+    "subtitle": "Join teams that are saving time and reducing errors with AI-powered automation.",
+    "button": "Sign In to Get Started"
+  },
+  "footer": {
+    "copyright": "Expenso — Smart Expense Management Platform",
+    "builtWith": "Built with AI-powered automation"
+  }
+}
