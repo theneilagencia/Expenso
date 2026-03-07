@@ -5,9 +5,10 @@ import App from '@/App.vue'
 import { router } from '@/router'
 import { i18n } from '@/i18n'
 
-// BTS Design System — register icons + global styles
+// BTS Design System — register icons + global styles (tokens, reset, typography)
 import '@/design-system/icons/fontawesome.js'
 import '@fortawesome/fontawesome-svg-core/styles.css'
+import '@/design-system/styles/global.scss'
 
 import '@/styles/main.scss'
 

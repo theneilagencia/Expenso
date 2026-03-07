@@ -16,19 +16,17 @@
     <!-- HERO -->
     <section class="landing__hero">
       <div class="landing__hero-content">
-        <BtsBadge variant="info">{{ t('landing.hero.badge') }}</BtsBadge>
+        <span class="landing__hero-badge">{{ t('landing.hero.badge') }}</span>
         <h1 class="landing__hero-title">{{ t('landing.hero.title') }}</h1>
         <p class="landing__hero-subtitle">{{ t('landing.hero.subtitle') }}</p>
         <div class="landing__hero-actions">
-          <BtsButton variant="primary" size="lg" @click="goToLogin">
-            <template #icon-left>
-              <BtsIcon name="arrow-right" prefix="fas" />
-            </template>
+          <button class="landing__hero-cta landing__hero-cta--primary" @click="goToLogin">
+            <BtsIcon name="arrow-right" prefix="fas" color="#1B5AB4" />
             {{ t('landing.hero.cta') }}
-          </BtsButton>
-          <BtsButton variant="tertiary" size="lg" @click="scrollToFeatures">
+          </button>
+          <button class="landing__hero-cta landing__hero-cta--secondary" @click="scrollToFeatures">
             {{ t('landing.hero.ctaSecondary') }}
-          </BtsButton>
+          </button>
         </div>
       </div>
     </section>
@@ -45,7 +43,7 @@
             class="landing__feature-card"
           >
             <div class="landing__feature-icon">
-              <BtsIcon :name="feature.icon" prefix="fas" />
+              <BtsIcon :name="feature.icon" prefix="fas" color="#1B5AB4" />
             </div>
             <h3 class="landing__feature-title">
               {{ t(`landing.features.${feature.key}.title`) }}
@@ -74,7 +72,7 @@
             class="landing__ai-card"
           >
             <div class="landing__ai-icon">
-              <BtsIcon :name="role.icon" prefix="fas" />
+              <BtsIcon :name="role.icon" prefix="fas" color="#FFFFFF" />
             </div>
             <h4 class="landing__ai-title">
               {{ t(`landing.aiHighlight.${role.key}.title`) }}
@@ -119,9 +117,9 @@
         <p class="landing__section-subtitle landing__section-subtitle--light">
           {{ t('landing.cta.subtitle') }}
         </p>
-        <BtsButton variant="primary" size="lg" @click="goToLogin">
+        <button class="landing__hero-cta landing__hero-cta--primary" @click="goToLogin">
           {{ t('landing.cta.button') }}
-        </BtsButton>
+        </button>
       </div>
     </section>
 
@@ -139,7 +137,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { BtsButton, BtsIcon, BtsBadge } from '@/design-system'
+import { BtsButton, BtsIcon } from '@/design-system'
 import LocaleSwitcher from '@/components/common/LocaleSwitcher.vue'
 
 const { t } = useI18n()
@@ -209,17 +207,21 @@ onUnmounted(() => {
     left: 0;
     right: 0;
     z-index: $z-dropdown;
-    padding: $spacing-md $spacing-xl;
+    padding: $spacing-sm $spacing-xl;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
 
     &--scrolled {
       background-color: $white;
-      box-shadow: $shadow-sm;
+      box-shadow: $shadow-md;
     }
   }
 
   &__header-inner {
     max-width: 1200px;
+    width: 100%;
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -230,6 +232,7 @@ onUnmounted(() => {
     font-size: $font-size-xl;
     font-weight: 700;
     color: $white;
+    letter-spacing: -0.02em;
     transition: color 0.3s ease;
 
     .landing__header--scrolled & {
@@ -250,7 +253,7 @@ onUnmounted(() => {
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, $primary-dark 0%, $primary 50%, $accent 100%);
-    padding: calc($spacing-2xl * 2) $spacing-xl $spacing-2xl;
+    padding: 120px $spacing-xl $spacing-2xl;
     text-align: center;
   }
 
@@ -263,11 +266,24 @@ onUnmounted(() => {
     animation: landingFadeIn 0.8s ease-out;
   }
 
+  &__hero-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: $spacing-xs $spacing-md;
+    background: rgba($white, 0.2);
+    border: 1px solid rgba($white, 0.3);
+    border-radius: $radius-full;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $white;
+    backdrop-filter: blur(4px);
+  }
+
   &__hero-title {
     font-size: $font-size-3xl;
     font-weight: 700;
     color: $white;
-    line-height: 1.2;
+    line-height: 1.15;
     margin: 0;
 
     @media (min-width: $breakpoint-md) {
@@ -282,9 +298,9 @@ onUnmounted(() => {
   &__hero-subtitle {
     font-size: $font-size-base;
     color: rgba($white, 0.85);
-    line-height: 1.6;
+    line-height: 1.7;
     margin: 0;
-    max-width: 600px;
+    max-width: 560px;
 
     @media (min-width: $breakpoint-md) {
       font-size: $font-size-lg;
@@ -294,11 +310,49 @@ onUnmounted(() => {
   &__hero-actions {
     display: flex;
     gap: $spacing-md;
-    margin-top: $spacing-sm;
+    margin-top: $spacing-md;
 
     @media (max-width: $breakpoint-sm) {
       flex-direction: column;
       width: 100%;
+    }
+  }
+
+  // Custom hero buttons (avoid BTS custom-property issues on gradient bg)
+  &__hero-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-sm;
+    padding: 14px 32px;
+    border-radius: $radius-lg;
+    font-size: $font-size-base;
+    font-weight: 600;
+    font-family: $font-family;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+
+    &--primary {
+      background: $white;
+      color: $primary;
+
+      &:hover {
+        background: $gray-50;
+        transform: translateY(-1px);
+        box-shadow: $shadow-md;
+      }
+    }
+
+    &--secondary {
+      background: transparent;
+      color: $white;
+      border: 1px solid rgba($white, 0.4);
+
+      &:hover {
+        background: rgba($white, 0.1);
+        border-color: rgba($white, 0.6);
+      }
     }
   }
 
@@ -314,6 +368,7 @@ onUnmounted(() => {
     font-weight: 700;
     color: $gray-800;
     text-align: center;
+    line-height: 1.3;
     margin: 0 0 $spacing-sm;
 
     @media (min-width: $breakpoint-md) {
@@ -330,17 +385,17 @@ onUnmounted(() => {
     color: $gray-500;
     text-align: center;
     margin: 0 auto $spacing-xl;
-    max-width: 640px;
+    max-width: 600px;
     line-height: 1.6;
 
     &--light {
-      color: rgba($white, 0.8);
+      color: rgba($white, 0.85);
     }
   }
 
   // ---------- FEATURES ----------
   &__features {
-    padding: calc($spacing-2xl * 2) 0;
+    padding: $spacing-2xl * 1.5 0;
     background: $white;
   }
 
@@ -360,21 +415,22 @@ onUnmounted(() => {
 
   &__feature-card {
     background: $white;
-    border: 1px solid $gray-100;
+    border: 1px solid $gray-200;
     border-radius: $radius-xl;
-    padding: $spacing-xl;
+    padding: $spacing-xl $spacing-lg;
+    box-shadow: $shadow-sm;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    animation: landingSlideUp 0.6s ease-out backwards;
+    animation: landingSlideUp 0.5s ease-out backwards;
 
     @for $i from 1 through 6 {
       &:nth-child(#{$i}) {
-        animation-delay: #{$i * 0.08}s;
+        animation-delay: #{$i * 0.05}s;
       }
     }
 
     &:hover {
       transform: translateY(-4px);
-      box-shadow: $shadow-md;
+      box-shadow: $shadow-lg;
     }
   }
 
@@ -382,13 +438,11 @@ onUnmounted(() => {
     width: 48px;
     height: 48px;
     border-radius: $radius-lg;
-    background: rgba($primary, 0.08);
+    background: rgba($primary, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: $spacing-md;
-    color: $primary;
-    font-size: $font-size-lg;
   }
 
   &__feature-title {
@@ -396,18 +450,19 @@ onUnmounted(() => {
     font-weight: 600;
     color: $gray-800;
     margin: 0 0 $spacing-sm;
+    line-height: 1.3;
   }
 
   &__feature-desc {
     font-size: $font-size-sm;
-    color: $gray-500;
-    line-height: 1.6;
+    color: $gray-600;
+    line-height: 1.65;
     margin: 0;
   }
 
   // ---------- AI HIGHLIGHT ----------
   &__ai {
-    padding: calc($spacing-2xl * 2) 0;
+    padding: $spacing-2xl * 1.5 0;
     background: linear-gradient(135deg, $primary-dark 0%, $primary 100%);
   }
 
@@ -429,26 +484,25 @@ onUnmounted(() => {
     text-align: center;
     padding: $spacing-xl $spacing-lg;
     border-radius: $radius-xl;
-    background: rgba($white, 0.08);
-    backdrop-filter: blur(4px);
-    transition: background-color 0.3s ease;
+    background: rgba($white, 0.12);
+    border: 1px solid rgba($white, 0.1);
+    transition: background-color 0.3s ease, transform 0.3s ease;
 
     &:hover {
-      background: rgba($white, 0.14);
+      background: rgba($white, 0.18);
+      transform: translateY(-2px);
     }
   }
 
   &__ai-icon {
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
     border-radius: $radius-full;
-    background: rgba($white, 0.15);
+    background: rgba($white, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto $spacing-md;
-    color: $white;
-    font-size: $font-size-lg;
   }
 
   &__ai-title {
@@ -460,14 +514,14 @@ onUnmounted(() => {
 
   &__ai-desc {
     font-size: $font-size-sm;
-    color: rgba($white, 0.75);
+    color: rgba($white, 0.8);
     margin: 0;
     line-height: 1.5;
   }
 
   // ---------- HOW IT WORKS ----------
   &__steps-section {
-    padding: calc($spacing-2xl * 2) 0;
+    padding: $spacing-2xl * 1.5 0;
     background: $gray-50;
   }
 
@@ -475,10 +529,7 @@ onUnmounted(() => {
     display: grid;
     grid-template-columns: 1fr;
     gap: $spacing-xl;
-
-    @media (min-width: $breakpoint-md) {
-      grid-template-columns: repeat(2, 1fr);
-    }
+    position: relative;
 
     @media (min-width: $breakpoint-lg) {
       grid-template-columns: repeat(4, 1fr);
@@ -488,6 +539,21 @@ onUnmounted(() => {
   &__step {
     text-align: center;
     padding: $spacing-lg;
+    position: relative;
+
+    // Connector line between steps (desktop only)
+    @media (min-width: $breakpoint-lg) {
+      &:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        top: 24px;
+        right: -$spacing-md;
+        width: calc(100% - 48px - #{$spacing-lg});
+        height: 2px;
+        background: $gray-200;
+        transform: translateX(50%);
+      }
+    }
   }
 
   &__step-number {
@@ -496,12 +562,14 @@ onUnmounted(() => {
     border-radius: $radius-full;
     background: $primary;
     color: $white;
-    font-size: $font-size-xl;
+    font-size: $font-size-lg;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto $spacing-md;
+    position: relative;
+    z-index: 1;
   }
 
   &__step-title {
@@ -513,14 +581,14 @@ onUnmounted(() => {
 
   &__step-desc {
     font-size: $font-size-sm;
-    color: $gray-500;
+    color: $gray-600;
     margin: 0;
     line-height: 1.6;
   }
 
   // ---------- CTA ----------
   &__cta {
-    padding: calc($spacing-2xl * 2) 0;
+    padding: $spacing-2xl * 1.5 0;
     background: linear-gradient(135deg, $primary 0%, $accent 100%);
   }
 
@@ -533,8 +601,8 @@ onUnmounted(() => {
 
   // ---------- FOOTER ----------
   &__footer {
-    padding: $spacing-xl;
-    background: $gray-50;
+    padding: $spacing-lg $spacing-xl;
+    background: $white;
     border-top: 1px solid $gray-100;
   }
 
@@ -555,7 +623,7 @@ onUnmounted(() => {
 
   &__footer-sub {
     font-size: $font-size-xs;
-    color: $gray-400;
+    color: $gray-500;
     margin: 0;
   }
 }
@@ -575,7 +643,7 @@ onUnmounted(() => {
 @keyframes landingSlideUp {
   from {
     opacity: 0;
-    transform: translateY(24px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -587,10 +655,6 @@ onUnmounted(() => {
   .landing__hero-content,
   .landing__feature-card {
     animation: none !important;
-  }
-
-  .landing__ai-card {
-    backdrop-filter: none;
   }
 }
 </style>
