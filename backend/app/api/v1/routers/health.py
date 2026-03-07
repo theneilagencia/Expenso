@@ -89,49 +89,97 @@ async def debug_db():
     import traceback
     result = {}
     try:
-        from sqlalchemy import text
-        from app.db.session import SessionLocal
-        db = SessionLocal()
-        try:
+        from sqlalchemy import create_engine, text
+        from app.config import settings
+        engine = create_engine(settings.DATABASE_URL, connect_args={"connect_timeout": 10})
+        with engine.connect() as conn:
             # Check tables
-            rows = db.execute(text(
+            rows = conn.execute(text(
                 "SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY tablename"
             )).fetchall()
             result["tables"] = [r[0] for r in rows]
 
             # Check alembic version
             try:
-                rows = db.execute(text("SELECT version_num FROM alembic_version")).fetchall()
+                rows = conn.execute(text("SELECT version_num FROM alembic_version")).fetchall()
                 result["alembic_version"] = [r[0] for r in rows]
             except Exception as e:
                 result["alembic_version"] = f"error: {e}"
+                conn.rollback()
 
             # Check users
             if "users" in result["tables"]:
-                rows = db.execute(text("SELECT email, role, status FROM users LIMIT 5")).fetchall()
+                rows = conn.execute(text("SELECT email, role, status FROM users LIMIT 5")).fetchall()
                 result["users"] = [{"email": r[0], "role": r[1], "status": r[2]} for r in rows]
             else:
                 result["users"] = "NO USERS TABLE"
-
-            # Try login flow
-            try:
-                from app.models.user import User
-                from app.core.security import verify_password
-                user = db.query(User).filter(User.email == "admin@expenso.io").first()
-                if user:
-                    result["admin_found"] = True
-                    result["admin_role"] = user.role
-                    result["password_ok"] = verify_password("Admin@2026!", user.password_hash)
-                else:
-                    result["admin_found"] = False
-            except Exception as e:
-                result["login_test"] = f"error: {e}"
-                result["login_traceback"] = traceback.format_exc()
-        finally:
-            db.close()
     except Exception as e:
         result["db_error"] = str(e)
         result["traceback"] = traceback.format_exc()
+    return result
+
+
+@router.post("/debug/migrate", summary="Temporary: run migrations", include_in_schema=False)
+async def debug_migrate():
+    """Temporary endpoint to run alembic migrations and return results."""
+    import io
+    import traceback
+    result = {"steps": []}
+
+    try:
+        from sqlalchemy import create_engine, text
+        from app.config import settings
+
+        engine = create_engine(settings.DATABASE_URL, connect_args={"connect_timeout": 10})
+
+        # Step 1: Test connection
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+            result["steps"].append("DB connection OK")
+
+        # Step 2: Run alembic
+        try:
+            from alembic.config import Config
+            from alembic import command
+
+            alembic_cfg = Config("alembic.ini")
+            alembic_cfg.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+
+            # Capture output
+            output = io.StringIO()
+            alembic_cfg.stdout = output
+
+            command.upgrade(alembic_cfg, "head")
+            result["steps"].append(f"Alembic upgrade OK: {output.getvalue()}")
+        except Exception as e:
+            result["steps"].append(f"Alembic FAILED: {e}")
+            result["alembic_traceback"] = traceback.format_exc()
+
+        # Step 3: Check tables after
+        with engine.connect() as conn:
+            rows = conn.execute(text(
+                "SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY tablename"
+            )).fetchall()
+            result["tables_after"] = [r[0] for r in rows]
+
+        # Step 4: Run seed
+        try:
+            from app.db.session import SessionLocal
+            from scripts.seed_db import seed
+            db = SessionLocal()
+            try:
+                seed(db)
+                result["steps"].append("Seed OK")
+            finally:
+                db.close()
+        except Exception as e:
+            result["steps"].append(f"Seed FAILED: {e}")
+            result["seed_traceback"] = traceback.format_exc()
+
+    except Exception as e:
+        result["error"] = str(e)
+        result["traceback"] = traceback.format_exc()
+
     return result
 
 
